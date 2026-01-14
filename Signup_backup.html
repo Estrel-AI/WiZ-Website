@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Request Access | WiiZ - The No-Code Platform for AI Agents</title>
+  <meta name="description" content="Request access to WiiZ Atlas - Transform your workflows with AI automation">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="assets/img/WiiZ_Logo_670_x_278 2.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+  <!-- Google tag (gtag.js) --> <script async src="https://www.googletagmanager.com/gtag/js?id=G-6WDCNZVEND"></script> 
+ <script>   window.dataLayer = window.dataLayer || [];   function gtag(){dataLayer.push(arguments);}   gtag('js', new Date());   gtag('config', 'G-6WDCNZVEND'); 
+  
+ </script>
+</head>
+
+<body class="signup-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+        <img src="assets/img/WiiZ_Logo_670_x_278 2.png" alt="Wiiz Logo" class="logo-img">
+      </a>
+
+    <nav id="navmenu" class="navmenu">
+  <ul>
+    
+    <li><a href="index.html#features">Product Feature</a></li>
+    <li><a href="services.html">Partner Program</a></li>
+    <li><a href="pricing.html">Pricing</a></li>
+    <li><a href="Faq.html" >FAQ</a></li> <!-- The "active" class has been moved here -->
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="Signup.html"class="active">Sign Up</a></li>
+  </ul>
+  <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+</nav>
+
+    </div>
+  </header>
+
+<!-- START: Replace everything from <main> to </main> with this -->
+<main class="main">
+
+  <!-- Request Access Section -->
+  <section id="request-access" class="request-access section">
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+      <div class="row justify-content-center">
+        
+        <!-- Left Side - Info -->
+        
+
+        <!-- Right Side - Form -->
+        <div class="col-lg-6 mb-5 mb-lg-0">
+          <div class="access-form-container" data-aos="fade-left" data-aos-delay="300">
+            
+            <div class="form-header text-center mb-4">
+              <h2>Request Your Beta Invite</h2>
+              <p class="text-muted">Fill out the form below, if approved, you will be notified of the next steps. We make every effort to respond within 1-2 business days.</p>
+            </div>
+
+            <!-- MODIFIED: Simplified Form -->
+            <form action="#" method="post" id="signup-form">
+              <div class="row gy-4">
+                
+                <div class="col-md-6">
+                  <label for="fullname" class="form-label">Full Name <span class="text-danger">*</span></label>
+                  <input type="text" name="fullname" class="form-control" id="fullname" placeholder="John Doe" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                  <input type="email" class="form-control" name="email" id="email" placeholder="john.doe@email.com" required>
+                </div>
+                
+                <!-- NEW: Role Dropdown -->
+<!-- PASTE THIS NEW COMBINED BLOCK -->
+<div class="col-md-6">
+  <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+  <select class="form-select" name="role" id="role" required>
+    <option value="">Select your role</option>
+    <option value="Students experimenting">Students experimenting</option>
+    <option value="Developers">Developers</option>
+    <option value="Startups launching AI tools">Startups launching AI tools</option>
+    <option value="SMB/Enterprise Customer">SMB/Enterprise Customer</option>
+    <option value="Government Customer">Government Customer</option>
+    <option value="System Integrator">System Integrator</option>
+  </select>
+</div>
+
+<div class="col-md-6">
+  <label for="phone" class="form-label">Phone Number </label>
+  <input type="tel" class="form-control" name="phone" id="phone" placeholder="+1 (555) 000-0000" inputmode="numeric">
+</div>
+<!-- NEW: LinkedIn Profile Field -->
+              <!-- NEW: LinkedIn Profile Field -->
+<div class="col-12">
+  <label for="linkedin_profile" class="form-label">LinkedIn Profile URL (Optional)</label>
+  <input type="url" class="form-control" name="linkedin_profile" id="linkedin_profile" placeholder="https://linkedin.com/in/yourprofile">
+  <div class="form-text">Providing a LinkedIn profile is preferable for faster approval.</div>
+</div>
+                <div class="col-12">
+                  <label for="message" class="form-label">Tell us about your interest (Optional)</label>
+                  <textarea class="form-control" name="message" id="message" rows="4" placeholder="What are you hoping to build or automate with WiiZ?"></textarea>
+                </div>
+
+               <div class="col-12">
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" id="terms" required>
+    <label class="form-check-label" for="terms">
+      I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a> <span class="text-danger">*</span>
+    </label>
+  </div>
+</div>
+
+                <div class="col-12">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter" checked>
+                    <label class="form-check-label" for="newsletter">
+                      Subscribe for product updates and AI insights
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="loading">Loading...</div>
+                  <div class="error-message"></div>
+                  <div class="sent-message">Your request has been submitted! We'll review it and get back to you soon.</div>
+                  <button type="submit" class="btn btn-primary w-100 btn-lg">
+                    <i class="bi bi-send me-2"></i>Submit Request
+                  </button>
+                </div>
+              </div>
+            </form>
+            
+          
+            
+          </div>
+        </div>
+
+        <div class="col-lg-5 offset-lg-1">
+          <div class="info-content" data-aos="fade-right" data-aos-delay="200">
+            
+            <div class="brand-section mb-4">
+              
+              <!-- NEW: Closed Beta Tag added here -->
+              <div class="beta-tag mb-3">
+               Controlled Beta Test
+              </div>
+              
+              <h1 class="display-5 fw-bold mb-3">Join the WiiZ Atlas</h1>
+              <p class="lead">Be among the first to experience the future of Agentic AI Orchestration.</p>
+            </div>
+
+<!-- THE NEW "PLATFORM VIDEOS" SECTION -->
+<div class="video-preview-section">
+  <h4 class="mb-3">While you wait, see what's possible:</h4>
+  <div class="inline-video-list">
+
+    <!-- Video 1 -->
+    <div class="inline-video-item">
+      <div class="video-trigger">
+        <i class="bi bi-play-circle-fill"></i>
+        <span>Building a Multi-Agent Workflow</span>
+      </div>
+      <video class="inline-video-player" muted playsinline>
+        <source src="assets/img/videos/Multi Agent 1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <!-- Video 2 -->
+    <div class="inline-video-item">
+      <div class="video-trigger">
+        <i class="bi bi-play-circle-fill"></i>
+        <span>Implementing AI Governance Guardrails</span>
+      </div>
+      <video class="inline-video-player" muted playsinline>
+        <source src="assets/img/videos/Guardrail 1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section><!-- /Request Access Section -->
+
+</main>
+
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="termsModalLabel">WiiZ – Beta Terms and Conditions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="font-size: 0.85rem; color: #6c757d; max-height: 60vh;">
+        <p class="small">Last updated: [20th Nov 2025]</p>
+        <h6>1. Introduction</h6>
+        <p>1.1 These Beta Terms and Conditions (“Terms”) govern your access to and use of the WiiZ platform and related services provided in beta form (“WiiZ”, the “Service”) by Estrel AI Ltd, a company incorporated in the Dubai International Financial Centre (“DIFC”) (“Estrel AI”, “we”, “our”, “us”).</p>
+        <p>1.2 By clicking “I Agree”, “Accept”, or otherwise accessing or using WiiZ as part of this controlled beta programme (“Beta Programme”), you agree to be bound by these Terms. If you do not agree, you must not use WiiZ.</p>
+        <p>1.3 If you are accepting these Terms on behalf of a company or organisation, you represent and warrant that you are authorised to bind that entity, and “you” and “your” will refer to that entity.</p>
+        <h6>2. Beta Nature of the Service</h6>
+        <p>2.1 WiiZ is being made available to you only as part of a controlled beta test for the purpose of evaluation, testing and providing feedback to Estrel AI.</p>
+        <p>2.2 WiiZ is a pre-release and experimental service. It may: contain bugs, defects, errors, or inaccuracies; be incomplete or unstable; be modified, suspended, or discontinued at any time without notice.</p>
+        <p>2.3 You acknowledge and agree that: WiiZ is provided “as is” and “as available” during the Beta Programme; certain features, safeguards, security, and compliance controls are still work in progress and may not yet meet production, regulatory, or industry standards; you will not rely on WiiZ as a production system or for critical operations.</p>
+        <h6>3. Eligibility and Registration</h6>
+        <p>3.1 Participation in the Beta Programme is by invitation or registration approval only. We may accept or reject any registration at our sole discretion.</p>
+        <p>3.2 You agree to provide accurate, current, and complete information when registering and to keep such information updated.</p>
+        <p>3.3 We may suspend or terminate your access to WiiZ at any time, with or without cause or notice, including if we reasonably believe you have breached these Terms.</p>
+        <h6>4. Permitted Use – Non-Commercial Only</h6>
+        <p>4.1 You may use WiiZ solely for: testing and evaluating the platform; exploring functionalities; providing feedback and suggestions to Estrel AI.</p>
+        <p>4.2 You must not use WiiZ for any commercial or production purposes, including but not limited to: providing services to your own customers or clients; deploying WiiZ outputs into live operational environments; integrating WiiZ as a core dependency of business-critical workflows.</p>
+        <p>4.3 You agree that you are fully responsible for how you use WiiZ and for ensuring that your use complies with any laws, regulations, internal policies, or contractual obligations that apply to you.</p>
+        <h6>5. User Content and Uploads</h6>
+        <p>5.1 “User Content” means any data, text, files, documents, prompts, instructions, or other content that you upload, submit, or otherwise make available via WiiZ.</p>
+        <p>5.2 During this Beta Programme, compliance, security, and data protection controls are still being developed and improved. Accordingly, you agree that you will: avoid uploading highly sensitive data (e.g. special category personal data, financial account numbers, passwords, trade secrets, or confidential data subject to strict regulatory or contractual controls); ensure that you have all necessary rights, consents, and permissions to upload any User Content you provide.</p>
+        <p>5.3 We reserve the right, but not the obligation, to: remove, delete, or anonymise User Content that we deem inappropriate, excessive, or risky; and restrict the types or volumes of data that may be uploaded.</p>
+        <p>5.4 You remain responsible for backing up your own User Content. We do not guarantee that User Content will be preserved and may delete it without notice as part of the beta process, system maintenance, or testing.</p>
+        <h6>6. Feedback</h6>
+        <p>6.1 As part of the Beta Programme, you may provide comments, ideas, enhancement requests, bug reports, or other feedback regarding WiiZ (“Feedback”).</p>
+        <p>6.2 You agree that: providing Feedback is voluntary; Estrel AI may use Feedback in any manner for any purpose (including to develop and improve WiiZ or other products and services) without obligation to you; and Estrel AI will own all rights, title, and interest in and to any improvements or modifications based on such Feedback.</p>
+        <p>6.3 You represent that your Feedback does not infringe any third-party rights and does not contain confidential information that you are not authorised to disclose.</p>
+        <!-- ... (Sections 7-16) ... -->
+        <h6>7. Intellectual Property</h6>
+        
+        <p>7.1 As between you and Estrel AI, we (and our licensors, as applicable) own all rights, title, and interest in and to WiiZ, including all software, models, algorithms, interfaces, designs, documentation, and related intellectual property.</p>
+
+<p>7.2 Subject to your compliance with these Terms, we grant you a limited, revocable, non-exclusive, non-transferable, non-sublicensable right to access and use WiiZ solely for non-commercial evaluation during the Beta Programme.</p>
+
+<p>7.3 Except as expressly permitted, you must not:</p>
+
+<p>copy, modify, adapt, translate, or create derivative works of WiiZ;</p>
+
+<p>reverse engineer, decompile, disassemble, or attempt to derive the source code of any part of WiiZ, except to the limited extent permitted by applicable law;</p>
+
+<p>remove or alter any proprietary notices, trademarks, or logos.</p>
+
+
+
+        <h6>8. Acceptable Use</h6>
+        <p>8.1 You agree not to use WiiZ to:</p>
+<ul>
+  <li>violate any applicable law, regulation, or third-party rights;</li>
+  <li>upload, generate, or distribute content that is unlawful, harmful, defamatory, obscene, hateful, discriminatory, or otherwise objectionable;</li>
+  <li>attempt to probe, scan, or test the vulnerability of any system or network, or breach any security or authentication measures;</li>
+  <li>introduce malware, viruses, or other harmful code;</li>
+  <li>misrepresent that WiiZ outputs are entirely human-generated when transparency is required by law or policy.</li>
+</ul>
+
+<p>8.2 You understand that AI-generated outputs may be inaccurate, incomplete, biased, or misleading, and you agree to independently review and validate any outputs before using or relying on them for any decision-making.</p>
+
+        <h6>9. Data Protection and Privacy</h6>
+        <p>9.1 Our handling of personal data in connection with WiiZ is described in our Privacy Policy, which you should read carefully. By using WiiZ, you acknowledge that you have read and understood the Privacy Policy. </p>
+        <p>9.2 You are responsible for ensuring that your use of WiiZ (including any personal data you upload) complies with applicable data protection laws that apply to you and your organisation. </p>
+        <h6>10. Confidentiality</h6>
+        <p>10.1 You may be provided with, or obtain access to, confidential information relating to Estrel AI, WiiZ, or other participants (“Confidential Information”). Confidential Information includes, without limitation, non-public technical information, product designs, planned features, and performance metrics.</p>
+
+<p>10.2 You agree to:</p>
+<ul>
+  <li>use Confidential Information solely for the purpose of participating in the Beta Programme;</li>
+  <li>not disclose Confidential Information to any third party without our prior written consent;</li>
+  <li>protect Confidential Information with at least reasonable care.</li>
+</ul>
+
+<p>10.3 This obligation does not apply to information that:</p>
+<ul>
+  <li>is or becomes publicly available without breach of these Terms;</li>
+  <li>you lawfully receive from a third party without confidentiality obligations;</li>
+  <li>you independently develop without use of Confidential Information; or</li>
+  <li>is required to be disclosed by law or regulatory authority (in which case you will, where legally permitted, give us prompt notice).</li>
+</ul>
+
+        <h6>11. Disclaimers</h6>
+        <p>11.1 To the maximum extent permitted by applicable law, WiiZ is provided on an “as is” and “as available” basis, with no warranties of any kind, whether express, implied, statutory, or otherwise, including any implied warranties of merchantability, fitness for a particular purpose, accuracy, or non-infringement.</p>
+
+<p>11.2 Without limiting the foregoing, we do not warrant that:</p>
+<ul>
+  <li>WiiZ will be uninterrupted, secure, or error-free;</li>
+  <li>any defects or vulnerabilities will be corrected within a particular timeframe; or</li>
+  <li>outputs will be accurate, complete, or suitable for any specific use case.</li>
+</ul>
+
+        <h6>12. Limitation of Liability</h6>
+        <p>12.1 To the maximum extent permitted by law, Estrel AI and its affiliates, directors, officers, employees, and agents shall not be liable for:</p>
+<ul>
+  <li>any indirect, incidental, special, consequential, or punitive damages;</li>
+  <li>loss of profits, revenue, goodwill, or data;</li>
+  <li>business interruption or other commercial damages or losses, arising out of or in connection with your use or inability to use WiiZ, even if we have been advised of the possibility of such damages.</li>
+</ul>
+
+<p>12.2 Our aggregate total liability arising out of or relating to these Terms and your use of WiiZ (whether in contract, tort, or otherwise) shall be limited to USD 100 (or equivalent in local currency) or, if higher, the minimum amount required by applicable law.</p>
+
+<p>12.3 Nothing in these Terms excludes or limits liability that cannot be excluded or limited under applicable law.</p>
+
+        <h6>13. Term and Termination</h6>
+        <p>13.1 These Terms apply from the time you accept them and continue for the duration of your participation in the Beta Programme.</p>
+
+<p>13.2 We may suspend or terminate your access to WiiZ at any time, with or without notice, for any reason, including if you breach these Terms or if we discontinue the Beta Programme.</p>
+
+<p>13.3 Upon termination:</p>
+<ul>
+  <li>Your rights to access and use WiiZ will immediately cease;</li>
+  <li>We may delete or anonymise your User Content and related data, subject to any legal obligations to retain certain data.</li>
+</ul>
+
+
+<h6>14. Changes to the Beta Programme or Terms </h6>
+<p>14.1 We may update or modify WiiZ (including features, functionality, or availability) at any time. </p>
+
+<p>14.2 We may update these Terms from time to time. If we make material changes, we may notify you (for example, by email or via the platform). Your continued use of WiiZ after any changes constitutes your acceptance of the updated Terms. </p>
+        <h6>15. Governing Law and Jurisdiction</h6>
+        <p>15.1 These Terms and any dispute arising out of or in connection with them shall be governed by and construed in accordance with the laws of the DIFC.</p>
+
+<p>15.2 The courts of the DIFC shall have exclusive jurisdiction over any dispute arising out of or relating to these Terms or your use of WiiZ, without prejudice to any mandatory provisions of applicable law.</p>
+
+        <h6>16. Miscellaneous</h6>
+        <p>16.1 If any provision of these Terms is held to be invalid or unenforceable, that provision will be enforced to the maximum extent permissible, and the remaining provisions will remain in full force and effect.</p>
+
+<p>16.2 You may not assign or transfer your rights or obligations under these Terms without our prior written consent. We may assign these Terms freely in connection with a merger, acquisition, or sale of assets.</p>
+
+<p>16.3 No failure or delay by us in exercising any right or remedy shall constitute a waiver of that right or remedy.</p>
+
+<p>16.4 These Terms, together with any additional terms referenced herein, constitute the entire agreement between you and Estrel AI regarding the Beta Programme and supersede all prior or contemporaneous agreements relating to its subject matter.</p>
+ <a href="t&c.html">For more information..</a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="privacyModalLabel">WiiZ – Beta Privacy Policy</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="font-size: 0.85rem; color: #6c757d; max-height: 60vh;">
+        <p class="small">Last updated: [20th Nov 2025]</p>
+        <h6>1. Introduction</h6>
+        <p>1.1 This Privacy Policy explains how Estrel AI Ltd (“Estrel AI”, “we”, “our”, “us”) collects, uses, discloses and protects personal data in connection with your participation in the WiiZ beta programme (“WiiZ”, the “Service”).</p>
+        <p>1.2 This Privacy Policy applies to: individuals who register for and use WiiZ during the beta phase; and representatives of organizations who access WiiZ as part of the Beta Programme.</p>
+        <p>1.3 By using WiiZ, you acknowledge that you have read and understood this Privacy Policy. If you do not agree, you should not use WiiZ.</p>
+        <h6>2. Who We Are (Controller)</h6>
+        <p>2.1 For the purposes of applicable data protection laws, Estrel AI Ltd, incorporated in the DIFC, is the data controller of personal data processed in connection with WiiZ, unless stated otherwise.</p>
+        <p>2.2 If you have any questions about this Privacy Policy or our data practices, you can contact us at: Email: sales@estrel.ai, Address: 102, First Floor, Innovation One Building, Dubai International Financial Centre, Dubai, UAE</p>
+        <h6>3. Personal Data We Collect</h6>
+        <p>We may collect and process the following categories of personal data during the Beta Programme: 3.1 Registration and Account Data (Name, job title, organisation, country/region, Email address and contact details, Account credentials); 3.2 Usage Data (Log-in/log-out times, session duration, pages and features used, Device and technical information); 3.3 User Content (Any content you choose to upload, input, or submit to WiiZ. Important: As the platform is in beta, we strongly recommend that you avoid uploading highly sensitive personal data); 3.4 Feedback and Communications (Feedback, bug reports, feature requests, surveys, or responses you provide); 3.5 Cookies and Similar Technologies (We may use cookies or similar technologies to support login, security, and analytics).</p>
+        <!-- ... (Sections 4-14, shortened for brevity) ... -->
+        <h6>4. How We Use Personal Data</h6>
+<p>We use personal data for the following purposes and legal bases (where applicable):</p>
+
+<p>4.1 To provide and operate WiiZ (Beta)</p>
+<ul>
+  <li>Creating and managing your account</li>
+  <li>Authenticating users and securing access</li>
+  <li>Enabling you to use available features and functionalities</li>
+</ul>
+
+<p>4.2 To improve and develop WiiZ</p>
+<ul>
+  <li>Analyzing usage patterns and performance to detect issues and improve stability</li>
+  <li>Using Feedback and User Content in anonymised or aggregated form to enhance models, workflows, and features</li>
+  <li>Testing new features and configurations</li>
+</ul>
+
+<p>4.3 To communicate with you</p>
+<ul>
+  <li>Sending service-related messages, such as onboarding information, updates, maintenance notices, or security alerts</li>
+  <li>Requesting feedback, surveys, or participation in research related to WiiZ</li>
+</ul>
+
+<p>4.4 For security and compliance</p>
+<ul>
+  <li>Monitoring for, detecting, and preventing fraud, abuse, or misuse of the Service</li>
+  <li>Investigating incidents and protecting our rights, property, and users</li>
+  <li>Complying with applicable legal and regulatory obligations or responding to lawful requests from authorities</li>
+</ul>
+
+<p>4.5 For our legitimate interests</p>
+<p>Where permitted by applicable law, we may process personal data as necessary for:</p>
+<ul>
+  <li>Operating and improving our business and services</li>
+  <li>Understanding how WiiZ is used to make informed product decisions</li>
+  <li>Protecting and defending our legal rights and interests</li>
+</ul>
+
+
+
+        <h6>5. Data Minimization – Upload Guidance</h6>
+        <p>5.1 Because WiiZ is currently in beta, certain security, governance, and compliance controls (including data residency, retention, and classification policies) are still being implemented and refined.</p>
+
+<p>5.2 Accordingly, you agree to:</p>
+<ul>
+  <li>Limit the personal data you upload to what is strictly necessary for testing;</li>
+  <li>Avoid uploading special category data (e.g. health, biometric, racial or ethnic origin, religious beliefs) or other highly sensitive information;</li>
+  <li>Avoid uploading confidential data that is subject to strict contractual or regulatory obligations, unless this has been explicitly agreed in writing.</li>
+</ul>
+
+<p>5.3 We may delete or anonymise data that appears to be inappropriate or excessively sensitive for the Beta Programme, at our discretion and without notice, to protect both you and us.</p>
+
+        <h6>6. Sharing of Personal Data</h6>
+        <p>We may share personal data in the following circumstances:</p>
+
+<p>6.1 Service Providers</p>
+<ul>
+  <li>We may use carefully selected third-party service providers (e.g. cloud hosting providers, authentication services, analytics providers, communication tools) who process personal data on our behalf and under our instructions, subject to appropriate contractual protections.</li>
+</ul>
+
+<p>6.2 Group Companies</p>
+<ul>
+  <li>We may share personal data with our affiliated or group companies, where relevant, for internal administration, product development, and support, in accordance with this Privacy Policy.</li>
+</ul>
+
+<p>6.3 Legal and Regulatory</p>
+<ul>
+  <li>We may disclose personal data if required to do so by law, regulation, or a valid legal process, or where we believe it is necessary to:</li>
+  <ul>
+    <li>protect our rights, privacy, safety, or property, and/or that of our users or third parties;</li>
+    <li>detect, prevent, or address fraud, security, or technical issues.</li>
+  </ul>
+</ul>
+
+<p>6.4 Business Transfers</p>
+<ul>
+  <li>In the event of a merger, acquisition, reorganisation, or sale of assets, personal data may be transferred as part of that transaction, subject to appropriate safeguards and, where required, notice to you.</li>
+</ul>
+
+<p>6.5 With Your Consent</p>
+<ul>
+  <li>We may share personal data with other third parties when you have given your explicit consent or when you direct us to do so.</li>
+</ul>
+
+        <h6>7. International Data Transfers</h6>
+        7.1 Personal data may be stored and processed in countries outside your country of residence, including outside the DIFC or the UAE, where our service providers or infrastructure are located. 
+
+7.2 Where required by applicable law, we will take steps to ensure that such transfers are subject to appropriate safeguards (for example, contractual protections) designed to protect your personal data. 
+        <h6>8. Data Retention</h6>
+        8.1 We retain personal data for as long as necessary to fulfil the purposes described in this Privacy Policy, unless a longer retention period is required or permitted by law. 
+
+8.2 Because WiiZ is a beta service: 
+
+we may retain certain logs, usage data, and Feedback for a limited period to analyse performance, improve the system, and ensure security; 
+
+we may periodically delete or anonymise User Content uploaded to the platform as part of system maintenance, testing, or at the end of the Beta Programme. 
+
+8.3 We may retain certain records for longer where necessary to comply with legal obligations, resolve disputes, or enforce our agreements. 
+
+
+        <h6>9. Security</h6>
+        <p>9.1 We implement reasonable technical and organisational measures to protect personal data against unauthorised access, loss, misuse, alteration, or destruction.</p>
+
+<p>9.2 However, you acknowledge that:</p>
+<ul>
+  <li>No system or transmission over the internet is completely secure; and</li>
+  <li>As a beta service, certain security and compliance capabilities are still being improved and may not yet meet a full production standard.</li>
+</ul>
+
+<p>9.3 You are responsible for:</p>
+<ul>
+  <li>Keeping your login credentials secure;</li>
+  <li>Promptly notifying us if you suspect any unauthorised access to your account.</li>
+</ul>
+
+
+
+        <h6>10. Your Rights</h6>
+<p>Depending on applicable data protection law, you may have the following rights in relation to your personal data:</p>
+
+<ul>
+  <li><strong>Access</strong> – to request confirmation whether we process your personal data and to obtain a copy.</li>
+  <li><strong>Rectification</strong> – to request correction of inaccurate or incomplete personal data.</li>
+  <li><strong>Erasure</strong> – to request deletion of your personal data in certain circumstances.</li>
+  <li><strong>Restriction</strong> – to request limitation of processing in certain circumstances.</li>
+  <li><strong>Objection</strong> – to object to processing based on our legitimate interests, on grounds relating to your particular situation.</li>
+  <li><strong>Portability</strong> – to request a copy of your personal data in a structured, commonly used, and machine-readable format, where technically feasible and applicable.</li>
+</ul>
+
+<p>To exercise these rights, please contact as per section 14 details. We will respond in accordance with applicable law. We may need to verify your identity before responding to your request.</p>
+
+
+        <h6>11. Children</h6>
+        11.1 WiiZ is not intended for use by children under the age of 18 and we do not knowingly collect personal data from children in connection with the Beta Programme. 
+
+11.2 If you believe that a child has provided us with personal data, please contact us so that we can take appropriate steps.
+
+        <h6>12. Third-Party Links and Services</h6>
+        <p>12.1 WiiZ may, from time to time, integrate with or provide links to third-party services or websites. This Privacy Policy does not apply to such third parties, and we are not responsible for their privacy practices.</p>
+
+<p>12.2 We encourage you to review the privacy policies of any third-party services you use in connection with WiiZ.</p>
+
+
+
+        <h6>13. Changes to this Privacy Policy</h6>
+        <p>13.1 We may update this Privacy Policy from time to time to reflect changes in our practices, legal requirements, or the nature of the Beta Programme.</p>
+
+<p>13.2 If we make material changes, we may notify you (for example, by email or via the platform). Your continued use of WiiZ after the effective date of any updated Privacy Policy constitutes your acceptance of the changes.</p>
+
+        <h6>14. Contact Us</h6>
+        <p>If you have any questions, concerns, or complaints about this Privacy Policy or our handling of personal data, you can contact us at:</p>
+
+<p><strong>Email:</strong> sales@estrel.ai</p>
+
+<p><strong>Address:</strong> 102, First Floor, Innovation One Building, Dubai International Financial Centre, Dubai, UAE</p>
+
+<p>If you believe that we have not resolved your concern satisfactorily, you may have the right to lodge a complaint with the relevant data protection or regulatory authority, where applicable.</p>
+
+
+<a href="privacypolicy.html">For full information..</a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END: Stop replacing here -->
+<!-- START: Replace your entire footer on ALL pages with this block -->
+<footer id="footer" class="footer">
+  <div class="container copyright text-center mt-4">
+    
+    <!-- Legal Links -->
+    <div class="legal-links mb-3">
+      <a href="t&c.html">Terms of Service</a>
+      <span>&bull;</span>
+      <a href="privacypolicy.html">Privacy Policy</a>
+    </div>
+    
+    <!-- Copyright Text -->
+    <p>© <span>Copyright</span> <strong class="px-1 sitename">Estrel AI Ltd</strong> <span>All Rights Reserved</span></p>
+
+  </div>
+</footer>
+<!-- END: Stop replacing here -->
+
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/forms.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

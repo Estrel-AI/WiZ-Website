@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Pricing - WiiZ</title>
+  <meta name="description" content="Flexible pricing plans for WiiZ's no-code AI automation platform.">
+  
+  <!-- Favicons -->
+  <link href="assets/img/WiiZ_Logo_670_x_278 2.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+  <!-- Pricing CSS File -->
+  <link href="assets/css/pricing.css" rel="stylesheet">
+  <style>
+    /* Override for 3-card layout in one row */
+    #plans-container {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    /* --- Custom: Pricing Card Feature List Polish --- */
+    .pricing-card .feature-list {
+      padding-left: 0;
+      margin-bottom: 0;
+    }
+
+    .pricing-card .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 0.4rem; /* Reduced from 0.75rem to 0.4rem */
+      line-height: 1.3; /* Tightened from 1.4 to 1.3 */
+      font-size: 0.95rem; /* Slightly smaller font */
+    }
+
+    .pricing-card .feature-list li i {
+      margin-top: 2px; /* Reduced from 4px to 2px */
+      font-size: 1rem;
+      flex-shrink: 0; /* Prevent icon from shrinking */
+    }
+    
+    /* Replace round background check with simple checkmark */
+    .pricing-card .feature-list li i.bi-check-circle-fill::before {
+      content: "\f26b" !important; /* Bootstrap icon code for bi-check */
+    }
+
+    /* Specific style for the promotional offer to make it stand out */
+    .pricing-card .feature-list li strong {
+      font-weight: 700;
+      color: var(--heading-color);
+      display: block; /* Force text after strong tag to new line */
+    }
+    
+    #plans-container > div {
+      flex: 1;
+      max-width: 360px;
+      min-width: 300px;
+    }
+    
+    .plan-description {
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+    
+    .price {
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+    
+    .plan-name {
+      text-align: left;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-list {
+      text-align: left;
+    }
+    
+    /* Billing toggle pill style */
+    .billing-cycle-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: #f0f0f0;
+      border-radius: 50px;
+      padding: 4px;
+      gap: 0;
+      margin: 0 auto 3rem auto;
+      width: fit-content;
+    }
+
+    .container > .billing-cycle-toggle {
+      display: inline-flex;
+    }
+    
+    .container {
+      text-align: center;
+    }
+
+    .billing-cycle-toggle .toggle-label {
+      padding: 10px 24px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: transparent;
+      color: #666;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .billing-cycle-toggle .toggle-label:hover {
+      color: #333;
+    }
+
+    .billing-cycle-toggle .toggle-label.active {
+      background: var(--accent-color);
+      color: #fff;
+    }
+
+    .billing-cycle-toggle .form-switch {
+      display: none;
+    }
+
+    /* Responsive: stack on smaller screens */
+    @media (max-width: 992px) {
+      #plans-container {
+        flex-wrap: wrap;
+      }
+      
+      #plans-container > div {
+        flex: 1 1 calc(50% - 1rem);
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #plans-container {
+        flex-direction: column;
+      }
+      
+      #plans-container > div {
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="pricing-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+        <img src="assets/img/WiiZ_Logo_670_x_278 2.png" alt="Wiiz Logo" class="logo-img">
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="index.html#features">Product Feature</a></li>
+          <li><a href="services.html">Partner Program</a></li>
+          <li><a href="pricing.html" class="active">Pricing</a></li>
+          <li><a href="Faq.html">FAQ</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li id="nav-signup-link"><a href="Signup.html">Sign Up</a></li>
+          <li id="nav-logout-link" style="display: none;"><a href="#">Sign Out</a></li>
+          <li id="nav-signin-link"><a href="Login.html">Sign in</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section id="pricing" class="pricing-section section light-background">
+      <div class="container" data-aos="fade-up">
+
+        <div class="section-title text-center">
+          <h2>Find the Plan That's Right for You</h2>
+          <p>Start for free and scale as you grow. No hidden fees.</p>
+        </div>
+
+        <div class="billing-cycle-toggle" data-aos="fade-up" data-aos-delay="100">
+          <span class="toggle-label active" data-period="monthly" id="monthlyLabel">Monthly</span>
+          <span class="toggle-label" data-period="annual" id="annualLabel">Annually (Save 10%)</span>
+          <input type="checkbox" id="billingToggle" style="display: none;">
+        </div>
+
+        <!-- Plans will be dynamically inserted here -->
+        <div id="plans-container" class="row gy-4 justify-content-center">
+          <!-- This container is now intentionally empty and will be populated by JavaScript -->
+        </div>
+
+      </div>
+    </section>
+
+    <section class="addons-section section">
+      <div class="container" data-aos="fade-up">
+        <div class="section-title text-center">
+          <h2>Need More Power?</h2>
+          <p>Top up your account with one-time run packs anytime.</p>
+        </div>
+        <div class="addons-grid" id="addons-container">
+          <div class="col-12 text-center">Loading add-on packs...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- START: Paste this entire section -->
+<section id="pricing-commitment" class="pricing-commitment section light-background">
+  <div class="container section-title" data-aos="fade-up">
+    <h2>Our Commitment to You</h2>
+    <p>Flexible, risk-free pricing designed for growth.</p>
+  </div>
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="row gy-4">
+      <div class="col-lg-4 d-flex">
+        <div class="commitment-item">
+          <div class="icon"><i class="bi bi-infinity"></i></div>
+          <h4>Your Plan, Your Pace</h4>
+          <p>Start with any plan. If your agents exceed their task limit, you'll seamlessly transition to flexible pay-as-you-go pricing. Upgrade only when it makes sense for you.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 d-flex">
+        <div class="commitment-item">
+          <div class="icon"><i class="bi bi-graph-up-arrow"></i></div>
+          <h4>Smarter Scaling, Better Value</h4>
+          <p>Our pricing is designed to reward growth. As you scale and move to higher tiers, your cost per AI task automatically decreases. The more you WiiZ, the more value you get.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 d-flex">
+        <div class="commitment-item">
+          <div class="icon"><i class="bi bi-gem"></i></div>
+          <h4>Partner Up & Save</h4>
+          <p>Lock in a lower rate by choosing an annual plan. For large-scale needs, contact our sales team to unlock exclusive discounts and dedicated support on our Enterprise plan.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- END: Stop pasting here -->
+  </main>
+
+  <footer id="footer" class="footer">
+    <div class="container copyright text-center mt-4">
+      <div class="legal-links mb-3">
+        <a href="t&c.html">Terms of Service</a>
+        <span>&bull;</span>
+        <a href="privacypolicy.html">Privacy Policy</a>
+      </div>
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Estrel AI Ltd</strong> <span>All Rights Reserved</span></p>
+    </div>
+  </footer>
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/forms.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_URL = 'https://payments.wiiz.it/plans/getSubscriptionPlans';
+      let plansData = null;
+
+      const plansContainer = document.getElementById('plans-container');
+      const addonsContainer = document.getElementById('addons-container');
+      const monthlyLabel = document.getElementById('monthlyLabel');
+      const annualLabel = document.getElementById('annualLabel');
+
+      const authToken = localStorage.getItem('wiizAuthToken');
+      const userData = localStorage.getItem('wiizUserData') ? JSON.parse(localStorage.getItem('wiizUserData')) : null;
+      const isUserAdmin = userData && userData.role && userData.role.toLowerCase() === 'admin';
+
+      let isAnnual = false;
+
+      if (monthlyLabel && annualLabel) {
+          monthlyLabel.addEventListener('click', () => {
+              if (isAnnual) {
+                  isAnnual = false;
+                  annualLabel.classList.remove('active');
+                  monthlyLabel.classList.add('active');
+                  displayPlans(isAnnual);
+              }
+          });
+
+          annualLabel.addEventListener('click', () => {
+              if (!isAnnual) {
+                  isAnnual = true;
+                  monthlyLabel.classList.remove('active');
+                  annualLabel.classList.add('active');
+                  displayPlans(isAnnual);
+              }
+          });
+      }
+
+      function handlePlanButtonClick(event) {
+        if (authToken && !isUserAdmin) {
+          event.preventDefault();
+          alert('Please contact your administrator to purchase or change plans.');
+          return;
+        }
+        if (!authToken) {
+          event.preventDefault();
+          window.location.href = 'Signup.html';
+        }
+      }
+
+      async function fetchPlans() {
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ "plan_code": "" })
+          });
+          const responseText = await response.text();
+          const data = JSON.parse(responseText);
+          if (!response.ok || data.code !== 0) throw new Error(data.message || 'Failed to fetch plans');
+          
+          data.plans.forEach(p => p.price = Number(p.price));
+          data.addons_packs.forEach(a => a.price = Number(a.price));
+          plansData = data;
+          
+          displayPlans(isAnnual);
+          displayAddons();
+          calculateAndDisplaySavings();
+          
+        } catch (error) {
+          console.error('Error fetching pricing plans:', error);
+          if (plansContainer) plansContainer.innerHTML = '<div class="col-12 text-center text-danger">Could not load pricing. Please try again later.</div>';
+          if (addonsContainer) addonsContainer.innerHTML = '<div class="col-12 text-center text-danger">Could not load add-ons.</div>';
+        }
+      }
+
+      function displayPlans(isAnnual) {
+        if (!plansContainer) return;
+        plansContainer.innerHTML = '';
+
+        const visiblePlans = plansData ? plansData.plans.filter(p => p.plan_code !== 'ADDON_PLAN') : [];
+        
+        const freeTrialLink = authToken ? 'https://hub.wiiz.it/aistudio/login' : 'Signup.html';
+        const freeTrialButtonText = authToken ? 'Go to Dashboard' : 'Start Free Trial';
+
+        const freeTrialCardHTML = `
+          <div class="col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="100">
+              <div class="pricing-card">
+                  <h3 class="plan-name">Free Plan</h3>
+                  <p class="plan-description">Perfect for exploring the platform and building your first AI agents.</p>
+                  <div class="price">
+                      <span class="currency">$</span><span class="amount">0</span>
+                  </div>
+                  <ul class="feature-list">
+                    </br>
+                      <li><i class="bi bi-check"></i> 500 Runs (One Time)</li>
+                      <li><i class="bi bi-check"></i> 14 Days Limited Access</li>
+                      <li><i class="bi bi-check"></i> Unlimited Workflow Creation</li>
+                      <li><i class="bi bi-check"></i> Unlimited Access to Intent Studio</li>
+                      <li><i class="bi bi-check"></i> Unlimited Users</li>
+                      <li><i class="bi bi-check"></i> EvalOps (AI Quality & Evaluation)</li>
+                      <li><i class="bi bi-check"></i> Guardrails & Policy Controls</li>
+                      <li><i class="bi bi-check"></i> Model Context Protocol</li>
+                      <li><i class="bi bi-check"></i> User Management</li>
+                      <li><i class="bi bi-check"></i> WiiZ Managed AI Services</li>
+                      
+                      <li><i class="bi bi-check"></i> Bring Your Own LLM (BYO-LLM) — Custom configuration support available</li>
+                      <li><i class="bi bi-star-fill text-warning"></i> Promotional Offer: WiiZ-managed LLM usage at no extra credit cost</li>
+                  </ul>
+                  <a href="${freeTrialLink}" class="btn btn-outline-primary rounded-pill mt-auto">${freeTrialButtonText}</a>
+              </div>
+          </div>`;
+
+        let basicCardHTML = '';
+        if (plansData) {
+            const monthlyPlan = visiblePlans.find(p => p.plan_code === 'WIIZ_STARTER_MONTHLY');
+            const annualPlan = visiblePlans.find(p => p.plan_code === 'WIIZ_STARTER_ANNUAL');
+            if (monthlyPlan && annualPlan) {
+                const selectedPlan = isAnnual ? annualPlan : monthlyPlan;
+                const displayPrice = isAnnual ? (selectedPlan.price / 12).toFixed(2) : selectedPlan.price.toFixed(2);
+                const periodLabel = isAnnual ? '/ month, billed annually' : '/ month';
+                
+                let checkoutUrl = '#';
+                if (authToken && userData) {
+                  const params = new URLSearchParams({
+                    zoho_customer_id: userData.zoho_customer_id || '',
+                    customer_name: userData.display_name || userData.username,
+                    customer_email: userData.email,
+                    plan_code: selectedPlan.plan_code,
+                    redirect_url: 'https://hub.wiiz.it/aistudio/login'
+                  });
+                  checkoutUrl = `https://payments.wiiz.it/payments/checkOut?${params.toString()}`;
+                }
+
+                basicCardHTML = `
+                  <div class="col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="200">
+                    <div class="pricing-card popular">
+                      <div class="popular-badge">Most Popular</div>
+                      <h3 class="plan-name">Starter Plan</h3>
+                      <p class="plan-description">For individuals and small teams scaling their AI automation.</p>
+                      <div class="price">
+                        <span class="currency">$</span><span class="amount">${displayPrice}</span><span class="period">${periodLabel}</span>
+                      </div>
+                      <ul class="feature-list">
+                        
+                        <li><i class="bi bi-check"></i> 5000 Runs (Monthly)</li>
+                        <li><i class="bi bi-check"></i> Unlimited Projects and Collaboration</li>
+                        <li><i class="bi bi-check"></i> Unlimited Workflow Creation</li>
+                        <li><i class="bi bi-check"></i> Unlimited Access to Intent Studio</li>
+                        <li><i class="bi bi-check"></i> Unlimited Users</li>
+                        <li><i class="bi bi-check"></i> EvalOps (AI Quality & Evaluation)</li>
+                        <li><i class="bi bi-check"></i> Guardrails & Policy Controls</li>
+                        <li><i class="bi bi-check"></i> Model Context Protocol</li>
+                        <li><i class="bi bi-check"></i> User Management</li>
+                        <li><i class="bi bi-check"></i> WiiZ Managed AI Services</li>
+                        
+                        <li><i class="bi bi-check"></i> Bring Your Own LLM (BYO-LLM) — Custom configuration support available</li>
+                        <li><i class="bi bi-star-fill text-warning"></i> Promotional Offer: WiiZ-managed LLM usage at no extra credit cost</li>
+                      </ul>
+                      <a href="${checkoutUrl}" class="btn btn-primary rounded-pill mt-auto checkout-btn">Choose Plan</a>
+                    </div>
+                  </div>`;
+            }
+        }
+
+        const enterpriseCardHTML = `
+          <div class="col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="300">
+              <div class="pricing-card">
+                  <h3 class="plan-name">Business</h3>
+                  <p class="plan-description">For large organizations with support, and scaling needs.</p>
+                  <div class="price"><h4 class="display-5 fw-bold">Custom</h4></div>
+                  <ul class="feature-list">
+                    
+                    <li><i class="bi "></i> <Strong>Everything in Starter: </strong></li>
+                    <li><i class="bi bi-check"></i> Custom Runs Pack</li>
+                    <li><i class="bi bi-check"></i> Unlimited Projects and Collaboration</li>
+                    <li><i class="bi bi-check"></i> Unlimited Workflow Creation</li>
+                    <li><i class="bi bi-check"></i> Unlimited Access to Intent Studio</li>
+                    <li><i class="bi bi-check"></i> Unlimited Users</li>
+                    <li><i class="bi bi-check"></i> WiiZ Managed AI Services</li>
+                    <li><i class="bi bi-check"></i> Multiple Environments (Dev / Test / Prod)</li>
+                    <li><i class="bi bi-check"></i> SSO & LDAP Integration</li>
+                    <li><i class="bi bi-check"></i> Advanced User Management</li>
+                    <li><i class="bi bi-check"></i> EvalOps (AI Quality & Evaluation)</li>
+                    <li><i class="bi bi-check"></i> Guardrails & Policy Controls</li>
+                    <li><i class="bi bi-check"></i> Security Center</li>
+                    
+                    <li><i class="bi bi-check"></i> Bring Your Own LLM (BYO-LLM) with custom configuration support</li>
+                   <li><i class="bi bi-star-fill text-warning"></i> Promotional Offer: WiiZ-managed LLM usage at no additional credit cost</li>
+                  </ul>
+                  <a href="contact.html" class="btn btn-outline-primary rounded-pill mt-auto">Contact Sales</a>
+              </div>
+          </div>`;
+        
+        plansContainer.innerHTML = freeTrialCardHTML + basicCardHTML + enterpriseCardHTML;
+        
+        const checkoutBtn = plansContainer.querySelector('.checkout-btn');
+        if (checkoutBtn) {
+          checkoutBtn.addEventListener('click', handlePlanButtonClick);
+        }
+      }
+    
+      function calculateAndDisplaySavings() {
+        if (!plansData) return;
+        const annualSavingsEl = document.querySelector('.toggle-label[data-period="annual"]');
+        const monthlyPlan = plansData.plans.find(p => p.plan_code === 'WIIZ_STARTER_MONTHLY');
+        const annualPlan = plansData.plans.find(p => p.plan_code === 'WIIZ_STARTER_ANNUAL');
+        if(monthlyPlan && annualPlan) {
+          const monthlyPriceForYear = monthlyPlan.price * 12;
+          const savings = monthlyPriceForYear - annualPlan.price;
+          const percentageSaved = Math.round((savings / monthlyPriceForYear) * 100);
+          if (percentageSaved > 0 && annualSavingsEl) {
+            annualSavingsEl.textContent = `Annually (Save ${percentageSaved}%)`;
+          }
+        }
+      }
+      
+      function displayAddons() {
+        if (!plansData || !plansData.addons_packs || !addonsContainer) return;
+        addonsContainer.innerHTML = '';
+        
+        // UPDATE: Use an allowed list to show ONLY the 1k, 5k, and 10k packs
+        // This automatically hides "Starter Monthly Addon", "Free Trial Addon", etc.
+        const allowedAddons = [
+          'WIIZ_1000RUNS_ADDON',
+          'WIIZ_5000RUNS_ADDON',
+          'WIIZ_10000RUNS_ADDON'
+        ];
+
+        const visibleAddons = plansData.addons_packs.filter(addon => allowedAddons.includes(addon.addon_code));
+
+        visibleAddons.forEach((addon, index) => {
+          // Logic to highlight the middle one (5000 runs) as popular
+          const isPopular = addon.addon_code === 'WIIZ_5000RUNS_ADDON'; 
+          const buttonClass = isPopular ? 'btn btn-primary rounded-pill mt-3' : 'btn btn-sm btn-outline-primary rounded-pill mt-3';
+          const cardClass = isPopular ? 'addon-pack popular' : 'addon-pack';
+          
+          let checkoutUrl = '#';
+          if (authToken && userData) {
+            const params = new URLSearchParams({
+              zoho_customer_id: userData.zoho_customer_id || '',
+              customer_name: userData.display_name || userData.username,
+              customer_email: userData.email,
+              plan_code: addon.addon_code,
+              redirect_url: 'https://hub.wiiz.it/aistudio/login'
+            });
+            checkoutUrl = `https://payments.wiiz.it/payments/checkOut?${params.toString()}`;
+          }
+
+          const addonCard = `
+            <div class="${cardClass}">
+              <div class="pack-name">${addon.name}</div>
+              <div class="pack-price">$${addon.price}</div>
+              <p class="pack-description">One-time purchase</p>
+              <a href="${checkoutUrl}" class="${buttonClass} checkout-btn">Buy Pack</a>
+            </div>`;
+          addonsContainer.insertAdjacentHTML('beforeend', addonCard);
+        });
+
+        const checkoutBtns = addonsContainer.querySelectorAll('.checkout-btn');
+        checkoutBtns.forEach(btn => {
+          btn.addEventListener('click', handlePlanButtonClick);
+        });
+      }
+      fetchPlans();
+    });
+  </script>
+
+</body>
+</html>

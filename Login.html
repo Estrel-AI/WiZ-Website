@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Login | WiiZ - The No-Code Platform for AI Agents</title>
+  <meta name="description" content="Login to your WiiZ account - Transform your workflows with AI automation">
+
+  <!-- Favicons -->
+  <link href="assets/img/WiiZ_Logo_670_x_278 2.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+
+  <!-- Redirect if already logged in -->
+  <script>
+    if (localStorage.getItem('wiizAuthToken')) {
+      window.location.href = 'index.html';
+    }
+  </script>
+</head>
+
+<body class="signup-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+        <img src="assets/img/WiiZ_Logo_670_x_278 2.png" alt="Wiiz Logo" class="logo-img">
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="index.html#features">Product Feature</a></li>
+          <li><a href="services.html">Partner Program</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+          <li><a href="Faq.html">FAQ</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="Signup.html">Sign Up</a></li>
+          <li><a href="Login.html" class="active">Sign in</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section id="request-access" class="request-access section">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+
+          <!-- Left Side - Form Column -->
+          <div class="col-lg-6 mb-5 mb-lg-0">
+            <div class="access-form-container" data-aos="fade-right" data-aos-delay="200">
+              
+              <!-- === LOGIN VIEW === -->
+              <div id="login-view">
+                <div class="form-header text-center mb-4">
+                  <h2>Welcome Back</h2>
+                  <p class="text-muted">Sign in to your WiiZ account.</p>
+                </div>
+                <form action="#" method="post" id="login-form">
+                  <div class="row gy-4">
+                    <div class="col-12">
+                      <label for="login-username" class="form-label">Username <span class="text-danger">*</span></label>
+                      <input type="text" name="username" class="form-control" id="login-username" required>
+                    </div>
+                    <div class="col-12">
+  <label for="login-password" class="form-label">Password <span class="text-danger">*</span></label>
+  <input type="password" name="password" class="form-control" id="login-password" required>
+</div>
+                   <!-- START: Replace the empty div with this block -->
+<div class="col-12 mt-3">
+  <!-- reCAPTCHA Widget -->
+  <div class="g-recaptcha mb-3" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"></div>
+  
+  <!-- Status Messages -->
+  <div class="loading">Logging in...</div>
+  <div class="error-message"></div>
+  <div class="sent-message">Login successful! Redirecting...</div>
+  
+  <!-- Submit Button -->
+  <button type="submit" class="btn btn-primary w-100 btn-lg">Login</button>
+</div>
+<!-- END: Stop replacing here -->
+                </form>
+               <div class="text-center mt-4">
+  <p class="text-muted small mb-1">Don't have an account? <a href="Signup.html" class="text-primary fw-semibold">Start a free trial</a></p>
+  <div>
+    <a href="#" id="show-forgot" class="small fw-semibold" style="color: #6F5C5F; text-decoration: none;">Forgot password?</a>
+  </div>
+</div>
+              </div>
+
+              <!-- === FORGOT PASSWORD VIEW (Hidden by default) === -->
+              <div id="forgot-view" style="display: none;">
+                <div class="form-header text-center mb-4">
+                  <h2>Reset Password</h2>
+                  <p class="text-muted">Enter your email and we'll send you a reset link.</p>
+                </div>
+                <form action="#" method="post" id="forgot-password-form">
+                  <div class="row gy-4">
+                    <div class="col-12">
+                      <label for="forgot-email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                      <input type="email" name="email" class="form-control" id="forgot-email" required placeholder="name@company.com">
+                    </div>
+                    <div class="col-12 mt-3">
+                      <div class="loading">Sending reset link...</div>
+                      <div class="error-message"></div>
+                      <div class="sent-message"></div>
+                      <button type="submit" class="btn btn-primary w-100 btn-lg">Send Reset Link</button>
+                    </div>
+                  </div>
+                </form>
+                <div class="text-center mt-4">
+                  <a href="#" id="back-to-login" class="text-primary fw-semibold small">Back to Login</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="footer">
+    <div class="container copyright text-center mt-4">
+      <div class="legal-links mb-3">
+        <a href="t&c.html">Terms of Service</a>
+        <span>&bull;</span>
+        <a href="privacypolicy.html">Privacy Policy</a>
+      </div>
+      <p>© <span>Copyright</span> <strong class="px-1 sitename">Estrel AI Ltd</strong> <span>All Rights Reserved</span></p>
+    </div>
+  </footer>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/forms.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/js/main.js"></script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <!-- Add this script block for the new logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginView = document.getElementById('login-view');
+      const forgotView = document.getElementById('forgot-view');
+      const showForgotBtn = document.getElementById('show-forgot');
+      const backToLoginBtn = document.getElementById('back-to-login');
+
+      // Toggle views
+      if (showForgotBtn) {
+        showForgotBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          loginView.style.display = 'none';
+          forgotView.style.display = 'block';
+        });
+      }
+
+      if (backToLoginBtn) {
+        backToLoginBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          forgotView.style.display = 'none';
+          loginView.style.display = 'block';
+        });
+      }
+
+      // Handle Forgot Password API
+      const forgotForm = document.getElementById('forgot-password-form');
+      if (forgotForm) {
+        forgotForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const form = this;
+          const loading = form.querySelector('.loading');
+          const errorMessage = form.querySelector('.error-message');
+          const sentMessage = form.querySelector('.sent-message');
+
+          loading.style.display = 'block';
+          errorMessage.style.display = 'none';
+          sentMessage.style.display = 'none';
+
+          const email = form.querySelector('input[name="email"]').value;
+
+          try {
+            const response = await fetch('https://backend.wiiz.it/aiwf/password-reset/request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: email }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+              throw new Error(data.message || 'Failed to request reset link.');
+            }
+
+            loading.style.display = 'none';
+            sentMessage.textContent = data.message;
+            sentMessage.style.display = 'block';
+            form.reset();
+
+          } catch (error) {
+            loading.style.display = 'none';
+            errorMessage.textContent = error.message;
+            errorMessage.style.display = 'block';
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
