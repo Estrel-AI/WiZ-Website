@@ -1,115 +1,166 @@
 /* ==========================================================================
-   REFRESHED GLASSMORPHISM THEME (Targeted Elements Only)
-   Strict adherence to brand variables & legibility.
+   VISUAL LAYER 1: THE GRID (Technical Workspace Background)
+   ========================================================================== */
+.hero-grid-bg {
+    /* Subtle 40px grid pattern behaving like graph paper */
+    background-image: linear-gradient(color-mix(in srgb, var(--accent-color), transparent 96%) 1px,
+            transparent 1px),
+        linear-gradient(90deg,
+            color-mix(in srgb, var(--accent-color), transparent 96%) 1px,
+            transparent 1px);
+    background-size: 40px 40px;
+    background-position: center top;
+    /* Optional: Fade out at the bottom */
+    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+/* Also apply to body if feasible, or specific sections */
+body.index-page,
+body.pricing-page,
+body.partner-page,
+body.contact-page {
+    /* Combining background color with grid */
+    background-color: var(--background-color);
+    background-image: linear-gradient(color-mix(in srgb, var(--accent-color), transparent 97%) 1px,
+            transparent 1px),
+        linear-gradient(90deg,
+            color-mix(in srgb, var(--accent-color), transparent 97%) 1px,
+            transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+    /* Parallax feel */
+}
+
+/* ==========================================================================
+   VISUAL LAYERS 2 & 3: PRECISION GLASS & GLOW
    ========================================================================== */
 
-/* 1. HEADER / NAVIGATION */
+/* Shared Engineering Glass Style */
+.header,
+.pricing-card,
+.feature-box,
+.monitor-frame,
+.call-to-action .container,
+.contact .contact-form,
+.contact .info-box,
+.faq-item,
+.service-details .service-box {
+    /* 1. Precision Border (1px solid white 0.6 opacity) */
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+
+    /* 2. Inner Highlight (Light hitting glass edge) */
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
+        0 8px 32px 0 rgba(0, 0, 0, 0.05);
+    /* Soft base shadow */
+
+    /* 3. Radius */
+    border-radius: 16px;
+
+    /* 4. Glass Base */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* SPECIFIC BACKGROUNDS (using color-mix) */
+
+/* Header */
 .header {
-    background-color: color-mix(in srgb, var(--background-color), transparent 10%) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    /* border-bottom: 0px solid color-mix(in srgb, var(--default-color), transparent 92%); */
-    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+    background-color: color-mix(in srgb,
+            var(--background-color),
+            transparent 15%) !important;
+    border-radius: 0 0 16px 16px;
+    /* Specific corner fix */
 }
 
-/* 2. PRICING CARDS */
+/* Pricing Card */
 .pricing-card {
-    background-color: color-mix(in srgb, var(--surface-color), transparent 30%) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in srgb, var(--surface-color), transparent 40%) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+    background-color: color-mix(in srgb,
+            var(--surface-color),
+            transparent 30%) !important;
 }
 
-/* Ensure popular card keeps its distinct look but with glass */
-.pricing-card.popular {
-    background: color-mix(in srgb, var(--accent-color), transparent 15%) !important;
-    color: var(--contrast-color);
-}
-
-.pricing-card.popular .btn-light {
-    background: color-mix(in srgb, var(--contrast-color), transparent 10%);
-}
-
-/* 3. FEATURE BOXES */
+/* Feature Box */
 .feature-box {
-    /* Base glass effect */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    background-color: color-mix(in srgb, var(--surface-color), transparent 40%);
 }
 
-/* Maintain brand color identity using color-mix for transparency */
+/* Hover Effect: VISUAL LAYER 2 - THE GLOW */
+.pricing-card:hover,
+.feature-box:hover,
+.faq-item:hover,
+.service-details .service-box:hover {
+    transform: translateY(-5px);
+    /* High Energy Glow Shadow */
+    box-shadow: 0 10px 40px -10px color-mix(in srgb, var(--accent-color), transparent 60%),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* --- Variant Overrides (Keeping Brand Colors) --- */
+
+.pricing-card.popular {
+    background: color-mix(in srgb,
+            var(--accent-color),
+            transparent 15%) !important;
+    color: var(--contrast-color);
+    border-color: color-mix(in srgb, var(--accent-color), white 20%) !important;
+}
+
 .features-cards .feature-box.orange {
     background-color: color-mix(in srgb, #fff3e2, transparent 30%);
-    border-color: color-mix(in srgb, #fff3e2, transparent 10%);
+    border-color: color-mix(in srgb, #fff3e2, white 40%) !important;
 }
 
 .features-cards .feature-box.blue {
     background-color: color-mix(in srgb, #deedfd, transparent 30%);
-    border-color: color-mix(in srgb, #deedfd, transparent 10%);
+    border-color: color-mix(in srgb, #deedfd, white 40%) !important;
 }
 
 .features-cards .feature-box.green {
     background-color: color-mix(in srgb, #d5f1e4, transparent 30%);
-    border-color: color-mix(in srgb, #d5f1e4, transparent 10%);
+    border-color: color-mix(in srgb, #d5f1e4, white 40%) !important;
 }
 
 .features-cards .feature-box.red {
     background-color: color-mix(in srgb, #fdeded, transparent 30%);
-    border-color: color-mix(in srgb, #fdeded, transparent 10%);
+    border-color: color-mix(in srgb, #fdeded, white 40%) !important;
 }
 
-/* 4. MONITOR FRAME / VIDEO CONTAINERS */
+/* Monitor Frame / CTAs */
 .monitor-frame {
     background-color: color-mix(in srgb, var(--surface-color), transparent 40%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in srgb, var(--surface-color), transparent 50%);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-    border-radius: 16px;
 }
 
-/* 5. CALL TO ACTION CONTAINER */
 .call-to-action .container {
-    background: color-mix(in srgb, var(--accent-color), transparent 15%) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in srgb, var(--contrast-color), transparent 85%);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    background: color-mix(in srgb,
+            var(--accent-color),
+            transparent 15%) !important;
+    /* CTA Special Glow */
+    box-shadow: 0 20px 60px -10px color-mix(in srgb, var(--accent-color), transparent 40%),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
 }
 
-/* 6. CONTACT FORM */
 .contact .contact-form,
 .contact .info-box {
-    background-color: color-mix(in srgb, var(--surface-color), transparent 20%) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in srgb, var(--surface-color), transparent 50%);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    background-color: color-mix(in srgb,
+            var(--surface-color),
+            transparent 20%) !important;
 }
 
-/* Info box needs to keep its accent color base but glassified */
 .contact .info-box {
-    background-color: color-mix(in srgb, var(--accent-color), transparent 15%) !important;
+    background-color: color-mix(in srgb,
+            var(--accent-color),
+            transparent 15%) !important;
     color: var(--contrast-color);
 }
 
-/* 7. FAQ ITEMS */
 .faq-item {
-    background-color: color-mix(in srgb, var(--surface-color), transparent 30%) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in srgb, var(--default-color), transparent 92%);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-}
-
-/* 8. PARTNER / SERVICES ITEMS */
-.service-details .service-box {
-    background-color: color-mix(in srgb, var(--surface-color), transparent 25%) !important;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    background-color: color-mix(in srgb,
+            var(--surface-color),
+            transparent 30%) !important;
 }
 
 /* ==========================================================================
@@ -150,7 +201,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: 80px;
+    padding-top: 100px;
     width: 100%;
 
     /* Optional: Add a backdrop blur if you have an image behind this div */
@@ -175,7 +226,9 @@
    Adapting previous "premium-form-card" to specific glass style */
 .premium-form-card,
 .login-card-central {
-    background-color: color-mix(in srgb, var(--surface-color), transparent 10%) !important;
+    background-color: color-mix(in srgb,
+            var(--surface-color),
+            transparent 10%) !important;
     /* Mostly opaque for forms */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -190,7 +243,7 @@
 /* Top accent bar */
 .premium-form-card::before,
 .login-card-central::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -257,6 +310,10 @@
 }
 
 .login-content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     width: 100%;
     max-width: 500px;
     padding: 20px;
@@ -278,4 +335,237 @@
 .login-page-subtitle {
     opacity: 0.9;
     margin-bottom: 2rem;
+}
+
+/* ========================================================
+   WiiZ Technical AI Theme (Glass, Grids & Glows)
+   Overrides for main.css, pricing.css, and custom-updates.css
+   ======================================================== */
+
+:root {
+    /* Tech Theme Variables */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+    --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+    --tech-grid-color: color-mix(in srgb, var(--accent-color), transparent 95%);
+    --ai-glow-primary: 0 0 20px color-mix(in srgb, var(--accent-color), transparent 50%);
+    --font-mono: "Roboto Mono", monospace;
+}
+
+/* --------------------------------------------------------
+   1. The "Blueprint" Background Grid
+   Replaces flat white backgrounds with a precision grid.
+   -------------------------------------------------------- */
+body,
+.light-background,
+.pricing-section,
+.partner-hero {
+    background-color: #f8f9ff;
+    /* Keeps your light base */
+    background-image: linear-gradient(var(--tech-grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--tech-grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    /* 40px precision grid */
+    background-attachment: fixed;
+    /* Parallax effect */
+}
+
+/* --------------------------------------------------------
+   2. Glassmorphism Card Style (The "HUD" Look)
+   Applies to all cards found in your uploaded CSS files.
+   -------------------------------------------------------- */
+.pricing-card,
+.feature-box,
+.pathway-item,
+.login-card-central,
+.info-box,
+.contact-form,
+.access-form-container,
+.agreement-box,
+.service-box {
+    /* Use your existing --surface-color but make it 15% transparent */
+    background: color-mix(in srgb,
+            var(--surface-color),
+            transparent 15%) !important;
+
+    /* The Blur Effect */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    /* The "Cut Glass" Edge */
+    border: var(--glass-border) !important;
+    border-radius: 16px !important;
+
+    /* Inner Highlight for 3D depth */
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), var(--glass-highlight) !important;
+
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+/* Active/Hover State: Lift + Glow */
+.pricing-card:hover,
+.feature-box:hover,
+.pathway-item:hover,
+.social-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 15px 40px -5px color-mix(in srgb, var(--accent-color), transparent 85%),
+        var(--glass-highlight) !important;
+}
+
+/* --------------------------------------------------------
+   3. The Monitor Frame (Specific Update for Main.css)
+   Makes the device frame look like "Dark Glass" hardware.
+   -------------------------------------------------------- */
+.monitor-frame {
+    /* Dark tech gradient */
+    background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        /* Deep shadow */
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1) !important;
+    /* Metallic edge */
+}
+
+/* --------------------------------------------------------
+   4. "AI Energy" Buttons
+   Replaces flat buttons with glowing, vibrant inputs.
+   -------------------------------------------------------- */
+.btn-primary,
+.btn-getstarted,
+.btn-cta {
+    background: linear-gradient(135deg,
+            var(--accent-color) 0%,
+            #8b6ed9 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--accent-color), transparent 60%) !important;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-primary:hover,
+.btn-getstarted:hover,
+.btn-cta:hover {
+    box-shadow: 0 0 25px color-mix(in srgb, var(--accent-color), transparent 30%) !important;
+    transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------
+   5. Technical Typography (Micro-details)
+   Applies monospace font to numbers and technical labels.
+   -------------------------------------------------------- */
+.price .amount,
+/* Pricing Page Numbers */
+.badge-beta,
+/* Beta Tags */
+.faq-item h3 .num,
+/* FAQ Numbers */
+.stat-box h3,
+/* Stats Numbers */
+.plan-name
+
+/* Plan Titles */
+    {
+    font-family: var(--font-mono);
+    letter-spacing: -0.5px;
+}
+
+/* --------------------------------------------------------
+   6. Navigation Bar (Glass Effect)
+   Updates .header from main.css
+   -------------------------------------------------------- */
+.header {
+    background-color: color-mix(in srgb, #ffffff, transparent 15%) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* --------------------------------------------------------
+   7. Login Page Background (The Fix you asked for)
+   Updates .login-animated-bg from custom-updates.css
+   -------------------------------------------------------- */
+.login-animated-bg {
+    /* Using color-mix to make the gradient 15% transparent */
+    background: linear-gradient(-45deg,
+            color-mix(in srgb, #f4d677, transparent 5%),
+            /* Highlight Color approx */
+            color-mix(in srgb, #e68f17, transparent 5%),
+            /* Highlight Warm approx */
+            color-mix(in srgb, var(--accent-color), transparent 20%),
+            color-mix(in srgb, #8b6ed9, transparent 20%)) !important;
+
+    background-size: 400% 400%;
+    animation: gradientBG 8s ease infinite;
+}
+
+/* ========================================================
+   FIX: Pricing Card "Popular" Text Visibility
+   Resets the white text back to dark for the glass theme.
+   ======================================================== */
+
+.pricing-card.popular h3,
+.pricing-card.popular h4,
+.pricing-card.popular .plan-name,
+.pricing-card.popular .plan-description,
+.pricing-card.popular .price .currency,
+.pricing-card.popular .price .amount,
+.pricing-card.popular .price .period,
+.pricing-card.popular .feature-list li,
+.pricing-card.popular .feature-list li strong {
+    color: var(--heading-color) !important;
+}
+
+/* Ensure the checkmark icons stay purple */
+.pricing-card.popular .feature-list li i {
+    color: var(--accent-color) !important;
+}
+
+/* Ensure the "Promotional Offer" star stays yellow/warning color */
+.pricing-card.popular .feature-list li i.text-warning {
+    color: #ffc107 !important;
+}
+
+/* Optional: Make the strikethrough price slightly lighter/grey */
+.pricing-card.popular .price .currency span {
+    color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/*  */
+
+/* ========================================================
+   FIX: Pricing Card "Popular" Text Visibility
+   Resets the white text back to dark for the glass theme.
+   ======================================================== */
+
+.pricing-card.popular h3,
+.pricing-card.popular h4,
+.pricing-card.popular .plan-name,
+.pricing-card.popular .plan-description,
+.pricing-card.popular .price .currency,
+.pricing-card.popular .price .amount,
+.pricing-card.popular .price .period,
+.pricing-card.popular .feature-list li,
+.pricing-card.popular .feature-list li strong {
+    color: var(--heading-color) !important;
+}
+
+/* Ensure the checkmark icons stay purple */
+.pricing-card.popular .feature-list li i {
+    color: var(--accent-color) !important;
+}
+
+/* Ensure the "Promotional Offer" star stays yellow/warning color */
+.pricing-card.popular .feature-list li i.text-warning {
+    color: #ffc107 !important;
+}
+
+/* Optional: Make the strikethrough price slightly lighter/grey */
+.pricing-card.popular .price .currency span {
+    color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.toggle-label.active {
+    color: white !important;
 }

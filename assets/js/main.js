@@ -242,7 +242,7 @@
             opacity = Math.max(0.5, Math.min(1, opacity));
 
             // Force full visibility when near center (within 25% of center)
-            if (Math.abs(normalizedDist) < 0.25) {
+            if (Math.abs(normalizedDist) < 0.30) {
               opacity = 1;
               scale = 1;
             }
