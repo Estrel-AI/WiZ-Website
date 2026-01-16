@@ -3192,3 +3192,112 @@ section,
   font-size: 2.5rem;
   font-weight: bold;
 }
+
+/* --- Custom: "Find Us On" Section --- */
+.find-us-on {
+  background-color: #fff; /* Clean white background */
+}
+
+.find-us-on .social-card {
+  display: block;
+  text-align: center;
+  padding: 30px 20px;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.3s ease-in-out;
+  text-decoration: none;
+  height: 100%;
+}
+
+.find-us-on .social-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent-color);
+}
+
+.find-us-on .social-card img {
+  height: 48px; /* Uniform logo height */
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.find-us-on .social-card:hover img {
+  transform: scale(1.1);
+}
+
+.find-us-on .social-card h4 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--heading-color);
+  margin-bottom: 0;
+}
+/* --- Custom: Login Page Info Panel --- */
+.login-info-panel {
+  padding: 2rem;
+}
+
+.login-info-panel h4 {
+  color: var(--heading-color);
+}
+
+.login-info-panel .btn-dark {
+  background-color: #343a40;
+  border-color: #343a40;
+  padding: 10px 30px;
+  font-weight: 500;
+}
+.login-info-panel .btn-dark:hover {
+  background-color: #23272b;
+  border-color: #1d2124;
+}
+
+@media (max-width: 991px) {
+  .login-info-panel {
+    display: none; /* Hide the illustration panel on mobile for a cleaner look */
+  }
+}
+/* --- Custom: Final Floating Atlas Link on Login Page --- */
+/* --- Custom: Final Floating Atlas Link on Login Page --- */
+.atlas-link-container {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  z-index: 10;
+  
+  background: #ffffff;
+  padding: 1rem;
+ 
+ 
+  /* The border line has been removed */
+  text-align: center;
+  width: 100%;
+  max-width: 300px;
+}
+
+
+
+.atlas-link-container p {
+  font-size: 0.6rem;
+  color: #6c757d;
+  margin-bottom: 1.25rem;
+}
+
+.atlas-link-container .btn-dark {
+  background-color: #FFFFFF;
+  border-color: #6849CB;
+  color: #6849CB;
+  font-weight: 500;
+}
+.atlas-link-container .btn-dark:hover {
+  background-color: #6849CB;
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+}
+
+/* On smaller screens, hide the floating box entirely for a clean mobile login */
+@media (max-width: 991px) {
+  .atlas-link-container {
+    display: none;
+  }
+}

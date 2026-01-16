@@ -197,7 +197,7 @@
 
         <div class="billing-cycle-toggle" data-aos="fade-up" data-aos-delay="100">
           <span class="toggle-label active" data-period="monthly" id="monthlyLabel">Monthly</span>
-          <span class="toggle-label" data-period="annual" id="annualLabel">Annually (Save 10%)</span>
+          <span class="toggle-label" data-period="annual" id="annualLabel">Annually (Save ~10%)</span>
           <input type="checkbox" id="billingToggle" style="display: none;">
         </div>
 
@@ -393,7 +393,8 @@
             if (monthlyPlan && annualPlan) {
                 const selectedPlan = isAnnual ? annualPlan : monthlyPlan;
                 const displayPrice = isAnnual ? (selectedPlan.price / 12).toFixed(2) : selectedPlan.price.toFixed(2);
-                const periodLabel = isAnnual ? '/ month, billed annually' : '/ month';
+                const periodLabel = isAnnual ? '/ month, billed annually' : '/ month, billed monthly';
+                const originalPrice = isAnnual ? "22.49" :"24.99";
                 
                 let checkoutUrl = '#';
                 if (authToken && userData) {
@@ -410,11 +411,13 @@
                 basicCardHTML = `
                   <div class="col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="200">
                     <div class="pricing-card popular">
-                      <div class="popular-badge">Most Popular</div>
+                      <div class="popular-badge">Promotion</div>
                       <h3 class="plan-name">Starter Plan</h3>
                       <p class="plan-description">For individuals and small teams scaling their AI automation.</p>
+                     
                       <div class="price">
-                        <span class="currency">$</span><span class="amount">${displayPrice}</span><span class="period">${periodLabel}</span>
+                      
+                        <span class="currency"> <span class="currency" style = "text-decoration: line-through">$${originalPrice}</span><br>$</span><span class="amount">${displayPrice}</span><span class="period">${periodLabel}</span>
                       </div>
                       <ul class="feature-list">
                         
@@ -446,7 +449,6 @@
                   <div class="price"><h4 class="display-5 fw-bold">Custom</h4></div>
                   <ul class="feature-list">
                     
-                    <li><i class="bi "></i> <Strong>Everything in Starter: </strong></li>
                     <li><i class="bi bi-check"></i> Custom Runs Pack</li>
                     <li><i class="bi bi-check"></i> Unlimited Projects and Collaboration</li>
                     <li><i class="bi bi-check"></i> Unlimited Workflow Creation</li>
@@ -485,7 +487,7 @@
           const savings = monthlyPriceForYear - annualPlan.price;
           const percentageSaved = Math.round((savings / monthlyPriceForYear) * 100);
           if (percentageSaved > 0 && annualSavingsEl) {
-            annualSavingsEl.textContent = `Annually (Save ${percentageSaved}%)`;
+            annualSavingsEl.textContent = `Annually (Save ~${percentageSaved}%)`;
           }
         }
       }

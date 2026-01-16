@@ -14,7 +14,9 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -37,7 +39,8 @@
 <body class="signup-page">
 
   <header id="header" class="header d-flex align-items-center fixed-top">
-    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+    <div
+      class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
       <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
         <img src="assets/img/WiiZ_Logo_670_x_278 2.png" alt="Wiiz Logo" class="logo-img">
       </a>
@@ -56,87 +59,86 @@
     </div>
   </header>
 
-  <main class="main">
-    <section id="request-access" class="request-access section">
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row justify-content-center">
+<!-- START: Replace your entire <main> section with this block -->
+<main class="main">
 
-          <!-- Left Side - Form Column -->
-          <div class="col-lg-6 mb-5 mb-lg-0">
-            <div class="access-form-container" data-aos="fade-right" data-aos-delay="200">
-              
-              <!-- === LOGIN VIEW === -->
-              <div id="login-view">
-                <div class="form-header text-center mb-4">
-                  <h1 style="font-weight: bold
-                  ;">Sign in to your WiiZ account</h1 style="font-weight: bols
-                  ;">
-                  <!-- <p class="text-muted">Sign in to your WiiZ account.</p> -->
-                </div>
-                <form action="#" method="post" id="login-form">
-                  <div class="row gy-4">
-                    <div class="col-12">
-                      <label for="login-username" class="form-label">Username <span class="text-danger">*</span></label>
-                      <input type="text" name="username" class="form-control" id="login-username" required>
-                    </div>
-                    <div class="col-12">
-  <label for="login-password" class="form-label">Password <span class="text-danger">*</span></label>
-  <input type="password" name="password" class="form-control" id="login-password" required>
-</div>
-                   <!-- START: Replace the empty div with this block -->
-<div class="col-12 mt-3">
-  <!-- reCAPTCHA Widget -->
-  <div class="g-recaptcha mb-3" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"></div>
-  
-  <!-- Status Messages -->
-  <div class="loading">Logging in...</div>
-  <div class="error-message"></div>
-  <div class="sent-message">Login successful! Redirecting...</div>
-  
-  <!-- Submit Button -->
-  <button type="submit" class="btn btn-primary w-100 btn-lg">Login</button>
-</div>
-<!-- END: Stop replacing here -->
-                </form>
-               <div class="text-center mt-4">
-  <p class="text-muted small mb-1">Don't have an account? <a href="Signup.html" class="text-primary fw-semibold">Start a free trial</a></p>
-  <div>
-    <a href="#" id="show-forgot" class="small fw-semibold" style="color: #6F5C5F; text-decoration: none;">Forgot password?</a>
+  <!-- Atlas 2.0 Link (Floating Box) -->
+  <div class="atlas-link-container" data-aos="fade-down" data-aos-delay="200">
+    <h6>Existing User of WiiZ Atlas 2.0?</h6>
+   <a href="https://hub.wiiz.it" class="btn btn-dark rounded-pill w-100" target="_blank">Go to Hub at WiiZ Atlas 2.0</a>
   </div>
-</div>
-              </div>
 
-              <!-- === FORGOT PASSWORD VIEW (Hidden by default) === -->
-              <div id="forgot-view" style="display: none;">
-                <div class="form-header text-center mb-4">
-                  <h2>Reset Password</h2>
-                  <p class="text-muted">Enter your email and we'll send you a reset link.</p>
-                </div>
-                <form action="#" method="post" id="forgot-password-form">
-                  <div class="row gy-4">
-                    <div class="col-12">
-                      <label for="forgot-email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                      <input type="email" name="email" class="form-control" id="forgot-email" required placeholder="name@company.com">
-                    </div>
-                    <div class="col-12 mt-3">
-                      <div class="loading">Sending reset link...</div>
-                      <div class="error-message"></div>
-                      <div class="sent-message"></div>
-                      <button type="submit" class="btn btn-primary w-100 btn-lg">Send Reset Link</button>
-                    </div>
+  <section id="request-access" class="request-access section">
+    <div class="container" data-aos="fade-up">
+      <div class="row justify-content-center">
+        <div class="col-lg-6">
+          <div class="access-form-container">
+            
+            <!-- LOGIN VIEW -->
+            <div id="login-view">
+              <div class="form-header text-center mb-4">
+                <h2>Sign in to WiiZ</h2>
+                <p class="text-muted">Welcome back! Please enter your details.</p>
+              </div>
+              <form action="#" method="post" id="login-form">
+                <div class="row gy-3">
+                  <div class="col-12">
+                    <label for="login-username" class="form-label">Username <span class="text-danger">*</span></label>
+                    <input type="text" name="username" class="form-control" id="login-username" required>
                   </div>
-                </form>
-                <div class="text-center mt-4">
-                  <a href="#" id="back-to-login" class="text-primary fw-semibold small">Back to Login</a>
+                  <div class="col-12">
+                    <label for="login-password" class="form-label">Password <span class="text-danger">*</span></label>
+                    <input type="password" name="password" class="form-control" id="login-password" required>
+                  </div>
+                  <div class="col-12 mt-3">
+                    <div class="g-recaptcha mb-3" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"></div>
+                    <div class="loading">Logging in...</div>
+                    <div class="error-message"></div>
+                    <div class="sent-message">Login successful! Redirecting...</div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mt-3">Sign In</button>
+                  </div>
+                </div>
+              </form>
+              <div class="text-center mt-4">
+                <p class="text-muted small mb-1">Don't have an account? <a href="Signup.html" class="text-primary fw-semibold">Start a free trial</a></p>
+                <div>
+                  <a href="#" id="show-forgot" class="text-muted small fw-semibold">Forgot password?</a>
                 </div>
               </div>
-
             </div>
+
+            <!-- FORGOT PASSWORD VIEW (Hidden) -->
+            <div id="forgot-view" style="display: none;">
+              <div class="form-header text-center mb-4">
+                <h2>Reset Password</h2>
+                <p class="text-muted">Enter your email and we'll send you a reset link.</p>
+              </div>
+              <form action="#" method="post" id="forgot-password-form">
+                <div class="row gy-4">
+                  <div class="col-12">
+                    <label for="forgot-email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control" id="forgot-email" required>
+                  </div>
+                  <div class="col-12 mt-3">
+                    <div class="loading">Sending...</div>
+                    <div class="error-message"></div>
+                    <div class="sent-message"></div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">Send Reset Link</button>
+                  </div>
+                </div>
+              </form>
+              <div class="text-center mt-4">
+                <a href="#" id="back-to-login" class="text-primary fw-semibold small">Back to Login</a>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
+</main>
+<!-- END: Stop replacing here -->
 
   <footer id="footer" class="footer">
     <div class="container copyright text-center mt-4">
@@ -145,7 +147,8 @@
         <span>&bull;</span>
         <a href="privacypolicy.html">Privacy Policy</a>
       </div>
-      <p>© <span>Copyright 2026</span> <strong class="px-1 sitename">Estrel AI Ltd</strong> <span>All Rights Reserved</span></p>
+      <p>© <span>Copyright 2026</span> <strong class="px-1 sitename">Estrel AI Ltd</strong> <span>All Rights
+          Reserved</span></p>
     </div>
   </footer>
 
@@ -156,7 +159,7 @@
   <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
   <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
   <script src="assets/js/main.js"></script>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <!-- Add this script block for the new logic -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -185,7 +188,7 @@
       // Handle Forgot Password API
       const forgotForm = document.getElementById('forgot-password-form');
       if (forgotForm) {
-        forgotForm.addEventListener('submit', async function(e) {
+        forgotForm.addEventListener('submit', async function (e) {
           e.preventDefault();
           const form = this;
           const loading = form.querySelector('.loading');
@@ -227,4 +230,5 @@
   </script>
 
 </body>
+
 </html>
