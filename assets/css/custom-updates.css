@@ -102,9 +102,9 @@ body.contact-page {
 /* --- Variant Overrides (Keeping Brand Colors) --- */
 
 .pricing-card.popular {
-    background: color-mix(in srgb,
+    /* background: color-mix(in srgb,
             var(--accent-color),
-            transparent 15%) !important;
+            transparent 15%) !important; */
     color: var(--contrast-color);
     border-color: color-mix(in srgb, var(--accent-color), white 20%) !important;
 }
@@ -184,29 +184,6 @@ body.contact-page {
 }
      */
 
-.login-animated-bg {
-    /* Updated Gradient: 
-       We wrap each variable in color-mix to add transparency individually.
-       Change '15%' to '50%' if you want it very faint.
-    */
-    background: linear-gradient(-45deg,
-            color-mix(in srgb, var(--highlight-color), transparent 7%),
-            color-mix(in srgb, var(--highlight-warm), transparent 7%),
-            color-mix(in srgb, var(--accent-color), transparent 7%),
-            color-mix(in srgb, var(--accent-secondary), transparent 7%));
-
-    background-size: 400% 400%;
-    animation: gradientBG 8s ease infinite;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 100px;
-    width: 100%;
-
-    /* Optional: Add a backdrop blur if you have an image behind this div */
-    /* backdrop-filter: blur(10px); */
-}
 
 @keyframes gradientBG {
     0% {
@@ -488,7 +465,14 @@ body,
    -------------------------------------------------------- */
 .login-animated-bg {
     /* Using color-mix to make the gradient 15% transparent */
-    background: linear-gradient(-45deg,
+
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 100px;
+    width: 100%;
+    background-image: linear-gradient(-45deg,
             color-mix(in srgb, #f4d677, transparent 5%),
             /* Highlight Color approx */
             color-mix(in srgb, #e68f17, transparent 5%),
@@ -496,8 +480,8 @@ body,
             color-mix(in srgb, var(--accent-color), transparent 20%),
             color-mix(in srgb, #8b6ed9, transparent 20%)) !important;
 
-    background-size: 400% 400%;
-    animation: gradientBG 8s ease infinite;
+    background-size: 200% 200% !important;
+    animation: gradientBG 7s ease infinite !important;
 }
 
 /* ========================================================
