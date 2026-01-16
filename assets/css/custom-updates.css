@@ -1,0 +1,181 @@
+/* ==========================================================================
+   GLOBAL GLASS / ANIMATED THEME
+   ========================================================================== */
+
+/* Animated Background (Global) */
+.animated-gradient-bg {
+    background: linear-gradient(-45deg, #b77923, #912059, #b33e53);
+    background-size: 400% 400%;
+    animation: gradientBG 5s ease infinite;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 80px;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Glass Card Effect */
+.glass-card {
+    background: rgba(255, 255, 255, 0.75);
+    /* Lower opacity for real glass feel */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    border-radius: 16px;
+    overflow: hidden;
+    /* For accent bars */
+}
+
+/* Login Page Specifics - Removed invalid wrapper, use login-animated-bg */
+
+.login-content-wrapper {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Signup Page Specifics (Layout Constraints) */
+.signup-content-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    /* Wider for 2-column layout */
+    padding: 2rem;
+}
+
+/* Text Colors on Gradient Background */
+.text-on-gradient-title {
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-on-gradient-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* PREMIUM FORM CARD (Updated to Glass) */
+.premium-form-card {
+    /* Extends glass-card */
+    background: rgba(255, 255, 255, 0.85);
+    /* Slightly more opaque for input readability */
+    backdrop-filter: blur(12px);
+    padding: 3rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Top accent bar for premium card */
+.premium-form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #912059, #FBC70F);
+}
+
+/* Form Controls in Glass */
+.premium-form-card .form-control,
+.premium-form-card .form-select,
+.glass-card .form-control {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #111;
+}
+
+.premium-form-card .form-control:focus,
+.glass-card .form-control:focus {
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(145, 32, 89, 0.15);
+    border-color: #912059;
+}
+
+/* Left Info Column Styling (Signup) */
+.info-content-glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.info-content-glass h1,
+.info-content-glass h2,
+.info-content-glass h3,
+.info-content-glass h4,
+.info-content-glass h5,
+.info-content-glass h6,
+.info-content-glass p,
+.info-content-glass li,
+.info-content-glass i {
+    color: #fff !important;
+    /* Force white text on dark/gradient bg */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.info-content-glass .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.info-content-glass .badge-beta {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Reuse existing login-animated-bg for backward compatibility if needed, 
+   but pointing to new class logic is better. 
+   Keeping the name to avoid breaking Login.html immediately. */
+.login-animated-bg {
+    background: radial-gradient(#912059, #AD2D45, #b77923);
+    background-size: 100%;
+    animation: gradientBG 5s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 80px;
+    border: 0px solid;
+    border-radius: 30px;
+    margin-top: 5%;
+}
+
+.login-card-central {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 3rem;
+    width: 100%;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    margin-top: 2rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+
+
+
+.container.signup-content-wrapper.aos-init.aos-animate {
+    border: 0px solid;
+    border-radius: 30px;
+}

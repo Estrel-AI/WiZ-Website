@@ -9,6 +9,7 @@
 
   // =================================================================================
   // AUTHENTICATION LOGIC (RUNS IMMEDIATELY)
+
   // =================================================================================
   /**
    * Checks login state and updates UI elements accordingly.
@@ -233,11 +234,11 @@
             const normalizedDist = (elementCenter - screenCenter) / (windowHeight / 2);
 
             // Strong Scale Effect: 0.85 (at edges) -> 1.0 (at center)
-            let scale = 1 - Math.abs(normalizedDist * 0.15);
+            let scale = 1 - Math.abs(normalizedDist * 0.20);
             scale = Math.max(0.35, Math.min(1, scale));
 
             // Strong Opacity Effect: 0.5 (at edges) -> 1.0 (at center)
-            let opacity = 1 - Math.abs(normalizedDist * 0.75);
+            let opacity = 1 - Math.abs(normalizedDist * 1);
             opacity = Math.max(0.5, Math.min(1, opacity));
 
             // Force full visibility when near center (within 25% of center)

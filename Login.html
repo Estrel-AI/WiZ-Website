@@ -27,6 +27,7 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
+  <link href="assets/css/custom-updates.css" rel="stylesheet">
 
   <!-- Redirect if already logged in -->
   <script>
@@ -59,86 +60,85 @@
     </div>
   </header>
 
-<!-- START: Replace your entire <main> section with this block -->
-<main class="main">
+  <main class="main" style="padding-top: 20px; ">
+    <div class="login-animated-bg">
+      <div class=" login-content-wrapper" data-aos="fade-up">
 
-  <!-- Atlas 2.0 Link (Floating Box) -->
-  <div class="atlas-link-container" data-aos="fade-down" data-aos-delay="200">
-    <h6>Existing User of WiiZ Atlas 2.0?</h6>
-   <a href="https://hub.wiiz.it" class="btn btn-dark rounded-pill w-100" target="_blank">Go to Hub at WiiZ Atlas 2.0</a>
-  </div>
+        <!-- Top Section -->
+        <h1 class="login-page-title">WiiZ Atlas 2.0</h1>
+        <p class="login-page-subtitle">Existing User Portal</p>
 
-  <section id="request-access" class="request-access section">
-    <div class="container" data-aos="fade-up">
-      <div class="row justify-content-center">
-        <div class="col-lg-6">
-          <div class="access-form-container">
-            
-            <!-- LOGIN VIEW -->
-            <div id="login-view">
-              <div class="form-header text-center mb-4">
-                <h2>Sign in to WiiZ</h2>
-                <p class="text-muted">Welcome back! Please enter your details.</p>
+        <a href="https://hub.wiiz.it" class="btn btn-light rounded-pill px-5 py-2 fw-bold text-primary mb-3"
+          style="background: #fff; color: #912059 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          Go to Hub at WiiZ Atlas 2.0
+        </a>
+
+        <!-- Central Card -->
+        <div class="login-card-central">
+          <h3 class="mb-2 fw-bold" style="color: #111;">Purchase plans from WiiZ.it website</h3>
+          <p class="text-muted small mb-4">Sign in to your account</p>
+
+          <!-- Login Form (Existing Logic Preserved) -->
+          <div id="login-view">
+            <form action="#" method="post" id="login-form">
+              <div class="mb-3 text-start">
+                <label for="login-username" class="form-label small fw-bold">Username <span
+                    class="text-danger">*</span></label>
+                <input type="text" name="username" class="form-control" id="login-username" required>
               </div>
-              <form action="#" method="post" id="login-form">
-                <div class="row gy-3">
-                  <div class="col-12">
-                    <label for="login-username" class="form-label">Username <span class="text-danger">*</span></label>
-                    <input type="text" name="username" class="form-control" id="login-username" required>
-                  </div>
-                  <div class="col-12">
-                    <label for="login-password" class="form-label">Password <span class="text-danger">*</span></label>
-                    <input type="password" name="password" class="form-control" id="login-password" required>
-                  </div>
-                  <div class="col-12 mt-3">
-                    <div class="g-recaptcha mb-3" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"></div>
-                    <div class="loading">Logging in...</div>
-                    <div class="error-message"></div>
-                    <div class="sent-message">Login successful! Redirecting...</div>
-                    <button type="submit" class="btn btn-primary w-100 btn-lg mt-3">Sign In</button>
-                  </div>
-                </div>
-              </form>
-              <div class="text-center mt-4">
-                <p class="text-muted small mb-1">Don't have an account? <a href="Signup.html" class="text-primary fw-semibold">Start a free trial</a></p>
-                <div>
-                  <a href="#" id="show-forgot" class="text-muted small fw-semibold">Forgot password?</a>
-                </div>
+              <div class="mb-3 text-start">
+                <label for="login-password" class="form-label small fw-bold">Password <span
+                    class="text-danger">*</span></label>
+                <input type="password" name="password" class="form-control" id="login-password" required>
               </div>
+
+              <div class="captcha-wrapper">
+                <div class="g-recaptcha" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"
+                  style="display: inline-block; margin-bottom: 1rem;"></div>
+              </div>
+
+              <div class="loading">Logging in...</div>
+              <div class="error-message"></div>
+              <div class="sent-message">Login successful! Redirecting...</div>
+
+              <button type="submit" class="btn btn-primary w-100 btn-lg"
+                style="background: linear-gradient(135deg,#912059,#AD2D45); border: none;">
+                WiiZ.it Website Customer Portal
+              </button>
+            </form>
+
+            <div class="mt-4">
+              <p class="text-muted small mb-1">Don't have an account? <a href="Signup.html"
+                  class="text-primary fw-semibold">Start a free trial</a></p>
+              <a href="#" id="show-forgot" class="text-muted small fw-semibold">Forgot password?</a>
             </div>
-
-            <!-- FORGOT PASSWORD VIEW (Hidden) -->
-            <div id="forgot-view" style="display: none;">
-              <div class="form-header text-center mb-4">
-                <h2>Reset Password</h2>
-                <p class="text-muted">Enter your email and we'll send you a reset link.</p>
-              </div>
-              <form action="#" method="post" id="forgot-password-form">
-                <div class="row gy-4">
-                  <div class="col-12">
-                    <label for="forgot-email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                    <input type="email" name="email" class="form-control" id="forgot-email" required>
-                  </div>
-                  <div class="col-12 mt-3">
-                    <div class="loading">Sending...</div>
-                    <div class="error-message"></div>
-                    <div class="sent-message"></div>
-                    <button type="submit" class="btn btn-primary w-100 btn-lg">Send Reset Link</button>
-                  </div>
-                </div>
-              </form>
-              <div class="text-center mt-4">
-                <a href="#" id="back-to-login" class="text-primary fw-semibold small">Back to Login</a>
-              </div>
-            </div>
-
           </div>
+
+          <!-- Forgot Password View (Hidden) -->
+          <div id="forgot-view" style="display: none;">
+            <h4 class="mb-3">Reset Password</h4>
+            <p class="text-muted small mb-4">Enter your email and we'll send you a reset link.</p>
+            <form action="#" method="post" id="forgot-password-form">
+              <div class="mb-3 text-start">
+                <label for="forgot-email" class="form-label small fw-bold">Email Address <span
+                    class="text-danger">*</span></label>
+                <input type="email" name="email" class="form-control" id="forgot-email" required>
+              </div>
+              <div class="loading">Sending...</div>
+              <div class="error-message"></div>
+              <div class="sent-message"></div>
+              <button type="submit" class="btn btn-primary w-100 btn-lg">Send Reset Link</button>
+            </form>
+            <div class="mt-4">
+              <a href="#" id="back-to-login" class="text-primary fw-semibold small">Back to Login</a>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-  </section>
-</main>
-<!-- END: Stop replacing here -->
+  </main>
+  <!-- END: Stop replacing here -->
 
   <footer id="footer" class="footer">
     <div class="container copyright text-center mt-4">
