@@ -4,7 +4,7 @@
 * License: https://bootstrapmade.com/license/
 */
 
-(function() {
+(function () {
   "use strict";
 
   // =================================================================================
@@ -16,7 +16,7 @@
    */
   function checkAuthState() {
     const authToken = localStorage.getItem('wiizAuthToken');
-    
+
     // Navbar links
     const signupLink = document.getElementById('nav-signup-link');
     const signinLink = document.getElementById('nav-signin-link');
@@ -37,21 +37,21 @@
     // "Get Started" / CTA buttons
     const ctaButtons = document.querySelectorAll('a.btn[href="Signup.html"], a.btn[href="Login.html"], a.btn[href="#about"]');
     if (authToken) {
-        ctaButtons.forEach(button => {
-            button.href = 'https://hub.wiiz.it/aistudio/login';
-            const icon = button.querySelector('i');
-            let buttonText = 'Get Started';
-            if (button.textContent.trim().toLowerCase().includes('learn more')) {
-                buttonText = 'Explore Platform';
-            }
-            button.innerHTML = icon ? `<i class="${icon.className}"></i> ${buttonText}` : buttonText;
-        });
+      ctaButtons.forEach(button => {
+        button.href = 'https://hub.wiiz.it/aistudio/login';
+        const icon = button.querySelector('i');
+        let buttonText = 'Get Started';
+        if (button.textContent.trim().toLowerCase().includes('learn more')) {
+          buttonText = 'Explore Platform';
+        }
+        button.innerHTML = icon ? `<i class="${icon.className}"></i> ${buttonText}` : buttonText;
+      });
     }
   }
 
   // --- Run the authentication check as soon as the script loads ---
   checkAuthState();
-  
+
   // ---------------------------------------------------------------------------
   // TEMPLATE HELPER FUNCTIONS (Definitions)
   // ---------------------------------------------------------------------------
@@ -132,7 +132,7 @@
     });
 
     document.querySelectorAll('.navmenu .toggle-dropdown').forEach(navmenu => {
-      navmenu.addEventListener('click', function(e) {
+      navmenu.addEventListener('click', function (e) {
         e.preventDefault();
         this.parentNode.classList.toggle('active');
         this.parentNode.nextElementSibling.classList.toggle('dropdown-active');
@@ -152,7 +152,7 @@
     document.querySelectorAll('.faq-item h3, .faq-item .faq-toggle').forEach((faqItem) => {
       faqItem.addEventListener('click', () => faqItem.parentNode.classList.toggle('faq-active'));
     });
-    
+
     // --- Logout Button Logic (Needs to be inside DOMContentLoaded) ---
     const logoutLink = document.getElementById('nav-logout-link');
     if (logoutLink) {
@@ -192,13 +192,13 @@
 
       const indicators = document.querySelectorAll(`button[data-bs-target="#${carouselId}"]`);
       if (indicators.length > 0) {
-        
+
         const firstIndicator = indicators[0];
         if (firstIndicator && !firstIndicator.classList.contains('active')) {
           indicators.forEach(ind => ind.classList.remove('active'));
           firstIndicator.classList.add('active');
         }
-        
+
         carouselElement.addEventListener('slid.bs.carousel', event => {
           indicators.forEach(indicator => indicator.classList.remove('active'));
           const activeIndicator = indicators[event.to];
@@ -206,12 +206,71 @@
         });
       }
     }
-    
+
     // Initialize carousels that might have external indicators.
     initializeCarouselWithExternalIndicators('offeringsCarousel');
     // Note: featuresCarousel now has its indicators inside, so it doesn't need this.
     // I'm leaving the call here as it's harmless and will work if you move them again.
-    initializeCarouselWithExternalIndicators('featuresCarousel'); 
+    initializeCarouselWithExternalIndicators('featuresCarousel');
+
+    // --- "Apple Style" Zoom on Scroll Logic ---
+    const scrollZoomElements = document.querySelectorAll('.scroll-zoom');
+
+    if (scrollZoomElements.length > 0) {
+      const handleScrollZoom = () => {
+        const windowHeight = window.innerHeight;
+
+        scrollZoomElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+
+          const isVisible = (rect.top < windowHeight && rect.bottom > 0);
+
+          if (isVisible) {
+            const elementCenter = rect.top + (rect.height / 2);
+            const screenCenter = windowHeight / 2;
+
+            // Normalized distance: -1 (top edge) to 1 (bottom edge) relative to half-screen
+            const normalizedDist = (elementCenter - screenCenter) / (windowHeight / 2);
+
+            // Strong Scale Effect: 0.85 (at edges) -> 1.0 (at center)
+            let scale = 1 - Math.abs(normalizedDist * 0.15);
+            scale = Math.max(0.35, Math.min(1, scale));
+
+            // Strong Opacity Effect: 0.5 (at edges) -> 1.0 (at center)
+            let opacity = 1 - Math.abs(normalizedDist * 0.75);
+            opacity = Math.max(0.5, Math.min(1, opacity));
+
+            // Force full visibility when near center (within 25% of center)
+            if (Math.abs(normalizedDist) < 0.25) {
+              opacity = 1;
+              scale = 1;
+            }
+
+            el.style.transform = `scale(${scale})`;
+            el.style.opacity = opacity;
+          }
+        });
+      };
+
+      window.addEventListener('scroll', () => {
+        window.requestAnimationFrame(handleScrollZoom);
+      });
+
+      // Run once immediately to set initial state
+      handleScrollZoom();
+
+      // Safety: Ensure they are fully visible after a delay if JS fails or calculates wrongly
+      setTimeout(() => {
+        scrollZoomElements.forEach(el => {
+          // If opacity is dangerously low (e.g. 0), force reset to 1
+          const currentOp = parseFloat(getComputedStyle(el).opacity);
+          if (currentOp < 0.2) {
+            el.style.opacity = '1';
+            el.style.transform = 'scale(1)';
+          }
+        });
+      }, 500);
+    }
   });
 
 })();
