@@ -3445,8 +3445,8 @@ section,
 }
 
 #header {
-  border: 0.1px solid white;
-  border-radius: 10px;
+  border: 0px solid;
+  border-radius: 5px;
 }
 
 /* */

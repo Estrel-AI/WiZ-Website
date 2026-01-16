@@ -1,18 +1,135 @@
 /* ==========================================================================
-   GLOBAL GLASS / ANIMATED THEME
+   REFRESHED GLASSMORPHISM THEME (Targeted Elements Only)
+   Strict adherence to brand variables & legibility.
    ========================================================================== */
 
-/* Animated Background (Global) */
-.animated-gradient-bg {
-    background: linear-gradient(-45deg, #b77923, #912059, #b33e53);
+/* 1. HEADER / NAVIGATION */
+.header {
+    background-color: color-mix(in srgb, var(--background-color), transparent 10%) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* border-bottom: 0px solid color-mix(in srgb, var(--default-color), transparent 92%); */
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* 2. PRICING CARDS */
+.pricing-card {
+    background-color: color-mix(in srgb, var(--surface-color), transparent 30%) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--surface-color), transparent 40%) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure popular card keeps its distinct look but with glass */
+.pricing-card.popular {
+    background: color-mix(in srgb, var(--accent-color), transparent 15%) !important;
+    color: var(--contrast-color);
+}
+
+.pricing-card.popular .btn-light {
+    background: color-mix(in srgb, var(--contrast-color), transparent 10%);
+}
+
+/* 3. FEATURE BOXES */
+.feature-box {
+    /* Base glass effect */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+/* Maintain brand color identity using color-mix for transparency */
+.features-cards .feature-box.orange {
+    background-color: color-mix(in srgb, #fff3e2, transparent 30%);
+    border-color: color-mix(in srgb, #fff3e2, transparent 10%);
+}
+
+.features-cards .feature-box.blue {
+    background-color: color-mix(in srgb, #deedfd, transparent 30%);
+    border-color: color-mix(in srgb, #deedfd, transparent 10%);
+}
+
+.features-cards .feature-box.green {
+    background-color: color-mix(in srgb, #d5f1e4, transparent 30%);
+    border-color: color-mix(in srgb, #d5f1e4, transparent 10%);
+}
+
+.features-cards .feature-box.red {
+    background-color: color-mix(in srgb, #fdeded, transparent 30%);
+    border-color: color-mix(in srgb, #fdeded, transparent 10%);
+}
+
+/* 4. MONITOR FRAME / VIDEO CONTAINERS */
+.monitor-frame {
+    background-color: color-mix(in srgb, var(--surface-color), transparent 40%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--surface-color), transparent 50%);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+}
+
+/* 5. CALL TO ACTION CONTAINER */
+.call-to-action .container {
+    background: color-mix(in srgb, var(--accent-color), transparent 15%) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--contrast-color), transparent 85%);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* 6. CONTACT FORM */
+.contact .contact-form,
+.contact .info-box {
+    background-color: color-mix(in srgb, var(--surface-color), transparent 20%) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--surface-color), transparent 50%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* Info box needs to keep its accent color base but glassified */
+.contact .info-box {
+    background-color: color-mix(in srgb, var(--accent-color), transparent 15%) !important;
+    color: var(--contrast-color);
+}
+
+/* 7. FAQ ITEMS */
+.faq-item {
+    background-color: color-mix(in srgb, var(--surface-color), transparent 30%) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--default-color), transparent 92%);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+/* 8. PARTNER / SERVICES ITEMS */
+.service-details .service-box {
+    background-color: color-mix(in srgb, var(--surface-color), transparent 25%) !important;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   RESTORED & ADAPTED STYLES FOR LOGIN / SIGNUP PAGES
+   Adapting the "Premium Layout" to strict brand adherence + glass
+   ========================================================================== */
+
+/* 9. PAGE-SPECIFIC ANIMATED BACKGROUND (Login/Signup Only) 
+   Using the brand gradient but keeping it subtle if needed, 
+   or full vibrancy as per previous design but mapped to variables where possible */
+.login-animated-bg {
+    background: linear-gradient(-45deg, var(--highlight-color), var(--highlight-warm), var(--accent-color), var(--accent-secondary));
     background-size: 400% 400%;
-    animation: gradientBG 5s ease infinite;
+    animation: gradientBG 8s ease infinite;
     min-height: 100vh;
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding-top: 80px;
+    width: 100%;
 }
 
 @keyframes gradientBG {
@@ -29,96 +146,50 @@
     }
 }
 
-/* Glass Card Effect */
-.glass-card {
-    background: rgba(255, 255, 255, 0.75);
-    /* Lower opacity for real glass feel */
+/* 10. PREMIUM FORM CARD (Signup/Login)
+   Adapting previous "premium-form-card" to specific glass style */
+.premium-form-card,
+.login-card-central {
+    background-color: color-mix(in srgb, var(--surface-color), transparent 10%) !important;
+    /* Mostly opaque for forms */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    border-radius: 16px;
-    overflow: hidden;
-    /* For accent bars */
-}
-
-/* Login Page Specifics - Removed invalid wrapper, use login-animated-bg */
-
-.login-content-wrapper {
-    width: 100%;
-    max-width: 500px;
-    padding: 20px;
-    text-align: center;
-}
-
-/* Signup Page Specifics (Layout Constraints) */
-.signup-content-wrapper {
-    width: 100%;
-    max-width: 1200px;
-    /* Wider for 2-column layout */
-    padding: 2rem;
-}
-
-/* Text Colors on Gradient Background */
-.text-on-gradient-title {
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.text-on-gradient-subtitle {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-/* PREMIUM FORM CARD (Updated to Glass) */
-.premium-form-card {
-    /* Extends glass-card */
-    background: rgba(255, 255, 255, 0.85);
-    /* Slightly more opaque for input readability */
-    backdrop-filter: blur(12px);
-    padding: 3rem;
+    border: 1px solid color-mix(in srgb, var(--surface-color), transparent 40%);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     position: relative;
+    overflow: hidden;
 }
 
-/* Top accent bar for premium card */
-.premium-form-card::before {
+/* Top accent bar */
+.premium-form-card::before,
+.login-card-central::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 6px;
-    background: linear-gradient(90deg, #912059, #FBC70F);
+    background: var(--accent-gradient);
 }
 
-/* Form Controls in Glass */
-.premium-form-card .form-control,
-.premium-form-card .form-select,
-.glass-card .form-control {
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: #111;
-}
-
-.premium-form-card .form-control:focus,
-.glass-card .form-control:focus {
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(145, 32, 89, 0.15);
-    border-color: #912059;
-}
-
-/* Left Info Column Styling (Signup) */
+/* 11. INFO SIDE PANEL (Signup Left) 
+   Glass effect on the gradient background */
 .info-content-glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Keep white-based for contrast on gradient */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 2.5rem;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
+    /* Explicit white text as its on the gradient */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
+/* White text overrides for the info panel on gradient */
 .info-content-glass h1,
 .info-content-glass h2,
 .info-content-glass h3,
@@ -129,53 +200,57 @@
 .info-content-glass li,
 .info-content-glass i {
     color: #fff !important;
-    /* Force white text on dark/gradient bg */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .info-content-glass .text-muted {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.info-content-glass .badge-beta {
-    background: rgba(255, 255, 255, 0.2) !important;
-    color: #fff !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Reuse existing login-animated-bg for backward compatibility if needed, 
-   but pointing to new class logic is better. 
-   Keeping the name to avoid breaking Login.html immediately. */
-.login-animated-bg {
-    background: radial-gradient(#912059, #AD2D45, #b77923);
-    background-size: 100%;
-    animation: gradientBG 5s ease infinite;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 80px;
-    border: 0px solid;
-    border-radius: 30px;
-    margin-top: 5%;
-}
-
-.login-card-central {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    border-radius: 16px;
-    padding: 3rem;
-    width: 100%;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-    margin-top: 2rem;
-    text-align: center;
+.badge-beta {
+    background: rgba(255, 255, 255, 0.25);
     border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
 }
 
+/* Form inputs inside these specific cards */
+.premium-form-card .form-control,
+.login-card-central .form-control {
+    background-color: color-mix(in srgb, var(--surface-color), transparent 20%);
+    border-color: color-mix(in srgb, var(--default-color), transparent 85%);
+    color: var(--default-color);
+}
 
+.premium-form-card .form-control:focus,
+.login-card-central .form-control:focus {
+    background-color: var(--surface-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color), transparent 85%);
+}
 
+.login-content-wrapper {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    z-index: 2;
+}
 
-.container.signup-content-wrapper.aos-init.aos-animate {
-    border: 0px solid;
-    border-radius: 30px;
+.signup-content-wrapper {
+    z-index: 2;
+}
+
+/* Text on gradient titles */
+.login-page-title,
+.login-page-subtitle {
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.login-page-subtitle {
+    opacity: 0.9;
+    margin-bottom: 2rem;
 }
