@@ -120,7 +120,7 @@
 /* 9. PAGE-SPECIFIC ANIMATED BACKGROUND (Login/Signup Only) 
    Using the brand gradient but keeping it subtle if needed, 
    or full vibrancy as per previous design but mapped to variables where possible */
-.login-animated-bg {
+/* .login-animated-bg {
     background: linear-gradient(-45deg, var(--highlight-color), var(--highlight-warm), var(--accent-color), var(--accent-secondary));
     background-size: 400% 400%;
     animation: gradientBG 8s ease infinite;
@@ -130,6 +130,31 @@
     justify-content: center;
     padding-top: 80px;
     width: 100%;
+}
+     */
+
+.login-animated-bg {
+    /* Updated Gradient: 
+       We wrap each variable in color-mix to add transparency individually.
+       Change '15%' to '50%' if you want it very faint.
+    */
+    background: linear-gradient(-45deg,
+            color-mix(in srgb, var(--highlight-color), transparent 7%),
+            color-mix(in srgb, var(--highlight-warm), transparent 7%),
+            color-mix(in srgb, var(--accent-color), transparent 7%),
+            color-mix(in srgb, var(--accent-secondary), transparent 7%));
+
+    background-size: 400% 400%;
+    animation: gradientBG 8s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 80px;
+    width: 100%;
+
+    /* Optional: Add a backdrop blur if you have an image behind this div */
+    /* backdrop-filter: blur(10px); */
 }
 
 @keyframes gradientBG {
