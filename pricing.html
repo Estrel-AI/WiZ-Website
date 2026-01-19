@@ -525,14 +525,22 @@
 
         const visibleAddons = plansData.addons_packs.filter(addon => allowedAddons.includes(addon.addon_code));
 
+        // Check for free plan
+        const isFreePlan = userData && userData.plan && userData.plan.toLowerCase().includes('free');
+
         visibleAddons.forEach((addon, index) => {
           // Logic to highlight the middle one (5000 runs) as popular
           const isPopular = addon.addon_code === 'WIIZ_5000RUNS_ADDON';
-          const buttonClass = isPopular ? 'btn btn-primary rounded-pill mt-3' : 'btn btn-sm btn-outline-primary rounded-pill mt-3';
+          let buttonClass = isPopular ? 'btn btn-primary rounded-pill mt-3' : 'btn btn-sm btn-outline-primary rounded-pill mt-3';
           const cardClass = isPopular ? 'addon-pack popular' : 'addon-pack';
 
           let checkoutUrl = '#';
-          if (authToken && userData) {
+          let isDisabled = false;
+
+          if (isFreePlan) {
+            isDisabled = true;
+            // We do NOT add the 'disabled' class here so we can control cursor and events manually
+          } else if (authToken && userData) {
             const params = new URLSearchParams({
               zoho_customer_id: userData.zoho_customer_id || '',
               customer_name: userData.display_name || userData.username,
@@ -543,14 +551,25 @@
             checkoutUrl = `https://payments.wiiz.it/payments/checkOut?${params.toString()}`;
           }
 
+          // If disabled: cursor not-allowed, prevent clicks, opacity
+          const buttonAttr = isDisabled ?
+            'onclick="event.preventDefault(); return false;" style="cursor: not-allowed; opacity: 0.6;" title="Buy a plan to get add-ons" data-bs-toggle="tooltip" data-bs-placement="bottom"' :
+            '';
+
           const addonCard = `
             <div class="${cardClass}">
               <div class="pack-name">${addon.name}</div>
               <div class="pack-price">$${addon.price}</div>
               <p class="pack-description">One-time purchase</p>
-              <a href="${checkoutUrl}" class="${buttonClass} checkout-btn">Buy Pack</a>
+              <a href="${checkoutUrl}" class="${buttonClass} checkout-btn" ${buttonAttr}>Buy Pack</a>
             </div>`;
           addonsContainer.insertAdjacentHTML('beforeend', addonCard);
+        });
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(addonsContainer.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
         });
 
         const checkoutBtns = addonsContainer.querySelectorAll('.checkout-btn');

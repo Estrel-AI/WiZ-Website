@@ -358,8 +358,9 @@ h6 {
   }
 }
 
-/* Navmenu - Mobile */
 @media (max-width: 1199px) {
+
+  /* 1. TOGGLE BUTTON (Floating on top) */
   .mobile-nav-toggle {
     color: var(--nav-color);
     font-size: 28px;
@@ -367,121 +368,126 @@ h6 {
     margin-right: 10px;
     cursor: pointer;
     transition: color 0.3s;
+    display: block;
+    z-index: 10000;
+    /* Highest priority */
+    position: relative;
   }
 
-  .navmenu {
-    padding: 0;
-    z-index: 9997;
+  /* 2. FORCE HEADER TO "DISAPPEAR" WHEN OPEN */
+  /* This fixes the split-screen glitch. We make the header transparent 
+     and remove all filters so the Menu Backdrop can cover the whole screen seamlessly. */
+  .mobile-nav-active .header {
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    border: none !important;
+    transition: none !important;
   }
 
-  .navmenu ul {
-    display: none;
-    list-style: none;
-    position: absolute;
-    inset: 60px 20px 20px 20px;
-    padding: 10px 0;
-    margin: 0;
-    border-radius: 6px;
-    background-color: var(--nav-mobile-background-color);
-    overflow-y: auto;
-    transition: 0.3s;
+  /* 3. THE BACKDROP (Dark Overlay) */
+  /* Attached to navmenu but forced to cover the Window */
+  .mobile-nav-active .navmenu::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
     z-index: 9998;
-    box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.1);
+    /* Behind drawer, in front of everything else */
+    backdrop-filter: blur(4px);
+    /* Optional: blurs the background content */
   }
 
-  .navmenu a,
-  .navmenu a:focus {
-    color: var(--nav-dropdown-color);
-    padding: 10px 20px;
-    font-family: var(--nav-font);
-    font-size: 17px;
-    font-weight: 500;
+  /* 4. THE DRAWER (White Menu Panel) */
+  .navmenu ul {
+    /* REMOVE BULLETS */
+    list-style: none !important;
+    padding-left: 0 !important;
+
+    /* Layout */
+    display: block !important;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    height: 100vh;
+    background-color: #ffffff;
+    z-index: 9999;
+    /* Top layer */
+
+    /* Animation */
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+
+    /* Spacing inside drawer */
+    padding: 80px 20px 20px 20px !important;
+    margin: 0 !important;
+    border-left: 1px solid rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+  }
+
+  /* Slide it in */
+  .mobile-nav-active .navmenu ul {
+    transform: translateX(0);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 5. LINKS (Clean style) */
+  .navmenu a {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 12px 20px;
+    font-family: var(--nav-font);
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
     white-space: nowrap;
     transition: 0.3s;
-  }
-
-  .navmenu a i,
-  .navmenu a:focus i {
-    font-size: 12px;
-    line-height: 0;
-    margin-left: 5px;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: 0.3s;
-    background-color: color-mix(in srgb, var(--accent-color), transparent 90%);
-  }
-
-  .navmenu a i:hover,
-  .navmenu a:focus i:hover {
-    background-color: var(--accent-color);
-    color: var(--contrast-color);
+    border-radius: 4px;
+    text-decoration: none;
   }
 
   .navmenu a:hover,
-  .navmenu .active,
-  .navmenu .active:focus {
-    color: var(--nav-dropdown-hover-color);
+  .navmenu .active {
+    color: var(--accent-color);
+    background-color: rgba(104, 73, 203, 0.05);
   }
 
-  .navmenu .active i,
-  .navmenu .active:focus i {
-    background-color: var(--accent-color);
-    color: var(--contrast-color);
-    transform: rotate(180deg);
-  }
-
+  /* 6. DROPDOWNS (Clean nested lists) */
   .navmenu .dropdown ul {
     position: static;
     display: none;
     z-index: 99;
-    padding: 10px 0;
-    margin: 10px 20px;
-    background-color: var(--nav-dropdown-background-color);
-    border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+    padding: 5px 10px;
+    margin: 0;
+    background: transparent;
     box-shadow: none;
-    transition: all 0.5s ease-in-out;
-  }
-
-  .navmenu .dropdown ul ul {
-    background-color: rgba(33, 37, 41, 0.1);
+    border: none;
+    list-style: none !important;
+    /* Kill bullets in dropdowns too */
   }
 
   .navmenu .dropdown>.dropdown-active {
     display: block;
-    background-color: rgba(33, 37, 41, 0.03);
   }
 
+  /* 7. SCROLL LOCK */
   .mobile-nav-active {
     overflow: hidden;
   }
 
+  /* 8. TOGGLE BUTTON COLOR FIX */
   .mobile-nav-active .mobile-nav-toggle {
-    color: #fff;
-    position: absolute;
-    font-size: 32px;
-    top: 15px;
-    right: 15px;
-    margin-right: 0;
-    z-index: 9999;
-  }
-
-  .mobile-nav-active .navmenu {
-    position: fixed;
-    overflow: hidden;
-    inset: 0;
-    background: rgba(33, 37, 41, 0.8);
-    transition: 0.3s;
-  }
-
-  .mobile-nav-active .navmenu>ul {
-    display: block;
+    color: #333 !important;
   }
 }
 
