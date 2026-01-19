@@ -230,21 +230,20 @@ body.contact-page {
 }
 
 /* 11. INFO SIDE PANEL (Signup Left) 
-   Glass effect on the gradient background */
+   Glass effect on the light grid background */
 .info-content-glass {
-    background-color: rgba(255, 255, 255, 0.1);
-    /* Keep white-based for contrast on gradient */
+    background-color: color-mix(in srgb, var(--surface-color), transparent 15%);
+    /* Light glass */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 2.5rem;
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    /* Explicit white text as its on the gradient */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: var(--default-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-/* White text overrides for the info panel on gradient */
+/* White text overrides REMOVED for light background compatibility */
 .info-content-glass h1,
 .info-content-glass h2,
 .info-content-glass h3,
@@ -254,8 +253,14 @@ body.contact-page {
 .info-content-glass p,
 .info-content-glass li,
 .info-content-glass i {
-    color: #fff !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    color: var(--heading-color) !important;
+    text-shadow: none;
+}
+
+.info-content-glass p,
+.info-content-glass li,
+.info-content-glass small {
+    color: var(--default-color) !important;
 }
 
 .info-content-glass .text-muted {
@@ -301,17 +306,18 @@ body.contact-page {
     z-index: 2;
 }
 
-/* Text on gradient titles */
+/* Text on gradient titles - Updated for Light Background */
 .login-page-title,
 .login-page-subtitle {
-    color: #fff;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    color: var(--heading-color);
+    text-shadow: none;
     text-align: center;
 }
 
 .login-page-subtitle {
-    opacity: 0.9;
+    opacity: 0.8;
     margin-bottom: 2rem;
+    color: var(--default-color);
 }
 
 /* ========================================================
@@ -464,8 +470,7 @@ body,
    Updates .login-animated-bg from custom-updates.css
    -------------------------------------------------------- */
 .login-animated-bg {
-    /* Using color-mix to make the gradient 15% transparent */
-
+    /* Removed colorful gradient to match standard page design */
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -473,16 +478,8 @@ body,
     padding-top: 100px;
     padding-bottom: 10px;
     width: 100%;
-    background-image: linear-gradient(-45deg,
-            color-mix(in srgb, #f4d677, transparent 5%),
-            /* Highlight Color approx */
-            color-mix(in srgb, #e68f17, transparent 5%),
-            /* Highlight Warm approx */
-            color-mix(in srgb, var(--accent-color), transparent 20%),
-            color-mix(in srgb, #8b6ed9, transparent 20%)) !important;
-
-    background-size: 200% 200% !important;
-    animation: gradientBG 7s ease infinite !important;
+    background: transparent !important;
+    /* animation: gradientBG 7s ease infinite !important; */
 }
 
 /* ========================================================
