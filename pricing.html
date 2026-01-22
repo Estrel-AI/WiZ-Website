@@ -528,6 +528,12 @@
         // Check for free plan
         const isFreePlan = userData && userData.plan && userData.plan.toLowerCase().includes('free');
 
+        const originalPriceMap = {
+          'WIIZ_1000RUNS_ADDON': 4.49,
+          'WIIZ_5000RUNS_ADDON': 22.49,
+          'WIIZ_10000RUNS_ADDON': 42.49
+        };
+
         visibleAddons.forEach((addon, index) => {
           // Logic to highlight the middle one (5000 runs) as popular
           const isPopular = addon.addon_code === 'WIIZ_5000RUNS_ADDON';
@@ -556,10 +562,21 @@
             'onclick="event.preventDefault(); return false;" style="cursor: not-allowed; opacity: 0.6;" title="Buy a plan to get add-ons" data-bs-toggle="tooltip" data-bs-placement="bottom"' :
             '';
 
+          // Determine price HTML (with optional strike-through)
+          const originalPrice = originalPriceMap[addon.addon_code];
+          let priceHtml = `<div class="pack-price">$${addon.price}</div>`;
+
+          if (originalPrice) {
+            priceHtml = `<div class="pack-price">
+                           <span style="text-decoration: line-through; opacity: 0.6; font-size: 0.9em; margin-right: 4px;">$${originalPrice}</span>
+                           $${addon.price}
+                         </div>`;
+          }
+
           const addonCard = `
             <div class="${cardClass}">
               <div class="pack-name">${addon.name}</div>
-              <div class="pack-price">$${addon.price}</div>
+              ${priceHtml}
               <p class="pack-description">One-time purchase</p>
               <a href="${checkoutUrl}" class="${buttonClass} checkout-btn" ${buttonAttr}>Buy Pack</a>
             </div>`;
