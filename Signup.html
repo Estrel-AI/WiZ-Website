@@ -164,9 +164,22 @@
                     <input type="text" name="username" class="form-control" id="username" required>
                   </div>
                   <div class="col-12">
-                    <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" name="email" id="email" required>
-                  </div>
+  <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <input type="email" class="form-control" name="email" id="email" required>
+    <button class="btn btn-outline-secondary" type="button" id="btn-verify-email">Verify Email</button>
+  </div>
+  <small id="email-feedback" class="form-text text-muted"></small>
+</div>
+
+<!-- NEW: Hidden OTP Field -->
+<!-- === COPY THIS INTO SIGNUP.HTML === -->
+<div class="col-12" id="otp-container" style="display: none;">
+  <label for="otp_input" class="form-label mt-2">One-Time Password (OTP) <span class="text-danger">*</span></label>
+  <input type="text" class="form-control" name="otp" id="otp_input" placeholder="Enter 6-digit OTP" maxlength="6">
+  <small class="text-muted">Check your inbox for the code.</small>
+</div>
+<!-- ================================== -->
                   <div class="col-md-6">
                     <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                     <input type="password" name="password" class="form-control" id="password" required>
@@ -196,7 +209,7 @@
                     <div class="loading">Creating your account...</div>
                     <div class="error-message"></div>
                     <div class="sent-message">Account created successfully! Please check your email.</div>
-                    <button type="submit" class="btn btn-primary w-100 btn-lg">Create Free Account</button>
+                    <button type="submit" id="btn-signup-submit" class="btn btn-primary w-100 btn-lg" disabled>Create Free Account</button>
                   </div>
                 </div>
               </form>

@@ -1,7 +1,87 @@
 
 
 document.addEventListener('DOMContentLoaded', () => {
+// --- OTP Verification Logic ---
+  const verifyEmailBtn = document.getElementById('btn-verify-email');
+  const emailInput = document.getElementById('email');
+  const otpContainer = document.getElementById('otp-container'); // Make sure this ID matches your HTML
+  const otpInput = document.getElementById('otp_input');
+  const emailFeedback = document.getElementById('email-feedback');
+  const submitBtn = document.getElementById('btn-signup-submit');
 
+  if (verifyEmailBtn && emailInput) {
+    
+    // 1. Handle Verify Click
+    verifyEmailBtn.addEventListener('click', async () => {
+      const email = emailInput.value;
+      
+      if (!email || !email.includes('@')) {
+        emailFeedback.textContent = 'Please enter a valid email address.';
+        emailFeedback.className = 'form-text text-danger';
+        return;
+      }
+
+      verifyEmailBtn.disabled = true;
+      verifyEmailBtn.textContent = 'Sending...';
+      emailFeedback.textContent = '';
+
+      try {
+        const response = await fetch('https://backend.wiiz.it/aiwf/generate_otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+
+        const data = await response.json();
+
+        // --- FIXED LOGIC HERE: Check if response.ok is true ---
+        if (response.ok) { 
+          // SUCCESS! Show the OTP box
+          emailFeedback.textContent = 'OTP sent! Please check your email.';
+          emailFeedback.className = 'form-text text-success'; // Green text
+          
+          if(otpContainer) {
+            otpContainer.style.display = 'block'; // Unhide the box
+          } else {
+            console.error("OTP Container not found in HTML");
+          }
+          
+          verifyEmailBtn.textContent = 'Resend OTP';
+        } else {
+          // Server returned an error (like 400 or 500)
+          throw new Error(data.message || 'Failed to send OTP.');
+        }
+
+      } catch (error) {
+        console.error(error);
+        emailFeedback.textContent = error.message || 'Error sending OTP.';
+        emailFeedback.className = 'form-text text-danger'; // Red text
+        verifyEmailBtn.textContent = 'Verify Email';
+      } finally {
+        verifyEmailBtn.disabled = false;
+      }
+    });
+
+    // 2. Enable Submit Button only when OTP is entered
+    if (otpInput) {
+      otpInput.addEventListener('input', function() {
+        if (this.value.length === 6 && emailInput.value) {
+          submitBtn.disabled = false;
+        } else {
+          submitBtn.disabled = true;
+        }
+      });
+    }
+
+    // 3. Reset if user changes email
+    emailInput.addEventListener('input', () => {
+      if(otpContainer) otpContainer.style.display = 'none';
+      if(otpInput) otpInput.value = '';
+      submitBtn.disabled = true;
+      verifyEmailBtn.textContent = 'Verify Email';
+      emailFeedback.textContent = '';
+    });
+  }
   // --- Authentication View Toggles ---
   const signupView = document.getElementById('signup-view');
   const loginView = document.getElementById('login-view');
@@ -141,13 +221,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Construct the payload for your API
+     // Get the OTP value
+      const otpValue = form.querySelector('input[name="otp"]').value;
+
       const data = {
         first_name: form.querySelector('input[name="first_name"]').value,
         last_name: form.querySelector('input[name="last_name"]').value,
         username: form.querySelector('input[name="username"]').value,
         email: form.querySelector('input[name="email"]').value,
         password: password,
-        plan: "free_trial", // Hardcoded as per your API requirement,
+        plan: "free_trial",
+        otp: otpValue, // Added OTP here
         recaptcha_token: recaptchaResponse
       };
       // START: Replace the entire try...catch block with this
