@@ -254,7 +254,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- SUCCESS LOGIC: HIDE THE VIEW and SHOW THE MODAL ---
         loading.style.display = 'none';
-
+        // Trigger Google Ads conversion
+        if (typeof gtag_report_conversion === "function") {
+          gtag_report_conversion();
+        }
+         if (typeof gtag === "function") {
+        console.log("Triggering Google Ads conversion event");
+        gtag('event', 'sign_up', {
+          debug_mode: true
+        });
+      }
         // Find the entire signup view container and hide it
         const signupView = document.getElementById('signup-view');
         if (signupView) {
