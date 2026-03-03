@@ -16,7 +16,6 @@
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link
-
     href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
     rel="stylesheet">
 
@@ -32,36 +31,36 @@
   <link href="assets/css/custom-updates.css" rel="stylesheet">
   <!-- Google tag (gtag.js) -->
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-H3VD5FK5QL"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3VD5FK5QL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
 
-  // Google Analytics
-  gtag('config', 'G-H3VD5FK5QL');
+    // Google Analytics
+    gtag('config', 'G-H3VD5FK5QL');
 
-  // Google Ads
-  gtag('config', 'AW-17874589480');
-</script>
+    // Google Ads
+    gtag('config', 'AW-17874589480');
+  </script>
 
 
 
-<!-- Event snippet for Sign-up conversion -->
-<script>
-function gtag_report_conversion(url) {
-  var callback = function () {
-    if (typeof(url) != 'undefined') {
-      window.location = url;
+  <!-- Event snippet for Sign-up conversion -->
+  <script>
+    function gtag_report_conversion(url) {
+      var callback = function () {
+        if (typeof (url) != 'undefined') {
+          window.location = url;
+        }
+      };
+      gtag('event', 'conversion', {
+        'send_to': 'AW-17874589480/JNRPCMeTnf4bEKiuostC',
+        'event_callback': callback
+      });
+      return false;
     }
-  };
-  gtag('event', 'conversion', {
-      'send_to': 'AW-17874589480/JNRPCMeTnf4bEKiuostC',
-      'event_callback': callback
-  });
-  return false;
-}
-</script>
+  </script>
 </head>
 
 <body class="signup-page">
@@ -83,7 +82,7 @@ function gtag_report_conversion(url) {
           <li><a href="Faq.html">FAQ</a></li> <!-- The "active" class has been moved here -->
           <li><a href="contact.html">Contact</a></li>
           <li><a href="Signup.html" class="active">Sign Up</a></li>
-          <li id="nav-signin-link"><a href="Login.html">Sign in</a></li>
+          <li id="nav-signin-link"><a href="https://hub.wiiz.it" target="_blank">Sign in</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -100,36 +99,118 @@ function gtag_report_conversion(url) {
       <div class="container signup-content-wrapper" data-aos="fade-up" data-aos-delay="100">
         <div class="row justify-content-center align-items-center">
 
-          <!-- Left Side - Info Column (Swapped & Glassy) -->
-          <div class="col-lg-5 mb-5 mb-lg-0">
-            <div class="info-content-glass" data-aos="fade-right" data-aos-delay="200">
+          <!-- Left Side - Form Column -->
+          <div class="col-lg-6 mb-5 mb-lg-0">
+            <div class="access-form-container premium-form-card" data-aos="fade-right" data-aos-delay="200">
+
+              <!-- === SIGN UP FORM (Visible by default) === -->
+              <div id="signup-view">
+                <div class=" form-header text-center mb-4">
+                  <h2>Create an Account</h2>
+                  <!-- <div class="text-left mt-4">
+                    <p class="text-muted medium">Already have an account? <a href="Login.html"
+                        class="text-primary fw-semibold">Login here</a></p>
+                  </div> -->
+                </div>
+                <form action="#" method="post" id="signup-form">
+                  <div class="row gy-3">
+                    <div class="col-md-6">
+                      <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                      <input type="text" name="first_name" class="form-control" id="first_name" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                      <input type="text" name="last_name" class="form-control" id="last_name" required>
+                    </div>
+                    <div class="col-12">
+                      <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                      <input type="text" name="username" class="form-control" id="username" required>
+                    </div>
+                    <div class="col-12">
+                      <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <input type="email" class="form-control" name="email" id="email" required>
+                        <button class="btn btn-outline-secondary" type="button" id="btn-verify-email">Verify
+                          Email</button>
+                      </div>
+                      <small id="email-feedback" class="form-text text-muted"></small>
+                    </div>
+
+                    <!-- NEW: Hidden OTP Field -->
+                    <!-- === COPY THIS INTO SIGNUP.HTML === -->
+                    <div class="col-12" id="otp-container" style="display: none;">
+                      <label for="otp_input" class="form-label mt-2">One-Time Password (OTP) <span
+                          class="text-danger">*</span></label>
+                      <input type="text" class="form-control" name="otp" id="otp_input" placeholder="Enter 6-digit OTP"
+                        maxlength="6">
+                      <small class="text-muted">Check your inbox for the code.</small>
+                    </div>
+                    <!-- ================================== -->
+                    <div class="col-md-6">
+                      <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                      <input type="password" name="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="confirm_password" class="form-label">Confirm Password <span
+                          class="text-danger">*</span></label>
+                      <input type="password" name="confirm_password" class="form-control" id="confirm_password"
+                        required>
+                    </div>
+                    <div class="col-12 mt-4">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="terms" required>
+                        <label class="form-check-label" for="terms">
+                          I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and
+                            Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy
+                            Policy</a> <span class="text-danger">*</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-12 mt-3" style="display: flex; flex-direction: column; align-items: center;">
+                      <!-- ADD THE RECAPTCHA WIDGET HERE -->
+                      <div class="captcha-wrapper">
+                        <div class="g-recaptcha" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"
+                          style="display: inline-block; margin-bottom: 1rem;"></div>
+                      </div>
+
+                      <div class="loading">Creating your account...</div>
+                      <div class="error-message"></div>
+                      <div class="sent-message">Account created successfully! Please check your email.</div>
+                      <button type="submit" id="btn-signup-submit" class="btn btn-primary w-100 btn-lg">
+                        Create Free Account
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Right Side - Info Column -->
+          <div class="col-lg-5 offset-lg-1">
+            <div class="info-content-glass" data-aos="fade-left" data-aos-delay="300">
               <div class="brand-section mb-5">
-                <div class="badge-beta"
-                  style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 50px; font-weight: 600; font-size: 1rem;">
-                  BETA</div>
                 <h1 class="display-5 fw-bold mb-3 mt-3">Join WiiZ Atlas 2.0</h1>
-                <p class="lead">Be among the first to experience the future of Agentic AI Orchestration.</p>
+                <p class="lead">Experience Enterprise Grade Agentic AI Orchestration Platform</p>
 
                 <div class="mt-4">
                   <div class="d-flex align-items-center mb-3">
-                    <i class="bi bi-lightning-charge-fill text-warning me-3 fs-4"></i>
+                    <i class="bi bi-people-fill text-primary me-3 fs-4"></i>
                     <div>
-                      <h6 class="mb-0 fw-bold">Fast Access</h6>
-                      <small class="text-muted">Quick login to your portal</small>
+                      <h6 class="mb-0 fw-bold">Collaborate with unlimited users</h6>
                     </div>
                   </div>
                   <div class="d-flex align-items-center mb-3">
-                    <i class="bi bi-shield-lock-fill text-primary me-3 fs-4"></i>
+                    <i class="bi bi-shield-lock-fill text-warning me-3 fs-4"></i>
                     <div>
-                      <h6 class="mb-0 fw-bold">Secure</h6>
-                      <small class="text-muted">Enterprise-grade security</small>
+                      <h6 class="mb-0 fw-bold">Experience MCP, Guardrails, EvalOps</h6>
                     </div>
                   </div>
                   <div class="d-flex align-items-center">
-                    <i class="bi bi-star-fill text-danger me-3 fs-4"></i>
+                    <i class="bi bi-stack me-3 fs-4" style="color: #912059;"></i>
                     <div>
-                      <h6 class="mb-0 fw-bold">Premium</h6>
-                      <small class="text-muted">All features at your fingertips</small>
+                      <h6 class="mb-0 fw-bold">Pre-integrated AI Services and other Stacks</h6>
                     </div>
                   </div>
                 </div>
@@ -162,92 +243,9 @@ function gtag_report_conversion(url) {
             </div>
           </div>
 
-          <!-- Right Side - Form Column (Swapped & Card Style) -->
-          <div class="col-lg-6 offset-lg-1">
-            <div class="access-form-container premium-form-card" data-aos="fade-left" data-aos-delay="300">
 
-              <!-- === SIGN UP FORM (Visible by default) === -->
-              <div id="signup-view">
-                <div class=" form-header text-center mb-4">
-                <h2>Create an Account</h2>
-                <div class="text-left mt-4">
-                  <p class="text-muted medium">Already have an account? <a href="Login.html"
-                      class="text-primary fw-semibold">Login here</a></p>
-                </div>
-              </div>
-              <form action="#" method="post" id="signup-form">
-                <div class="row gy-3">
-                  <div class="col-md-6">
-                    <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
-                    <input type="text" name="first_name" class="form-control" id="first_name" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
-                    <input type="text" name="last_name" class="form-control" id="last_name" required>
-                  </div>
-                  <div class="col-12">
-                    <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
-                    <input type="text" name="username" class="form-control" id="username" required>
-                  </div>
-                  <div class="col-12">
-  <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-  <div class="input-group">
-    <input type="email" class="form-control" name="email" id="email" required>
-    <button class="btn btn-outline-secondary" type="button" id="btn-verify-email">Verify Email</button>
-  </div>
-  <small id="email-feedback" class="form-text text-muted"></small>
-</div>
-
-<!-- NEW: Hidden OTP Field -->
-<!-- === COPY THIS INTO SIGNUP.HTML === -->
-<div class="col-12" id="otp-container" style="display: none;">
-  <label for="otp_input" class="form-label mt-2">One-Time Password (OTP) <span class="text-danger">*</span></label>
-  <input type="text" class="form-control" name="otp" id="otp_input" placeholder="Enter 6-digit OTP" maxlength="6">
-  <small class="text-muted">Check your inbox for the code.</small>
-</div>
-<!-- ================================== -->
-                  <div class="col-md-6">
-                    <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                    <input type="password" name="password" class="form-control" id="password" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="confirm_password" class="form-label">Confirm Password <span
-                        class="text-danger">*</span></label>
-                    <input type="password" name="confirm_password" class="form-control" id="confirm_password" required>
-                  </div>
-                  <div class="col-12 mt-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="terms" required>
-                      <label class="form-check-label" for="terms">
-                        I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and
-                          Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy
-                          Policy</a> <span class="text-danger">*</span>
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-12 mt-3" style="display: flex; flex-direction: column; align-items: center;">
-                    <!-- ADD THE RECAPTCHA WIDGET HERE -->
-                    <div class="captcha-wrapper">
-                      <div class="g-recaptcha" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"
-                        style="display: inline-block; margin-bottom: 1rem;"></div>
-                    </div>
-
-                    <div class="loading">Creating your account...</div>
-                    <div class="error-message"></div>
-                    <div class="sent-message">Account created successfully! Please check your email.</div>
-                  <button type="submit" id="btn-signup-submit" class="btn btn-primary w-100 btn-lg">
-                    Create Free Account
-                  </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-
-          </div>
         </div>
-
       </div>
-    </div>
     </div>
 
   </main>
@@ -271,7 +269,8 @@ function gtag_report_conversion(url) {
           <p class="text-muted mb-4">Your account has been created successfully. You can now log in to hub to get
             started.</p>
 
-          <a href="https://hub.wiiz.it" class="btn btn-primary btn-lg w-100">Go to Hub at WiiZ Atlas 2.0 </a>
+          <a href="https://hub.wiiz.it" class="btn btn-primary btn-lg w-100" target="_blank">Go to Hub at WiiZ Atlas 2.0
+          </a>
 
         </div>
       </div>

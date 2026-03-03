@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Redirect to index.html after a 1-second delay
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'pricing.html';
         }, 1000);
 
       } catch (error) {
