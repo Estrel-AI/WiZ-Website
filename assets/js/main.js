@@ -39,7 +39,7 @@
     const ctaButtons = document.querySelectorAll('a.btn[href="Signup.html"], a.btn[href="Login.html"], a.btn[href="#about"]');
     if (authToken) {
       ctaButtons.forEach(button => {
-        button.href = 'https://hub.wiiz.it/aistudio/login';
+        button.href = 'https://Hub (Beta).wiiz.it/aistudio/login';
         const icon = button.querySelector('i');
         let buttonText = 'Get Started';
         if (button.textContent.trim().toLowerCase().includes('learn more')) {

@@ -51,6 +51,137 @@
 
 <body class="index-page">
 
+  <!-- Disruption of Services on Hub (Beta) Banner -->
+  <div id="dr-banner" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 99999;
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: #fff;
+    text-align: center;
+    padding: 12px 50px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 12px rgba(217, 119, 6, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  ">
+    <span
+      style="display:inline-block;width:10px;height:10px;background:#fbbf24;border-radius:50%;animation:dr-pulse 1.5s ease-in-out infinite;"></span>
+    ⚠️ Disruption of Services on Hub (Beta) — DR in Progress. Some services may be temporarily unavailable.
+    <button
+      onclick="document.getElementById('dr-banner').style.display='none';document.getElementById('header').style.top='0px';"
+      style="
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background 0.2s;
+    " onmouseover="this.style.background='rgba(255,255,255,0.35)'"
+      onmouseout="this.style.background='rgba(255,255,255,0.2)'">&times;</button>
+  </div>
+  <style>
+    /* Shorten header on mobile */
+    @media (max-width: 1200px) {
+      .header .logo .logo-img {
+        height: 45px !important;
+        max-height: 45px !important;
+      }
+
+      .header {
+        padding: 5px 0 !important;
+      }
+    }
+
+    @keyframes dr-pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    #dr-banner {
+      top: 0 !important;
+    }
+
+    #header {
+      top: 50px !important;
+    }
+
+    @media (max-width: 1200px) {
+      #header {
+        top: 60px !important;
+      }
+
+      .main {
+        margin-top: 60px !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #dr-banner {
+        padding: 10px 40px !important;
+        font-size: 0.85rem !important;
+      }
+
+      #header {
+        top: 75px !important;
+      }
+
+      .main {
+        margin-top: 75px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #dr-banner {
+        padding: 8px 35px !important;
+        font-size: 0.8rem !important;
+        gap: 6px !important;
+      }
+
+      #header {
+        top: 85px !important;
+      }
+
+      .main {
+        margin-top: 85px !important;
+      }
+    }
+
+    .features-carousel.section {
+      padding-top: 180px !important;
+    }
+  </style>
+
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div
       class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
