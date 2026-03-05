@@ -120,36 +120,49 @@
 
 
 
-      <!-- Section Title with enhanced styling -->
+      <!-- Section Title with Center Content styling -->
       <div class="container section-title" data-aos="fade-up" style="
-    position: relative;
-    margin-top: 30px;
-    z-index: 2;
-    margin-bottom: -60px;
-    padding-bottom: 0px;
-  ">
+          position: relative;
+          z-index: 50; 
+          margin-top: 35px;
+          margin-bottom: -10px;
+          padding-bottom: 0px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      ">
 
         <h2 style="
-      font-size: 3rem;
-      font-weight: 700;
+          font-size: 3.5rem;
+          font-weight: 700;
+          color: #1a1525;
+          margin-bottom: 5px;
+          padding-bottom: 0px;
+          line-height: 1.2;
+        ">WiiZ Atlas 2.0</h2>
 
-      background: linear-gradient(135deg, #111112 0%, #912059 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0px;
-      padding-bottom: 0px;
-      line-height: 1.2;
-      /* AI Glow Text Effect */
-      filter: drop-shadow(0 0 20px rgba(104, 73, 203, 0.2));
-    ">Welcome to <span
-            style="background: linear-gradient(135deg, #912059 0%, #FBC70F 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">WiiZ
-            Atlas 2.0</h2>
+        <p class="hero-subtitle" style="
+          font-size: 1.6rem;
+          font-weight: 500;
+          color: #1a1525;
+          margin-bottom: 25px;
+          letter-spacing: 0.5px;
+        ">Agentic AI OS</p>
 
+        <!-- Universal Get Started button (below subtitle, above carousel) -->
+        <div class="universal-cta" style="position: relative; z-index: 60;">
+          <a href="Signup.html" class="btn btn-primary btn-lg"
+            style="background: linear-gradient(90deg, #9b51e0 0%, #ff8a00 100%); border: 2px solid rgba(255, 255, 255, 0.4); padding: 12px 35px; border-radius: 50px; font-weight: 600; font-size: 1.05rem; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 10px 25px rgba(155, 81, 224, 0.5); transition: transform 0.3s ease, box-shadow 0.3s ease;"
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(255, 138, 0, 0.6)'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(155, 81, 224, 0.5)'">
+            <i class="bi bi-rocket-takeoff-fill" style="font-size: 1.1rem;"></i> Get Started
+          </a>
+        </div>
 
       </div>
 
-      <div class="container" style="position: relative; z-index: 2; margin-top: 0px; padding-top: 0px;">
+      <div class="container" style="position: relative; z-index: 10; margin-top: 30px;">
 
         <div id="featuresCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="7000"
           data-bs-pause="hover">
@@ -166,7 +179,7 @@
 
           <!-- Slides -->
           <!-- START: Replace your existing carousel-inner with this block -->
-          <div class="carousel-inner" style="padding: 35px 0;">
+          <div class="carousel-inner" style="padding: 35px 0;padding-top: 0px;">
 
             <!-- Slide 1: WiiZ Atlas 1.0 Introduction -->
             <div class="carousel-item active">
@@ -183,14 +196,6 @@
                     <p style="font-size: 1.05rem; color: #666; line-height: 1.7; margin-bottom: 2rem;">Experience our
                       all-in-one <b>Agentic OS</b> - designed to build, orchestrate, and govern autonomous agents with
                       ease.</p>
-                    <div class="cta-group mt-4" style="align-items: center; margin-left: auto;">
-                      <a href="Signup.html" class="btn btn-primary btn-lg"
-                        style="background: linear-gradient(135deg, #912059 0%, #AD2D45 100%); border: none; padding: 15px 40px; border-radius: 50px; font-weight: 600; font-size: 1.1rem; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(145, 32, 89, 0.3); transition: all 0.3s ease; align-items: center;"
-                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 40px rgba(145, 32, 89, 0.4)'"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(145, 32, 89, 0.3)'">
-                        <i class="bi bi-rocket-takeoff" style="font-size: 1.2rem;"></i> Get Started
-                      </a>
-                    </div>
                   </div>
                 </div>
                 <!-- START: Replace the monitor column with this block -->
@@ -803,11 +808,6 @@
             text-align: left;
           }
 
-          /* 4. Center the "Sign Up Now" button */
-          #features .carousel-item .cta-group {
-            justify-content: center;
-          }
-
           /* 5. Adjust the main section padding for mobile */
           #features.section {
             padding: 100px 0 60px 0 !important;
@@ -815,7 +815,14 @@
 
           /* 6. Adjust title font size for mobile */
           #features .section-title h2 {
-            font-size: 2rem !important;
+            font-size: 1.8rem !important;
+            margin-bottom: 2px !important;
+          }
+
+          /* 6b. Adjust subtitle for mobile */
+          #features .section-title .hero-subtitle {
+            font-size: 1.1rem !important;
+            margin-bottom: 6px !important;
           }
 
           /* 7. Hide the large prev/next buttons on mobile */
@@ -828,6 +835,13 @@
           #features .carousel-indicators {
             bottom: -40px !important;
             /* Bring them a bit closer */
+          }
+
+          /* Mobile sticky CTA position */
+          .mobile-sticky-cta {
+            position: sticky;
+            top: 70px;
+            z-index: 10;
           }
         }
 
@@ -913,14 +927,14 @@
         <div class="container section-title" data-aos="fade-up">
           <h2>The Command Center for Your AI Agents</h2>
           <p>Visually build, monitor, and scale your automated workflows from one unified dashboard.</p>
-          <div class="cta-group mt-4">
+          <!-- <div class="cta-group mt-4">
             <a href="Signup.html" class="btn btn-primary btn-lg"
               style="background: linear-gradient(135deg, #912059 0%, #AD2D45 100%); border: none; padding: 15px 40px; border-radius: 50px; font-weight: 600; font-size: 1.1rem; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(145, 32, 89, 0.3); transition: all 0.3s ease; align-self: center;"
               onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 40px rgba(145, 32, 89, 0.4)'"
               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(145, 32, 89, 0.3)'">
               </i> Get Started
             </a>
-          </div>
+          </div> -->
         </div><!-- End Section Title -->
 
         <!-- Workflow Image -->
