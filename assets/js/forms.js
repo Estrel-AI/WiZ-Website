@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
       emailFeedback.textContent = '';
 
       try {
-        const response = await fetch('https://backend.wiiz.it/aiwf/generate_otp', {
+        const response = await fetch('https://www.wiiz.it/aiwf/generate_otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email })
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // START: Replace the entire try...catch block with this
       try {
         // New API endpoint
-        const response = await fetch('https://backend.wiiz.it/aiwf/signup', {
+        const response = await fetch('https://www.wiiz.it/aiwf/signup', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         // YOUR ORIGINAL API ENDPOINT
-        const response = await fetch('https://backend.wiiz.it/aiwf/signin', {
+        const response = await fetch('https://www.wiiz.it/aiwf/signin', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Redirect to index.html after a 1-second delay
         setTimeout(() => {
-          window.location.href = 'pricing.html';
+          window.location.href = 'index.html';
         }, 1000);
 
       } catch (error) {

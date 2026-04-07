@@ -551,3 +551,118 @@ body,
 .toggle-label.active {
     color: white !important;
 }
+
+/* ==========================================================================
+   TOP ALERT SYSTEM
+   ========================================================================== */
+#top-alert {
+    position: fixed;
+    top: 90px;
+    right: 30px;
+    z-index: 9999;
+    min-width: 320px;
+    max-width: 420px;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    border-left: 3px solid #dc3545;
+    border-radius: 8px;
+    padding: 14px 40px 14px 18px;
+    display: none;
+    font-family: 'Inter', sans-serif;
+    animation: slideInRight 0.3s ease-out;
+}
+
+#top-alert.show {
+    display: block !important;
+}
+
+#top-alert .alert-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#top-alert #alert-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+#top-alert #alert-message {
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #495057;
+    padding-right: 8px;
+}
+
+#top-alert .btn-close {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    opacity: 0.6;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+}
+
+#top-alert .btn-close:hover {
+    opacity: 1;
+}
+
+/* Alert type colors */
+#top-alert.alert-danger {
+    border-left-color: #dc3545;
+}
+
+#top-alert.alert-danger #alert-icon {
+    color: #dc3545;
+}
+
+#top-alert.alert-warning {
+    border-left-color: #ffc107;
+}
+
+#top-alert.alert-warning #alert-icon {
+    color: #ffc107;
+}
+
+#top-alert.alert-success {
+    border-left-color: #28a745;
+}
+
+#top-alert.alert-success #alert-icon {
+    color: #28a745;
+}
+
+#top-alert.alert-info {
+    border-left-color: #17a2b8;
+}
+
+#top-alert.alert-info #alert-icon {
+    color: #17a2b8;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #top-alert {
+        min-width: calc(100vw - 40px);
+        max-width: calc(100vw - 40px);
+        right: 20px;
+        left: 20px;
+        top: 70px;
+    }
+}

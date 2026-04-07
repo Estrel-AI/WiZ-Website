@@ -16,6 +16,7 @@
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link
+
     href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
     rel="stylesheet">
 
@@ -29,38 +30,41 @@
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
   <link href="assets/css/custom-updates.css" rel="stylesheet">
+  
+  <!-- Configuration Script -->
+  <script src="assets/js/config.js"></script>
   <!-- Google tag (gtag.js) -->
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H3VD5FK5QL"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-H3VD5FK5QL"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-    // Google Analytics
-    gtag('config', 'G-H3VD5FK5QL');
+  // Google Analytics
+  gtag('config', 'G-H3VD5FK5QL');
 
-    // Google Ads
-    gtag('config', 'AW-17874589480');
-  </script>
+  // Google Ads
+  gtag('config', 'AW-17874589480');
+</script>
 
 
 
-  <!-- Event snippet for Sign-up conversion -->
-  <script>
-    function gtag_report_conversion(url) {
-      var callback = function () {
-        if (typeof (url) != 'undefined') {
-          window.location = url;
-        }
-      };
-      gtag('event', 'conversion', {
-        'send_to': 'AW-17874589480/JNRPCMeTnf4bEKiuostC',
-        'event_callback': callback
-      });
-      return false;
+<!-- Event snippet for Sign-up conversion -->
+<script>
+function gtag_report_conversion(url) {
+  var callback = function () {
+    if (typeof(url) != 'undefined') {
+      window.location = url;
     }
-  </script>
+  };
+  gtag('event', 'conversion', {
+      'send_to': 'AW-17874589480/JNRPCMeTnf4bEKiuostC',
+      'event_callback': callback
+  });
+  return false;
+}
+</script>
 </head>
 
 <body class="signup-page">
@@ -82,7 +86,7 @@
           <li><a href="Faq.html">FAQ</a></li> <!-- The "active" class has been moved here -->
           <li><a href="contact.html">Contact</a></li>
           <li><a href="Signup.html" class="active">Sign Up</a></li>
-          <li id="nav-signin-link"><a href="https://hub.wiiz.it" target="_blank">Sign in</a></li>
+          <li id="nav-signin-link"><a href="https://hub.wiiz.it/aistudio/login" target="_blank">Sign in</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -106,86 +110,193 @@
               <!-- === SIGN UP FORM (Visible by default) === -->
               <div id="signup-view">
                 <div class=" form-header text-center mb-4">
-                  <h2>Create an Account</h2>
-                  <!-- <div class="text-left mt-4">
-                    <p class="text-muted medium">Already have an account? <a href="Login.html"
-                        class="text-primary fw-semibold">Login here</a></p>
-                  </div> -->
-                </div>
-                <form action="#" method="post" id="signup-form">
-                  <div class="row gy-3">
-                    <div class="col-md-6">
-                      <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
-                      <input type="text" name="first_name" class="form-control" id="first_name" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
-                      <input type="text" name="last_name" class="form-control" id="last_name" required>
-                    </div>
-                    <div class="col-12">
-                      <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
-                      <input type="text" name="username" class="form-control" id="username" required>
-                    </div>
-                    <div class="col-12">
-                      <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                      <div class="input-group">
-                        <input type="email" class="form-control" name="email" id="email" required>
-                        <button class="btn btn-outline-secondary" type="button" id="btn-verify-email">Verify
-                          Email</button>
-                      </div>
-                      <small id="email-feedback" class="form-text text-muted"></small>
-                    </div>
+                <h2>Create an Account</h2>
+              </div>
 
-                    <!-- NEW: Hidden OTP Field -->
-                    <!-- === COPY THIS INTO SIGNUP.HTML === -->
-                    <div class="col-12" id="otp-container" style="display: none;">
-                      <label for="otp_input" class="form-label mt-2">One-Time Password (OTP) <span
-                          class="text-danger">*</span></label>
-                      <input type="text" class="form-control" name="otp" id="otp_input" placeholder="Enter 6-digit OTP"
-                        maxlength="6">
-                      <small class="text-muted">Check your inbox for the code.</small>
+              <!-- STEP 1: Email Verification (Visible by default) -->
+              <div id="email-verification-step">
+                <form action="#" method="post" id="email-verification-form">
+                  <div class="mb-3">
+                    <label for="email-verify" class="form-label">Verify your Email ID <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" name="email" id="email-verify" required placeholder="Enter your Email ID">
+                    <small id="email-verify-feedback" class="form-text text-muted"></small>
+                  </div>
+                  
+                  <!-- OTP Input Section - Always in DOM, visibility controlled by class -->
+                  <div class="mb-3 otp-section" id="otp-verify-container">
+                    <label for="otp-verify-input" class="form-label fw-bold">One-Time Password (OTP) <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control form-control-lg" name="otp" id="otp-verify-input" placeholder="Enter 6-digit OTP" maxlength="6" style="font-size: 1.2rem; letter-spacing: 0.5rem; text-align: center;">
+                    <small class="text-muted d-block mt-2">Check your inbox for the verification code.</small>
+                    
+                    <!-- Timer Display -->
+                    <div id="otp-timer" class="mt-2 text-center timer-hidden">
+                      <small class="text-muted">Code expires in: <strong id="timer-countdown" class="text-primary">90</strong> seconds</small>
                     </div>
-                    <!-- ================================== -->
-                    <div class="col-md-6">
-                      <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                      <input type="password" name="password" class="form-control" id="password" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="confirm_password" class="form-label">Confirm Password <span
-                          class="text-danger">*</span></label>
-                      <input type="password" name="confirm_password" class="form-control" id="confirm_password"
-                        required>
-                    </div>
-                    <div class="col-12 mt-4">
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="terms" required>
-                        <label class="form-check-label" for="terms">
-                          I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and
-                            Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy
-                            Policy</a> <span class="text-danger">*</span>
-                        </label>
-                      </div>
-                    </div>
-                    <div class="col-12 mt-3" style="display: flex; flex-direction: column; align-items: center;">
-                      <!-- ADD THE RECAPTCHA WIDGET HERE -->
-                      <div class="captcha-wrapper">
-                        <div class="g-recaptcha" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"
-                          style="display: inline-block; margin-bottom: 1rem;"></div>
-                      </div>
-
-                      <div class="loading">Creating your account...</div>
-                      <div class="error-message"></div>
-                      <div class="sent-message">Account created successfully! Please check your email.</div>
-                      <button type="submit" id="btn-signup-submit" class="btn btn-primary w-100 btn-lg">
-                        Create Free Account
+                    
+                    <!-- Resend Button -->
+                    <div id="resend-container" class="mt-2 text-center resend-hidden">
+                      <button type="button" id="btn-resend-otp" class="btn btn-link text-primary p-0">
+                        <i class="bi bi-arrow-clockwise"></i> Resend Code
                       </button>
                     </div>
                   </div>
+
+                  <div class="loading" style="display: none;">Sending verification code...</div>
+                  <div class="error-message" style="display: none;"></div>
+                  <div class="sent-message" style="display: none;"></div>
+
+                  <button type="button" id="btn-send-otp" class="btn btn-primary w-100 btn-lg">
+                    Send Verification Code
+                  </button>
+                  
+                  <button type="button" id="btn-verify-otp" class="btn btn-success w-100 btn-lg verify-btn-hidden">
+                    Verify Email & Continue
+                  </button>
                 </form>
+
+                <style>
+                  .otp-section {
+                    max-height: 0;
+                    overflow: hidden;
+                    opacity: 0;
+                    transition: all 0.3s ease;
+                    padding: 0 15px;
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                    border: 2px solid #e9ecef;
+                  }
+                  
+                  .otp-section.show {
+                    max-height: 500px;
+                    opacity: 1;
+                    padding: 15px;
+                    margin-top: 15px;
+                  }
+                  
+                  .verify-btn-hidden {
+                    display: none !important;
+                  }
+                  
+                  .verify-btn-show {
+                    display: block !important;
+                    margin-top: 10px;
+                  }
+                  
+                  .timer-hidden {
+                    display: none;
+                  }
+                  
+                  .timer-show {
+                    display: block;
+                  }
+                  
+                  .resend-hidden {
+                    display: none;
+                  }
+                  
+                  .resend-show {
+                    display: block;
+                  }
+                </style>
+
+                <!-- OR Divider -->
+                <div class="text-center my-4">
+                  <span class="text-muted" style="font-size: 14px;">or sign up with</span>
+                </div>
+
+                <!-- OAuth Buttons -->
+                <div class="oauth-buttons-row mb-4">
+                  <div class="d-flex justify-content-center gap-3">
+                    <a href="#" id="google-oauth-btn" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; border-radius: 12px; border: 2px solid #e0e0e0;">
+                      <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M47.532 24.5528C47.532 22.9214 47.3997 21.2811 47.1175 19.6761H24.48V28.9181H37.4434C36.9055 31.8988 35.177 34.5356 32.6461 36.2111V42.2078H40.3801C44.9217 38.0278 47.532 31.8547 47.532 24.5528Z" fill="#4285F4"/>
+                        <path d="M24.48 48.0016C30.9529 48.0016 36.4116 45.8764 40.3888 42.2078L32.6549 36.2111C30.5031 37.675 27.7252 38.5039 24.4888 38.5039C18.2275 38.5039 12.9187 34.2798 11.0139 28.6006H3.03296V34.7825C7.10718 42.8868 15.4056 48.0016 24.48 48.0016Z" fill="#34A853"/>
+                        <path d="M11.0051 28.6006C9.99973 25.6199 9.99973 22.3922 11.0051 19.4115V13.2296H3.03298C-0.371021 20.0112 -0.371021 28.0009 3.03298 34.7825L11.0051 28.6006Z" fill="#FBBC04"/>
+                        <path d="M24.48 9.49932C27.9016 9.44641 31.2086 10.7339 33.6866 13.0973L40.5387 6.24523C36.2 2.17101 30.4414 -0.068932 24.48 0.00161733C15.4055 0.00161733 7.10718 5.11644 3.03296 13.2296L11.005 19.4115C12.901 13.7235 18.2187 9.49932 24.48 9.49932Z" fill="#EA4335"/>
+                      </svg>
+                    </a>
+                    
+                    <a href="#" id="linkedin-oauth-btn" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; border-radius: 12px; border: 2px solid #e0e0e0;">
+                      <i class="bi bi-linkedin" style="font-size: 28px; color: #0A66C2;"></i>
+                    </a>
+                    
+                    <a href="#" id="github-oauth-btn" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; border-radius: 12px; border: 2px solid #e0e0e0;">
+                      <i class="bi bi-github" style="font-size: 28px; color: #333;"></i>
+                    </a>
+                  </div>
+                </div>
+                <div class="text-center mb-4">
+                  <p class="text-muted medium mb-0">Already have an account? <a href="https://hub.wiiz.it/aistudio/login"
+                      target="_blank" class="text-primary fw-semibold">Log in</a></p>
+                </div>
               </div>
 
+              <!-- STEP 2: Full Registration Form (Hidden by default) -->
+              <div id="full-registration-step" style="display: none;">
+                <div class="mb-3">
+                  <button type="button" id="btn-back-to-email" class="btn btn-link text-muted p-0">
+                    <i class="bi bi-arrow-left"></i> Change Email
+                  </button>
+                  <p class="text-muted small mt-2">Verified: <strong id="verified-email-display"></strong></p>
+                </div>
+
+              <form action="#" method="post" id="signup-form">
+                <div class="row gy-3">
+                  <div class="col-md-6">
+                    <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+                    <input type="text" name="first_name" class="form-control" id="first_name" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <input type="text" name="last_name" class="form-control" id="last_name" required>
+                  </div>
+                  <div class="col-12">
+                    <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                    <input type="text" name="username" class="form-control" id="username" required>
+                  </div>
+                  <!-- Email is already verified, hidden field -->
+                  <input type="hidden" name="email" id="email-hidden">
+                  <input type="hidden" name="otp" id="otp-hidden">
+                  <div class="col-md-6">
+                    <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                    <input type="password" name="password" class="form-control" id="password" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="confirm_password" class="form-label">Confirm Password <span
+                        class="text-danger">*</span></label>
+                    <input type="password" name="confirm_password" class="form-control" id="confirm_password" required>
+                  </div>
+                  <div class="col-12 mt-4">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="terms" required>
+                      <label class="form-check-label" for="terms">
+                        I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and
+                          Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy
+                          Policy</a> <span class="text-danger">*</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-12 mt-3" style="display: flex; flex-direction: column; align-items: center;">
+                    <!-- ADD THE RECAPTCHA WIDGET HERE -->
+                    <div class="captcha-wrapper">
+                      <div class="g-recaptcha" data-sitekey="6Lf-GkgsAAAAAAyYJGIQf2XJLYoaw3A1a3utYFka"
+                        style="display: inline-block; margin-bottom: 1rem;"></div>
+                    </div>
+
+                    <div class="loading">Creating your account...</div>
+                    <div class="error-message"></div>
+                    <div class="sent-message">Account created successfully! Please check your email.</div>
+                  <button type="submit" id="btn-signup-submit" class="btn btn-primary w-100 btn-lg">
+                    Create Free Account
+                  </button>
+                  </div>
+                </div>
+              </form>
+              </div>
             </div>
+
           </div>
+        </div>
 
           <!-- Right Side - Info Column -->
           <div class="col-lg-5 offset-lg-1">
@@ -243,19 +354,125 @@
             </div>
           </div>
 
-
         </div>
       </div>
+    </div>
     </div>
 
   </main>
 
+  <!-- OAuth Button Handlers Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // OAuth button click handlers
+      const googleBtn = document.getElementById('google-oauth-btn');
+      const linkedinBtn = document.getElementById('linkedin-oauth-btn');
+      const githubBtn = document.getElementById('github-oauth-btn');
+      
+      if (googleBtn) {
+        googleBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const backendUrl = window.WiiZConfig ? window.WiiZConfig.getBackendUrl() : 'https://test-backend.wiiz.it';
+          window.location.href = `${backendUrl}/auth/google`;
+        });
+      }
+      
+      if (linkedinBtn) {
+        linkedinBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const backendUrl = window.WiiZConfig ? window.WiiZConfig.getBackendUrl() : 'https://test-backend.wiiz.it';
+          window.location.href = `${backendUrl}/auth/linkedin`;
+        });
+      }
+      
+      if (githubBtn) {
+        githubBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const backendUrl = window.WiiZConfig ? window.WiiZConfig.getBackendUrl() : 'https://test-backend.wiiz.it';
+          window.location.href = `${backendUrl}/auth/github`;
+        });
+      }
+      
+      // Check for OAuth callback parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get('error');
+      const message = urlParams.get('message');
+      const oauthSuccess = urlParams.get('oauth_success');
+      const provider = urlParams.get('provider');
+      
+      // Handle OAuth success - only for new users
+      if (oauthSuccess === 'true' && provider) {
+        // Don't hide signup form - keep it visible in background
+        
+        // Update modal content for new user
+        const modalTitle = document.querySelector('#successModal .modal-title');
+        const modalText = document.querySelector('#successModal .text-muted');
+        const oauthCredentialsMsg = document.getElementById('oauth-credentials-message');
+        
+        if (modalTitle) modalTitle.textContent = 'Account Created!';
+        if (modalText) modalText.textContent = 'Your account has been created successfully. You can now log in to hub to get started or go to pricing page to purchase a plan.';
+        
+        // Show the OAuth credentials message
+        if (oauthCredentialsMsg) {
+          oauthCredentialsMsg.style.display = 'block';
+        }
+        
+        // Show success modal
+        const successModalEl = document.getElementById('successModal');
+        if (successModalEl) {
+          const successModal = new bootstrap.Modal(successModalEl);
+          successModal.show();
+        }
+        
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
+      // Handle OAuth error - existing user
+      if (error === 'email_exists' && message) {
+        // Show validation message for existing users
+        const emailVerifyStep = document.getElementById('email-verification-step');
+        if (emailVerifyStep) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+          errorDiv.innerHTML = `
+            <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Email Already Registered!</strong><br>
+            ${decodeURIComponent(message)}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          `;
+          emailVerifyStep.insertBefore(errorDiv, emailVerifyStep.firstChild);
+        }
+        
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
+      // Handle other OAuth errors
+      if (error && error !== 'email_exists' && message) {
+        const emailVerifyStep = document.getElementById('email-verification-step');
+        if (emailVerifyStep) {
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'alert alert-warning alert-dismissible fade show mt-3';
+          errorDiv.innerHTML = `
+            <strong><i class="bi bi-exclamation-circle-fill me-2"></i>Authentication Error</strong><br>
+            ${decodeURIComponent(message)}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          `;
+          emailVerifyStep.insertBefore(errorDiv, emailVerifyStep.firstChild);
+        }
+        
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    });
+  </script>
+
 
   <!-- =============================================
-     START: PASTE THE NEW SUCCESS MODAL HERE
+     SUCCESS MODAL FOR OAUTH SIGNUP
      ============================================= -->
   <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true"
-    data-bs-backdrop="static" data-bs-keyboard="false">
+    data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content text-center" style="border-radius: 1rem; padding: 2rem;">
         <div class="modal-body">
@@ -263,21 +480,20 @@
           <div class="success-icon-wrapper mb-3">
             <i class="bi bi-check-lg"></i>
           </div>
-
           <h3 class="modal-title mb-2" id="successModalLabel">Account Created!</h3>
-
-          <p class="text-muted mb-4">Your account has been created successfully. You can now log in to hub to get
-            started.</p>
-
-          <a href="https://hub.wiiz.it" class="btn btn-primary btn-lg w-100" target="_blank">Go to Hub at WiiZ Atlas 2.0
-          </a>
-
+          <p class="text-muted mb-3">Your account has been created successfully. You can now log in to hub to get started or go to pricing page to purchase a plan.</p>
+          <p class="text-muted mb-4" id="oauth-credentials-message" style="display: none;">
+            <i class="bi bi-envelope-fill me-1"></i>
+            <strong>Your username and password have been sent to your email.</strong>
+          </p>
+          <div class="d-flex gap-3">
+            <a href="pricing.html" class="btn btn-primary flex-fill">View Pricing Plans</a>
+            <a href="https://hub.wiiz.it/aistudio/login" class="btn btn-primary flex-fill">Go to Hub at WiiZ Atlas 2.0</a>
+          </div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- END: Stop replacing here -->
   <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
       <div class="modal-content">
@@ -1779,6 +1995,277 @@
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
+
+  <!-- Two-Step Signup Process Handler -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Elements
+      const emailVerificationStep = document.getElementById('email-verification-step');
+      const fullRegistrationStep = document.getElementById('full-registration-step');
+      const emailVerifyInput = document.getElementById('email-verify');
+      const otpVerifyContainer = document.getElementById('otp-verify-container');
+      const otpVerifyInput = document.getElementById('otp-verify-input');
+      const btnSendOtp = document.getElementById('btn-send-otp');
+      const btnVerifyOtp = document.getElementById('btn-verify-otp');
+      const btnResendOtp = document.getElementById('btn-resend-otp');
+      const btnBackToEmail = document.getElementById('btn-back-to-email');
+      const verifiedEmailDisplay = document.getElementById('verified-email-display');
+      const emailHidden = document.getElementById('email-hidden');
+      const otpHidden = document.getElementById('otp-hidden');
+      const emailVerifyFeedback = document.getElementById('email-verify-feedback');
+      const loading = document.querySelector('#email-verification-form .loading');
+      const errorMessage = document.querySelector('#email-verification-form .error-message');
+      const sentMessage = document.querySelector('#email-verification-form .sent-message');
+      const otpTimer = document.getElementById('otp-timer');
+      const timerCountdown = document.getElementById('timer-countdown');
+      const resendContainer = document.getElementById('resend-container');
+
+      let verifiedEmail = '';
+      let verifiedOtp = '';
+      let timerInterval = null;
+
+      // Timer function
+      function startOtpTimer(seconds = 90) {
+        let timeLeft = seconds;
+        
+        // Show timer, hide resend button
+        otpTimer.classList.remove('timer-hidden');
+        otpTimer.classList.add('timer-show');
+        resendContainer.classList.remove('resend-show');
+        resendContainer.classList.add('resend-hidden');
+        timerCountdown.textContent = timeLeft;
+        
+        // Clear any existing timer
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+        
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          timerCountdown.textContent = timeLeft;
+          
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            // Hide timer, show resend button
+            otpTimer.classList.remove('timer-show');
+            otpTimer.classList.add('timer-hidden');
+            resendContainer.classList.remove('resend-hidden');
+            resendContainer.classList.add('resend-show');
+          }
+        }, 1000);
+      }
+
+      // Function to send OTP
+      async function sendOtp(isResend = false) {
+        const email = emailVerifyInput.value.trim();
+        
+        if (!email || !email.includes('@')) {
+          errorMessage.textContent = 'Please enter a valid email address.';
+          errorMessage.style.display = 'block';
+          sentMessage.style.display = 'none';
+          return;
+        }
+
+        const button = isResend ? btnResendOtp : btnSendOtp;
+        const originalText = button.textContent;
+        
+        button.disabled = true;
+        button.textContent = isResend ? 'Resending...' : 'Sending...';
+        loading.style.display = 'block';
+        errorMessage.style.display = 'none';
+        sentMessage.style.display = 'none';
+
+        try {
+          const response = await fetch('https://www.wiiz.it/aiwf/generate_otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+          });
+
+          const data = await response.json();
+          console.log('API Response:', data);
+          console.log('Response OK:', response.ok);
+          console.log('Data success:', data.success);
+
+          // Check if OTP was sent successfully - handle different response formats
+          if (response.ok || data.message === 'OTP sent to email' || data.message?.includes('OTP sent')) {
+            console.log('OTP sent successfully, showing OTP container');
+            loading.style.display = 'none';
+            sentMessage.textContent = isResend 
+              ? 'New verification code sent! Please check your email.' 
+              : 'Verification code sent! Please check your email and enter the code below.';
+            sentMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            // Show OTP input and verify button using CSS classes
+            console.log('Adding show class to OTP container');
+            otpVerifyContainer.classList.add('show');
+            
+            btnSendOtp.style.display = 'none';
+            btnVerifyOtp.classList.remove('verify-btn-hidden');
+            btnVerifyOtp.classList.add('verify-btn-show');
+            emailVerifyInput.disabled = true;
+            
+            // Start the 90-second timer
+            startOtpTimer(90);
+            
+            // Focus on OTP input
+            setTimeout(() => {
+              otpVerifyInput.focus();
+              console.log('OTP input focused');
+            }, 300);
+          } else {
+            throw new Error(data.message || 'Failed to send verification code.');
+          }
+        } catch (error) {
+          console.error(error);
+          loading.style.display = 'none';
+          sentMessage.style.display = 'none';
+          errorMessage.textContent = error.message || 'Error sending verification code.';
+          errorMessage.style.display = 'block';
+          button.textContent = originalText;
+        } finally {
+          button.disabled = false;
+          if (!isResend) {
+            button.textContent = originalText;
+          }
+        }
+      }
+
+      // Step 1: Send OTP
+      btnSendOtp.addEventListener('click', () => sendOtp(false));
+
+      // Resend OTP
+      if (btnResendOtp) {
+        btnResendOtp.addEventListener('click', () => {
+          // Clear the OTP input when resending
+          otpVerifyInput.value = '';
+          sendOtp(true);
+        });
+      }
+
+      // Step 2: Verify OTP and move to full registration
+      btnVerifyOtp.addEventListener('click', () => {
+        const otp = otpVerifyInput.value.trim();
+        
+        if (!otp || otp.length !== 6) {
+          errorMessage.textContent = 'Please enter a valid 6-digit OTP.';
+          errorMessage.style.display = 'block';
+          sentMessage.style.display = 'none';
+          return;
+        }
+
+        // Store verified email and OTP
+        verifiedEmail = emailVerifyInput.value.trim();
+        verifiedOtp = otp;
+
+        // Clear the timer
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+
+        // Hide step 1, show step 2
+        emailVerificationStep.style.display = 'none';
+        fullRegistrationStep.style.display = 'block';
+
+        // Display verified email
+        verifiedEmailDisplay.textContent = verifiedEmail;
+
+        // Set hidden fields for form submission
+        emailHidden.value = verifiedEmail;
+        otpHidden.value = verifiedOtp;
+      });
+
+      // Back button: Return to email verification
+      if (btnBackToEmail) {
+        btnBackToEmail.addEventListener('click', () => {
+          // Clear the timer
+          if (timerInterval) {
+            clearInterval(timerInterval);
+          }
+          
+          fullRegistrationStep.style.display = 'none';
+          emailVerificationStep.style.display = 'block';
+          
+          // Reset step 1
+          emailVerifyInput.disabled = false;
+          emailVerifyInput.value = verifiedEmail;
+          otpVerifyContainer.classList.remove('show');
+          otpVerifyInput.value = '';
+          btnSendOtp.style.display = 'block';
+          btnVerifyOtp.classList.add('verify-btn-hidden');
+          btnVerifyOtp.classList.remove('verify-btn-show');
+          otpTimer.classList.add('timer-hidden');
+          otpTimer.classList.remove('timer-show');
+          resendContainer.classList.add('resend-hidden');
+          resendContainer.classList.remove('resend-show');
+          errorMessage.style.display = 'none';
+          sentMessage.style.display = 'none';
+        });
+      }
+    });
+  </script>
+
+  <!-- OAuth Callback Handler -->
+  <script>
+    // Set up OAuth URLs dynamically when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const googleBtn = document.getElementById('google-oauth-btn');
+      const linkedinBtn = document.getElementById('linkedin-oauth-btn');
+      const githubBtn = document.getElementById('github-oauth-btn');
+      
+      if (googleBtn && window.WiiZConfig) {
+        googleBtn.href = window.WiiZConfig.getAuthUrl('google');
+      }
+      if (linkedinBtn && window.WiiZConfig) {
+        linkedinBtn.href = window.WiiZConfig.getAuthUrl('linkedin');
+      }
+      if (githubBtn && window.WiiZConfig) {
+        githubBtn.href = window.WiiZConfig.getAuthUrl('github');
+      }
+    });
+    
+    // Handle OAuth callback
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const provider = urlParams.get('provider');
+    const error = urlParams.get('error');
+
+    if (token) {
+      // Store token in localStorage
+      localStorage.setItem('wiizAuthToken', token);
+      localStorage.setItem('wiizAuthProvider', provider);
+      
+      // Decode JWT to get credentials
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        
+        // Store credentials for customer portal and hub
+        localStorage.setItem('oauthUsername', payload.username);
+        localStorage.setItem('oauthPassword', payload.password);
+        localStorage.setItem('oauthEmail', payload.email);
+        localStorage.setItem('zohoCustomerId', payload.zoho_customer_id);
+        localStorage.setItem('isOAuthLogin', 'true');
+        
+        // Show success modal
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+        
+        // Auto redirect to customer portal (same as traditional signup)
+        setTimeout(() => {
+          window.location.href = 'index.html'; // Customer portal home page
+        }, 3000);
+      } catch (e) {
+        console.error('Failed to decode token:', e);
+        // Fallback to customer portal
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 3000);
+      }
+    }
+    
+    // Note: OAuth error handling is now done in the OAuth Button Handlers Script above
+  </script>
 
 </body>
 
