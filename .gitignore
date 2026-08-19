@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+ 
+# Runtime secrets
+.env
+ 
+# Host / runtime data
+certbot/
+backend/mysql-data/
+*.log

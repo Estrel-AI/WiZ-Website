@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/admin/blog/upload": {},
+    "/api/admin/home-features/upload": {},
+    "/api/admin/media/upload": {},
+    "/api/auth": {},
+    "/api/auth/[provider]": {},
+    "/api/auth/[provider]/callback": {},
+    "/api/auth/current-user": {},
+    "/api/auth/logout": {},
+    "/api/auth/session": {},
+    "/api/auth/verify": {},
+    "/api/health/database": {},
+    "/api/openapi": {},
+    "/api/payments/create-checkout": {}
+  }
+}

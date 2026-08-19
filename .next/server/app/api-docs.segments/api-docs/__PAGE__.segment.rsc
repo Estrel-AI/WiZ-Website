@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[94987,["/_next/static/chunks/158179aea16a5b42.js","/_next/static/chunks/5f96d7967b3670be.js"],"default"]
+3:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/4d348ff2302e5aac.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"KR7fh89nqL6Y5V9fPbtzl","rsc":["$","$1","c",{"children":[["$","main",null,{"className":"min-h-screen bg-slate-100","children":["$","div",null,{"className":"mx-auto max-w-7xl px-4 py-6","children":[["$","div",null,{"className":"mb-4 rounded-3xl border border-slate-200 bg-white px-6 py-5 shadow-sm","children":[["$","h1",null,{"className":"text-2xl font-semibold text-slate-950","children":"Swagger API Docs"}],["$","p",null,{"className":"mt-2 text-sm text-slate-500","children":"Current admin endpoints plus the planned hierarchy and use case detail CRUD API contract."}]]}],["$","div",null,{"className":"overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm","children":["$","$L2",null,{"url":"/api/openapi"}]}]]}]}],[["$","script","script-0",{"src":"/_next/static/chunks/5f96d7967b3670be.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

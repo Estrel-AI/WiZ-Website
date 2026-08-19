@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,59356,i=>{"use strict";var t=i.i(43476),e=i.i(31893);function n(){return(0,t.jsx)(e.AdminHierarchyManager,{view:"function"})}i.s(["default",()=>n])}]);

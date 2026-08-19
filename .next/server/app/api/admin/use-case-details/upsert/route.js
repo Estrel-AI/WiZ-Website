@@ -1,0 +1,11 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/admin/use-case-details/upsert/route.js")
+R.c("server/chunks/_c400a830._.js")
+R.c("server/chunks/node_modules_next_1402a1da._.js")
+R.c("server/chunks/[root-of-the-server]__347c96f1._.js")
+R.c("server/chunks/_2d9e5633._.js")
+R.c("server/chunks/[root-of-the-server]__8f5ebbc3._.js")
+R.c("server/chunks/[root-of-the-server]__84ac5fa1._.js")
+R.c("server/chunks/node_modules_next_f5199d09._.js")
+R.c("server/chunks/ce889_server_app_api_admin_use-case-details_upsert_route_actions_15568e19.js")
+R.m(80183)
+module.exports=R.m(80183).exports

@@ -1,0 +1,6 @@
+
+de_modules
+.env
+*.log
+*.md
+.git

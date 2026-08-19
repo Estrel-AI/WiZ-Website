@@ -1,0 +1,10 @@
+var R=require("../../../chunks/[turbopack]_runtime.js")("server/app/api/cookie-consent/route.js")
+R.c("server/chunks/[root-of-the-server]__10885352._.js")
+R.c("server/chunks/[root-of-the-server]__84ac5fa1._.js")
+R.c("server/chunks/node_modules_next_f5199d09._.js")
+R.c("server/chunks/[root-of-the-server]__8f5ebbc3._.js")
+R.c("server/chunks/_2d9e5633._.js")
+R.c("server/chunks/node_modules_next_a56e0a3a._.js")
+R.c("server/chunks/_next-internal_server_app_api_cookie-consent_route_actions_bd07ca6f.js")
+R.m(38520)
+module.exports=R.m(38520).exports

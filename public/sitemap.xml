@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://wiiz.it/</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/about</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/partner</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/usecase</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/pricing</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/contact</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/blog</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/register</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/usecase/usecasedetail?useCaseId=51&amp;industryTitle=Banking+and+Financial+Services&amp;functionTitle=Compliance</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/usecase/usecasedetail?useCaseId=53&amp;industryTitle=Banking+and+Financial+Services&amp;functionTitle=Customer+Experience</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/usecase/usecasedetail?useCaseId=74&amp;industryTitle=Manufacturing&amp;functionTitle=Operations+Management</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/blog/who-governs-the-agent-how-the-industry-is-finally-closing-the-agentic-ai-security-gap</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wiiz.it/blog/not-just-a-chatbot-how-agentic-ai-is-quietly-fixing-broken-systems-across-industries</loc>
+  <lastmod>2026-05-21T09:57:58+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>

@@ -1,0 +1,3 @@
+{
+  "/(website)/usecase/[industrySlug]/[functionSlug]/[useCaseSlug]/page": "app/(website)/usecase/[industrySlug]/[functionSlug]/[useCaseSlug]/page.js"
+}

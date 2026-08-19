@@ -1,0 +1,3 @@
+module.exports=[5381,a=>{"use strict";var b=a.i(7997),c=a.i(58896);let d=(0,c.buildWebsiteMetadata)({title:"Use Case Details",description:"Explore WiiZ use case details for AI workflow orchestration and automation.",path:"/ai-agents/usecasedetail",image:c.websiteOgImages.usecase});function e({children:a}){return(0,b.jsx)(b.Fragment,{children:a})}a.s(["default",()=>e,"metadata",0,d])}];
+
+//# sourceMappingURL=src_app_%28website%29_ai-agents_usecasedetail_layout_tsx_440a760d._.js.map

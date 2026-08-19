@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="176" height="48" viewBox="0 0 176 48" role="img" aria-labelledby="title">
+  <title id="title">Scrut Automation</title>
+  <rect width="176" height="48" fill="none"/>
+  <path d="M23 9 39 37H7L23 9Z" fill="#20242A"/>
+  <path d="M23 20 29 31H17l6-11Z" fill="#D13B6C"/>
+  <text x="48" y="23" fill="#20242A" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="800">Scrut</text>
+  <text x="48" y="38" fill="#4B5563" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700">Automation</text>
+</svg>

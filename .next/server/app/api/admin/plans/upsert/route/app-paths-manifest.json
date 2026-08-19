@@ -1,0 +1,3 @@
+{
+  "/api/admin/plans/upsert/route": "app/api/admin/plans/upsert/route.js"
+}
