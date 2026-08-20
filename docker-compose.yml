@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wiiz-website-test
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.dev
+    environment:
+      - NODE_ENV=production
+      - APP_ENV=testing
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8
+    container_name: wiiz-website-test-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-wiiz_website_test}
+      - MYSQL_USER=${MYSQL_USER:-wiiz_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-wiiz_password}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+volumes:
+  db_data:
