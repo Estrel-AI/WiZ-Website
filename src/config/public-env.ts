@@ -7,12 +7,12 @@ const isLocalFrontend =
 
 export const HUB_BASE_URL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_HUB_BASE_URL,
-  "https://hub.wiiz.it",
+  "https://sandbox.wiiz.it",
 );
 
 export const AUTH_API_BASE_URL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_AUTH_API_BASE_URL,
-  "https://dev.wiiz.it/aiwf",
+  "https://sandbox.wiiz.it/aiwf",
 );
 
 export const AUTH_OAUTH_BASE_URL = normalizeBaseUrl(

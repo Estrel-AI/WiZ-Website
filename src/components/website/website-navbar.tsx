@@ -145,7 +145,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                           Website Login
                         </Link> */}
                         <Link
-                          href="https://hub.wiiz.it"
+                          href="https://sandbox.wiiz.it"
                           target="_blank"
                           rel="noreferrer"
                           title="Log in to the hub"
@@ -154,7 +154,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                           WiiZ for Developer
                         </Link>
                           <Link
-                          href="https://wbs.wiiz.it"
+                          href="https://testwbs.wiiz.it"
                           target="_blank"
                           rel="noreferrer"
                           title="Log in to the hub"
@@ -235,7 +235,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
             </Link> */}
             
             <Link
-              href="https://hub.wiiz.it"
+              href="https://sandbox.wiiz.it"
               target="_blank"
               rel="noreferrer"
               onClick={() => setMobileMenuOpen(false)}
@@ -244,7 +244,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                WiiZ for Developer
             </Link>
               <Link
-              href="https://wbs.wiiz.it"
+              href="https://testwbs.wiiz.it"
               target="_blank"
               rel="noreferrer"
               onClick={() => setMobileMenuOpen(false)}
