@@ -22,13 +22,11 @@ services:
     container_name: wiiz-website-test-db
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-wiiz_website_test}
-      - MYSQL_USER=${MYSQL_USER:-wiiz_user}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-wiiz_password}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-wizz_db}
+      - MYSQL_USER=${MYSQL_USER:-wizz_db_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-Wizz@321}
     volumes:
       - db_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
     restart: unless-stopped
 
 volumes:
