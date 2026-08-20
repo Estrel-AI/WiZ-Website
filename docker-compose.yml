@@ -9,10 +9,11 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env.dev
+      - .env
     environment:
       - NODE_ENV=production
       - APP_ENV=testing
+      - MYSQL_HOST=db
     depends_on:
       - db
     restart: unless-stopped
