@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="176" height="48" viewBox="0 0 176 48" role="img" aria-labelledby="title">
+  <title id="title">Kantata</title>
+  <rect width="176" height="48" fill="none"/>
+  <text x="8" y="31" fill="#20242A" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="800">Kantata</text>
+  <path d="M130 15h34" stroke="#D13B6C" stroke-width="4" stroke-linecap="round"/>
+  <path d="M130 24h24" stroke="#D13B6C" stroke-width="4" stroke-linecap="round"/>
+  <path d="M130 33h34" stroke="#D13B6C" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-03-30T17:25:35.722Z",
+  "blogCategories": [
+    {
+      "id": "cat-platform",
+      "name": "Platform",
+      "slug": "platform"
+    },
+    {
+      "id": "cat-ai-ops",
+      "name": "AI Ops",
+      "slug": "ai-ops"
+    },
+    {
+      "id": "cat-governance",
+      "name": "Governance",
+      "slug": "governance"
+    }
+  ],
+  "blogTags": [
+    {
+      "id": "tag-agentic-ai",
+      "name": "Agentic AI",
+      "slug": "agentic-ai"
+    },
+    {
+      "id": "tag-enterprise",
+      "name": "Enterprise",
+      "slug": "enterprise"
+    },
+    {
+      "id": "tag-automation",
+      "name": "Automation",
+      "slug": "automation"
+    }
+  ],
+  "blogPosts": [
+    {
+      "id": "blog-1",
+      "title": "How Enterprise Teams Operationalize Agentic Workflows",
+      "slug": "how-enterprise-teams-operationalize-agentic-workflows",
+      "featuredImage": "/images/mission.png",
+      "shortDescription": "A practical framework for moving from experiments to governed AI operations.",
+      "content": "## Why operational discipline matters\n\nEnterprise AI programs need orchestration, governance, and visibility. This article can be replaced from the admin panel with your own long-form content.",
+      "author": "WiiZ Team",
+      "categoryId": "cat-ai-ops",
+      "tagIds": [
+        "tag-agentic-ai",
+        "tag-enterprise"
+      ],
+      "status": "published",
+      "publishDate": "2026-03-15",
+      "seo": {
+        "metaTitle": "How Enterprise Teams Operationalize Agentic Workflows",
+        "metaDescription": "A framework for scaling agentic AI programs with governance and observability.",
+        "metaKeywords": [],
+        "canonicalUrl": ""
+      },
+      "createdAt": "2026-03-15T09:00:00.000Z",
+      "updatedAt": "2026-03-15T09:00:00.000Z"
+    }
+  ],
+  "industries": [
+    {
+      "id": "industry-government",
+      "name": "Government",
+      "slug": "government",
+      "description": "Trusted automation for public sector workflows and compliance-heavy operations.",
+      "status": "published",
+      "sortOrder": 1,
+      "seo": {
+        "metaTitle": "Government AI Use Cases",
+        "metaDescription": "Government-focused AI workflow use cases.",
+        "metaKeywords": [],
+        "canonicalUrl": ""
+      }
+    },
+    {
+      "id": "industry-bfsi",
+      "name": "Banking & Financial Services",
+      "slug": "banking-financial-services",
+      "description": "AI orchestration for compliance, operations, and customer service.",
+      "status": "published",
+      "sortOrder": 2,
+      "seo": {
+        "metaTitle": "BFSI AI Use Cases",
+        "metaDescription": "BFSI AI use cases and workflow automation.",
+        "metaKeywords": [],
+        "canonicalUrl": ""
+      }
+    }
+  ],
+  "functions": [
+    {
+      "id": "function-compliance-monitoring",
+      "industryId": "industry-government",
+      "name": "Compliance Monitoring",
+      "slug": "compliance-monitoring",
+      "summary": "Monitor policies, obligations, and controls with repeatable AI workflows.",
+      "status": "published",
+      "sortOrder": 2
+    },
+    {
+      "id": "function-risk-operations",
+      "industryId": "industry-bfsi",
+      "name": "Risk Operations",
+      "slug": "risk-operations",
+      "summary": "Support analysts with faster evidence gathering and controls mapping.",
+      "status": "published",
+      "sortOrder": 1
+    }
+  ],
+  "useCases": [
+    {
+      "id": "use-case-regulatory-mapping",
+      "industryId": "industry-government",
+      "functionId": "function-compliance-monitoring",
+      "title": "Regulatory vs Internal Policy Mapping and AI Recommendation",
+      "slug": "regulatory-vs-internal-policy-mapping",
+      "bannerTitle": "Regulatory",
+      "summary": "Map regulatory clauses to internal policies and controls with faster analyst review.",
+      "heroImage": "/images/workflow.png",
+      "status": "published",
+      "publishDate": "2026-03-18",
+      "seo": {
+        "metaTitle": "Regulatory vs Internal Policy Mapping",
+        "metaDescription": "A use case for regulatory clause mapping and AI-driven recommendations.",
+        "metaKeywords": [],
+        "canonicalUrl": ""
+      },
+      "impact": {
+        "label": "Impact",
+        "value": "30-50%",
+        "description": "Reduction in regulatory interpretation effort."
+      },
+      "challenges": {
+        "title": "Challenges",
+        "items": [
+          "Regulatory circulars often arrive in fragmented, unstructured formats.",
+          "Interpretation depends heavily on manual expert intervention.",
+          "Clause-to-policy mapping is time-consuming and error-prone.",
+          "Audit traceability is hard to maintain consistently at scale."
+        ]
+      },
+      "outcomes": {
+        "title": "Outcomes",
+        "items": [
+          "Structured regulatory obligation registers for compliance teams.",
+          "Faster clause-level applicability and confidence visibility.",
+          "Explainable compliance posture for auditors and leadership."
+        ]
+      },
+      "artefacts": {
+        "title": "Key Artefacts Generated",
+        "items": [
+          "Regulatory Obligation Register",
+          "Clause-to-Control Mapping Sheet",
+          "Compliance Gap and Breach Matrix"
+        ]
+      },
+      "detail": {
+        "title": "Detail Page Summary",
+        "items": [
+          "Banner, summary, impact metric, and hero image are editable in admin.",
+          "The four fixed sections are stored as dedicated fields for predictability."
+        ]
+      },
+      "createdAt": "2026-03-18T10:00:00.000Z",
+      "updatedAt": "2026-03-18T10:00:00.000Z"
+    }
+  ],
+  "pricingPlans": [
+    {
+      "id": "plan-free",
+      "planName": "Free",
+      "price": "Free",
+      "billingPeriod": "Forever",
+      "description": "Explore the platform with a lightweight sandbox experience.",
+      "features": [
+        "1 workspace",
+        "Starter automation templates",
+        "Community support"
+      ],
+      "ctaText": "Get Started",
+      "highlighted": false,
+      "visible": true,
+      "planOrder": 1
+    },
+    {
+      "id": "plan-starter",
+      "planName": "Starter",
+      "price": "9.99",
+      "billingPeriod": "Per month",
+      "description": "Ideal for small teams validating operational use cases.",
+      "features": [
+        "3 workspaces",
+        "Priority email support",
+        "Advanced analytics"
+      ],
+      "ctaText": "Start Trial",
+      "highlighted": true,
+      "visible": true,
+      "planOrder": 2
+    },
+    {
+      "id": "plan-enterprise",
+      "planName": "Enterprise",
+      "price": "Custom",
+      "billingPeriod": "Contact sales",
+      "description": "Security, governance, and deployment flexibility for scale.",
+      "features": [
+        "Custom deployment",
+        "SSO and governance",
+        "Dedicated onboarding"
+      ],
+      "ctaText": "Talk to Sales",
+      "highlighted": false,
+      "visible": true,
+      "planOrder": 3
+    }
+  ],
+  "homePage": {
+    "salesBar": {
+      "visible": true,
+      "text": "WiiZ Atlas 2.0 - Agentic AI OS Free Sign up for Early Adopters! ",
+      "ctaLabel": "Sign up123",
+      "ctaHref": "/register"
+    },
+    "hero": {
+      "eyebrow": "Enterprise AI Operations",
+      "heading": "Operating System for the fdgdf",
+      "highlightedText": "Agentic AI Economy",
+      "subheading": "Design, orchestrate, govern, and deploy enterprise AI agents from one unified platform.",
+      "image": "/images/partner-banner.jpg",
+      "buttons": [
+        {
+          "label": "Get Started",
+          "href": "/register",
+          "variant": "secondary"
+        },
+        {
+          "label": "Book Enterprise Demo",
+          "href": "/contact",
+          "variant": "primary"
+        }
+      ]
+    },
+    "aiAgents": {
+      "heading": "Built for Teams Driving Real AI Outcomes",
+      "subheading": "Manage the audience cards visually in admin and keep the public homepage aligned without touching code.",
+      "cards": [
+        {
+          "id": "card-ai-teams",
+          "title": "AI Teams",
+          "image": "/images/Ai_Team.jpg",
+          "description": "Build and operate reliable AI agent workflows with stronger governance.",
+          "bullets": [
+            "Reduce fragmented tooling",
+            "Orchestrate multi-agent workflows",
+            "Improve observability and performance visibility"
+          ],
+          "cta": "Start Free",
+          "accent": "gold"
+        },
+        {
+          "id": "card-enterprise-it",
+          "title": "Enterprise IT",
+          "image": "/images/Enterprice_it.jpg",
+          "description": "Maintain governance, infrastructure control, and enterprise security.",
+          "bullets": [
+            "Apply policy enforcement",
+            "Increase monitoring and audit readiness",
+            "Reduce deployment risk"
+          ],
+          "cta": "Book an Appointment",
+          "accent": "rose"
+        },
+        {
+          "id": "card-system-integrators",
+          "title": "System Integrators",
+          "image": "/images/system_integrator.jpg",
+          "description": "Deliver scalable AI solutions for enterprise clients with repeatability.",
+          "bullets": [
+            "Accelerate integrations",
+            "Manage multi-agent client solutions",
+            "Deploy faster across organizations"
+          ],
+          "cta": "Partner with Us",
+          "accent": "gold"
+        }
+      ]
+    },
+    "blocks": [
+      {
+        "id": "block-use-cases",
+        "label": "Use Cases",
+        "heading": "Showcase high-impact AI programs clearly",
+        "body": "Use the visual editor to manage messaging for homepage sections without changing the public design language."
+      },
+      {
+        "id": "block-sales-proof",
+        "label": "Sales Proof",
+        "heading": "Keep campaigns, hero copy, and CTAs aligned",
+        "body": "Your team can update sales-bar content and narrative blocks from admin in a controlled way."
+      }
+    ],
+    "seo": {
+      "metaTitle": "WiiZ Home",
+      "metaDescription": "Enterprise AI orchestration and automation platform.",
+      "metaKeywords": [],
+      "canonicalUrl": ""
+    }
+  }
+}
