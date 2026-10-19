@@ -4,7 +4,7 @@ import PolicyModalTrigger from "@/src/components/website/policy-modal-trigger";
 import SocialAuthButtons from "@/src/components/website/social-auth-buttons";
 import { RECAPTCHA_SITE_KEY } from "@/src/config/public-env";
 import { DEVELOPER_LOGIN_URL } from "@/src/features/auth/website-auth";
-import { requestSignupOtp, verifyOtp, submitSignup } from "@/src/services/website-auth-service";
+import { isEmailAlreadyRegistered, requestSignupOtp, verifyOtp, submitSignup } from "@/src/services/website-auth-service";
 import { Check, CircleAlert, Pencil, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -238,6 +238,11 @@ export default function DeveloperRegistrationForm({
       return;
     }
 
+    if (await isEmailAlreadyRegistered(email.trim())) {
+      setErrorMessage("This email is already registered. Please log in to your existing account instead.");
+      return;
+    }
+
     setLoading("otp");
     setErrorMessage("");
     setSuccessMessage("");
@@ -283,8 +288,7 @@ export default function DeveloperRegistrationForm({
       setIsUsernameEditable(false);
       setStep("details");
     } catch (error) {
-      const errStr = getErrorMessage(error);
-      setErrorMessage(errStr.includes("invalid") || errStr.includes("Invalid") ? "Invalid OTP. Please try again." : errStr);
+      setErrorMessage(getErrorMessage(error));
     } finally {
       setLoading(null);
     }
