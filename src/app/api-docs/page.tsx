@@ -1,4 +1,4 @@
-import SwaggerUi from "@/src/components/swagger/swagger-ui";
+import SwaggerUiLazy from "@/src/components/swagger/swagger-lazy";
 
 export const metadata = {
   title: "API Docs",
@@ -15,7 +15,7 @@ export default function ApiDocsPage() {
           </p>
         </div>
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <SwaggerUi url="/api/openapi" />
+          <SwaggerUiLazy url="/api/openapi" />
         </div>
       </div>
     </main>

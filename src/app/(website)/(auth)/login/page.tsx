@@ -1,8 +1,10 @@
 "use client";
 
 import PolicyModalTrigger from "@/src/components/website/policy-modal-trigger";
+import SocialAuthButtons from "@/src/components/website/social-auth-buttons";
 import { RECAPTCHA_SITE_KEY } from "@/src/config/public-env";
-import { HUB_LOGIN_URL, persistWebsiteLogin } from "@/src/features/auth/website-auth";
+import { persistWebsiteLogin } from "@/src/features/auth/website-auth";
+import { getHubLoginUrl } from "@/src/features/auth/user-type";
 import { requestPasswordReset, submitSignin } from "@/src/services/website-auth-service";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -199,6 +201,10 @@ export default function LoginPage() {
       persistWebsiteLogin(responseData as Record<string, unknown>);
       setView("success");
       setSuccessMessage("Login successful. You can continue to the hub now.");
+      // Redirect to profile after a brief delay
+      setTimeout(() => {
+        window.location.href = "/profile";
+      }, 1200);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -265,13 +271,12 @@ export default function LoginPage() {
 
           {view === "success" ? (
             <div className="space-y-4">
-              <Link
-                href={HUB_LOGIN_URL}
-                target="_blank"
+              <a
+                href={getHubLoginUrl()}
                 className="block w-full rounded-xl bg-gradient-to-r from-[#912059] to-[#D87AAA] px-4 py-3 text-center text-sm font-medium text-white transition-all hover:scale-[1.02]"
               >
                 Continue to Hub
-              </Link>
+              </a>
               <button
                 type="button"
                 onClick={() => {
@@ -376,10 +381,12 @@ export default function LoginPage() {
               >
                 {isLoggingIn ? "Logging in..." : "Login"}
               </button>
+
+              <SocialAuthButtons intent="login" variant="icons" />
             </form>
           ) : null}
 
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-3">
             {view === "login" ? (
               <>
                 <p className="text-xs text-gray-400">

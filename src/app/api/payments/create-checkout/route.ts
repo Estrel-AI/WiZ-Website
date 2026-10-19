@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { HUB_BASE_URL, PAYMENTS_API_BASE_URL, buildPublicApiUrl } from "@/src/config/public-env";
+import { PAYMENTS_API_BASE_URL, buildPublicApiUrl } from "@/src/config/public-env";
 import { getTokenFromRequest, verifyAuthToken } from "@/src/lib/website-auth";
+import { DEVELOPER_LOGIN_URL, BUSINESS_LOGIN_URL } from "@/src/features/auth/website-auth";
 
 export const runtime = "nodejs";
 
@@ -49,12 +50,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Use dynamic redirect_url from query params if provided, otherwise determine based on user type
+  const searchParams = new URL(request.url).searchParams;
+  const redirectUrl =
+    searchParams.get("redirect_url") ||
+    (user.org_id ? BUSINESS_LOGIN_URL : DEVELOPER_LOGIN_URL);
+
   const params = new URLSearchParams({
     zoho_customer_id: zohoCustomerId,
     customer_name: user.name?.trim() || user.username || user.email,
     customer_email: user.email,
     plan_code: selectedCode,
-    redirect_url: buildPublicApiUrl(HUB_BASE_URL, "/aistudio/login"),
+    redirect_url: redirectUrl,
   });
 
   return NextResponse.json({

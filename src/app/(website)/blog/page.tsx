@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CalendarDays, FileText } from "lucide-react";
 import { listPublishedBlogs } from "@/src/lib/admin-blog";
+import { fetchPublicSectionHeader } from "@/src/lib/website-section-headers";
 import { stripHtml } from "@/src/lib/html-content";
 import { buildWebsiteMetadata, websiteOgImages } from "@/src/lib/website-og";
+import { BlogCardThumbnail } from "@/src/components/website/blog-image-modal";
 
 export const metadata: Metadata = buildWebsiteMetadata({
   title: { absolute: "Agentic AI Blog | Enterprise AI Trends & Expert Insights | WiiZ" },
@@ -21,6 +23,10 @@ function formatDate(dateString: string) {
   }).format(new Date(dateString));
 }
 
+function truncate(text: string, maxLength: number) {
+  return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+}
+
 function getBlogImageUrl(filepath: string | null) {
   if (!filepath) {
     return null;
@@ -36,7 +42,10 @@ function getBlogImageUrl(filepath: string | null) {
 
 export default async function BlogPage() {
   try {
-    const rows = await listPublishedBlogs();
+    const [rows, header] = await Promise.all([
+      listPublishedBlogs(),
+      fetchPublicSectionHeader("BLOG").catch(() => null),
+    ]);
     const featuredPost = rows[0] ?? null;
     const secondaryPosts = rows.slice(1);
 
@@ -47,15 +56,21 @@ export default async function BlogPage() {
         <div className="md:block hidden absolute top-1/2  right-0 -translate-y-1/2 translate-x-1/2 w-[160%] lg:w-[120%] xl:w-[90%] h-[100%]  bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none [-webkit-mask-image:radial-gradient(circle_at_center,quaternary_0_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0"></div>
         <div className="absolute -top-[250px] left-1/2 transform -translate-x-1/2 w-[600px] h-[500px] bg-gradient-about blur-[200px] rounded-full pointer-events-none"></div>
           <div className="relative mx-auto container text-center">
-            <span className="inline-flex rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-secondary">
-              Blog
-            </span>
-            <h1 className="mt-6 max-w-4xl text-3xl md:text-4xl lg:text-5xl leading-tight md:leading-[1.1] font-semibold text-white mb-3 md:mb-6 tracking-tight md:px-10 mx-auto">
-              Ideas, product notes, and practical AI stories from the WiiZ team.
+            {header?.badgeText ? (
+              <div className="mb-6 inline-block rounded-full border border-[#5E4A47] bg-[#211A2533] px-3.5 py-1 shadow-sm">
+                <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#E68F17]">
+                  {header.badgeText}
+                </span>
+              </div>
+            ) : null}
+            <h1 className="max-w-4xl text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-[2.5rem] leading-tight md:leading-[1.15] mx-auto text-center">
+              {header?.heading || "Ideas, product notes, and practical AI stories from the WiiZ team."}
             </h1>
-            <p className="mt-5 text-base md:text-lg text-[#FDFDFD] max-w-4xl mx-auto md:px-16">
-              Explore published posts from the admin panel in a website experience that matches the rest of the product theme.
-            </p>
+            {header?.description ? (
+              <p className="mt-4 text-base md:text-lg font-light text-[#EBEBEB] max-w-2xl mx-auto text-center leading-relaxed">
+                {header.description}
+              </p>
+            ) : null}
           </div>
         </section>
 
@@ -87,10 +102,10 @@ export default async function BlogPage() {
                             {formatDate(featuredPost.updatedAt)}
                           </span>
                         </div>
-                        <h2 className="mt-6 text-3xl font-semibold leading-tight text-white md:text-4xl">
+                        <h2 className="mt-6 text-3xl font-semibold leading-tight text-white md:text-2xl xl:text-4xl">
                           {featuredPost.title}
                         </h2>
-                        <p className="mt-5 max-w-2xl text-base leading-8 text-white/70 md:text-lg">
+                        <p className="mt-5 max-w-2xl text-base xl:leading-8 leading-6 text-white/70 md:text-lg">
                           {featuredPost.shortDescription || stripHtml(featuredPost.content).slice(0, 220)}
                         </p>
                       </div>
@@ -100,12 +115,13 @@ export default async function BlogPage() {
                       </div>
                     </div>
 
-                    <div className="relative min-h-[300px] overflow-hidden lg:min-h-full">
+                    <div className="relative aspect-[3/2] md:min-h-[300px] overflow-hidden bg-[linear-gradient(135deg,#3b1429_0%,#180913_100%)] lg:aspect-[16/10] lg:self-center">
                       {getBlogImageUrl(featuredPost.filepath) ? (
-                        <img
+                        <BlogCardThumbnail
                           src={getBlogImageUrl(featuredPost.filepath) ?? ""}
                           alt={featuredPost.title}
-                          className="h-full w-full transition-transform duration-500 group-hover:scale-105"
+                          title={featuredPost.title}
+                          aspectRatioClassName="h-full min-h-[260px] md:min-h-[300px] aspect-[3/2] lg:aspect-[16/10]"
                         />
                       ) : (
                         <div className="flex h-full items-end bg-[radial-gradient(circle_at_top,#b94f83_0%,#4f1737_45%,#180913_100%)] p-8">
@@ -132,15 +148,16 @@ export default async function BlogPage() {
                           href={`/blog/${post.slug}`}
                           className="group flex h-full flex-col overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-white/[0.04] transition-transform duration-300 hover:-translate-y-1"
                         >
-                          <div className="relative h-56 overflow-hidden bg-[linear-gradient(135deg,#3b1429_0%,#180913_100%)]">
+                          <div className="relative overflow-hidden bg-[linear-gradient(135deg,#3b1429_0%,#180913_100%)]">
                             {getBlogImageUrl(post.filepath) ? (
-                              <img
+                              <BlogCardThumbnail
                                 src={getBlogImageUrl(post.filepath) ?? ""}
                                 alt={post.title}
-                                className="h-full w-full transition-transform duration-500 group-hover:scale-105"
+                                title={post.title}
+                                aspectRatioClassName="aspect-[16/10]"
                               />
                             ) : (
-                              <div className="flex h-full items-end p-6">
+                              <div className="flex aspect-[16/10] items-end p-6">
                                 <div className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white/80">
                                   Published
                                 </div>
@@ -153,10 +170,10 @@ export default async function BlogPage() {
                               {formatDate(post.updatedAt)}
                             </div>
                             <h3 className="mt-4 text-2xl font-semibold leading-tight text-white">
-                              {post.title}
+                              {truncate(post.title, 70)}
                             </h3>
                             <p className="mt-4 line-clamp-3 text-sm leading-7 text-white/65">
-                              {post.shortDescription || stripHtml(post.content).slice(0, 150)}
+                              {truncate(post.shortDescription || stripHtml(post.content), 141)}
                             </p>
                             <div className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-secondary">
                               Explore post

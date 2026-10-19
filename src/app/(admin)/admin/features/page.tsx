@@ -1,7 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  Edit3,
+  GripVertical,
+  Layers3,
+  Pencil,
+  Plus,
+  Save,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -22,15 +31,26 @@ import {
   IMPACT_IMAGE_MAX_SIZE_MB,
   IMPACT_VIDEO_MAX_SIZE_MB,
 } from "@/src/lib/admin-media-constraints";
+import { cn } from "@/src/lib/utils";
 import type {
   ApiResponse,
   HomeFeatureDisplayOrderPayload,
+  HomeFeatureHeader,
+  HomeFeatureHeaderUpsertPayload,
   HomeFeatureListPayload,
   HomeFeatureMediaType,
   HomeFeatureRow,
   HomeFeatureUpsertPayload,
   ListData,
 } from "@/src/types/admin-api";
+
+const DEFAULT_HEADER: HomeFeatureHeader = {
+  id: 0,
+  heading: "Everything you need to move from prototype to production",
+  description: "WiiZ brings together the core capabilities required to Orchestrate enterprise AI agents at scale.",
+  createdAt: "",
+  updatedAt: "",
+};
 
 type MediaInputMode = "url" | "upload";
 
@@ -81,6 +101,38 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function OverlayButton({
+  label,
+  active = false,
+  className,
+  onClick,
+  children,
+}: {
+  label: string;
+  active?: boolean;
+  className?: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "group relative block w-full rounded-2xl border border-dashed border-transparent text-left transition focus:outline-none hover:border-white/30 cursor-pointer",
+        active && "ring-2 ring-[#98235f]",
+        className,
+      )}
+    >
+      <span className="pointer-events-none absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full bg-black/80 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white opacity-0 backdrop-blur transition group-hover:opacity-100 group-focus:opacity-100 shadow-md">
+        <Edit3 className="h-3.5 w-3.5 text-[#E68F17]" />
+        {label}
+      </span>
+      {children}
+    </button>
+  );
+}
+
 function FeatureListEditor({
   items,
   onChange,
@@ -127,6 +179,8 @@ function FeatureListEditor({
                 label={safeItems.length === 1 ? "Feature" : `Feature ${index + 1}`}
                 value={item}
                 onChange={(event) => updateItem(index, event.target.value)}
+                maxLength={165}
+                counter={`${item.length}/165 characters (including spaces)`}
                 placeholder="Enter feature text"
               />
             </div>
@@ -149,6 +203,15 @@ function FeatureListEditor({
 
 export default function AdminFeaturesPage() {
   const { showToast } = useAdminToast();
+
+  const [headerSaved, setHeaderSaved] = useState<HomeFeatureHeader>(DEFAULT_HEADER);
+  const [headerDraft, setHeaderDraft] = useState<HomeFeatureHeader>(DEFAULT_HEADER);
+  const [headerLoading, setHeaderLoading] = useState(true);
+  const [headerSaving, setHeaderSaving] = useState(false);
+  const [headerErrors, setHeaderErrors] = useState<Record<string, string>>({});
+  const [headerModalOpen, setHeaderModalOpen] = useState(false);
+  const [headerDiscardDialog, setHeaderDiscardDialog] = useState(false);
+
   const [rows, setRows] = useState<HomeFeatureRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -165,6 +228,34 @@ export default function AdminFeaturesPage() {
   const requestRef = useRef<AbortController | null>(null);
   const dragRowIdRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/admin/home-feature-header", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = (await response.json()) as ApiResponse<HomeFeatureHeader | null>;
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.error || payload.message);
+        }
+        if (active && payload.data) {
+          setHeaderSaved(payload.data);
+          setHeaderDraft(payload.data);
+        }
+      })
+      .catch((error: unknown) =>
+        showToast({
+          tone: "error",
+          title: "Header unavailable",
+          description: error instanceof Error ? error.message : "Showing default content.",
+        }),
+      )
+      .finally(() => {
+        if (active) setHeaderLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [showToast]);
 
   const loadFeatures = useCallback(async (query: string) => {
     requestRef.current?.abort();
@@ -222,6 +313,63 @@ export default function AdminFeaturesPage() {
       requestRef.current?.abort();
     };
   }, []);
+
+  function updateHeader<K extends keyof HomeFeatureHeader>(key: K, value: HomeFeatureHeader[K]) {
+    setHeaderDraft((current) => ({ ...current, [key]: value }));
+    setHeaderErrors((current) => ({ ...current, [key]: "" }));
+  }
+
+  function validateHeader() {
+    const next: Record<string, string> = {};
+    if (!headerDraft.heading.trim()) next.heading = "Heading is required.";
+    if (headerDraft.heading.length > 113) next.heading = "Maximum 113 characters.";
+    if (!headerDraft.description.trim()) next.description = "Description is required.";
+    if (headerDraft.description.length > 154) next.description = "Maximum 154 characters.";
+    setHeaderErrors(next);
+    return !Object.keys(next).length;
+  }
+
+  async function saveHeader() {
+    if (!validateHeader()) return;
+    setHeaderSaving(true);
+    try {
+      const body: HomeFeatureHeaderUpsertPayload = {
+        id: headerDraft.id,
+        heading: headerDraft.heading.trim(),
+        description: headerDraft.description.trim(),
+      };
+      const response = await fetch("/api/admin/home-feature-header", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const payload = (await response.json()) as ApiResponse<{ id: number }>;
+      if (!response.ok || !payload.success) throw new Error(payload.error || payload.message);
+      const next = { ...headerDraft, id: payload.data?.id ?? headerDraft.id, updatedAt: new Date().toISOString() };
+      setHeaderSaved(next);
+      setHeaderDraft(next);
+      setHeaderModalOpen(false);
+      showToast({
+        tone: "success",
+        title: "Feature Header updated",
+        description: "The homepage feature header was saved successfully.",
+      });
+    } catch (error) {
+      showToast({
+        tone: "error",
+        title: "Unable to save header",
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      setHeaderSaving(false);
+    }
+  }
+
+  function handleDiscardHeader() {
+    setHeaderDraft(headerSaved);
+    setHeaderErrors({});
+    setHeaderDiscardDialog(false);
+  }
 
   function resetEditor() {
     setForm(createEmptyForm());
@@ -537,8 +685,123 @@ export default function AdminFeaturesPage() {
     void persistRowOrder(currentRows);
   }
 
+  const hasHeaderChanges = JSON.stringify(headerSaved) !== JSON.stringify(headerDraft);
+
   return (
     <div className="space-y-6">
+      {headerLoading ? (
+        <LoadingSkeleton rows={6} />
+      ) : (
+        <div className="space-y-6">
+          <SectionHeader
+            title="Feature Header"
+            description="Edit Main Heading, Description only"
+            action={
+              <div className="flex items-center gap-3">
+                <AdminButton
+                  variant="secondary"
+                  onClick={() => setHeaderDiscardDialog(true)}
+                  disabled={!hasHeaderChanges || headerSaving}
+                >
+                  Discard
+                </AdminButton>
+                <AdminButton onClick={() => void saveHeader()} disabled={headerSaving || !hasHeaderChanges}>
+                  <Save className="mr-2 h-4 w-4" />
+                  {headerSaving ? "Saving..." : "Save Changes"}
+                </AdminButton>
+              </div>
+            }
+          />
+
+          <AdminCard className="overflow-hidden p-4 md:p-6">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
+                  Live Preview
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3.5 py-1.5 text-xs font-medium text-slate-600">
+                  <Layers3 className="h-4 w-4" />
+                  Live Sync
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-pink-100 px-3.5 py-1.5 text-xs font-semibold text-pink-700">
+                  <Sparkles className="h-4 w-4" />
+                  Hover to Edit
+                </span>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-[24px] bg-[#180913] p-2 shadow-inner border border-[#2B1826]">
+              <OverlayButton
+                label="Edit Feature Header"
+                active={headerModalOpen}
+                onClick={() => setHeaderModalOpen(true)}
+                className="block w-full rounded-[20px] bg-[#180913] px-6 py-12 text-center font-sans md:px-12 md:py-16"
+              >
+                <div className="mx-auto max-w-3xl text-center">
+                  <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl lg:text-4xl leading-tight">
+                    {headerDraft.heading || "Everything you need to move from prototype to production"}
+                  </h2>
+                  <p className="mt-3 text-base font-light text-[#EBEBEB] md:text-lg md:px-12">
+                    {headerDraft.description ||
+                      "WiiZ brings together the core capabilities required to Orchestrate enterprise AI agents at scale."}
+                  </p>
+                </div>
+              </OverlayButton>
+            </div>
+          </AdminCard>
+        </div>
+      )}
+
+      <Modal
+        open={headerModalOpen}
+        onClose={() => setHeaderModalOpen(false)}
+        title="Edit Feature Header"
+        description="Update the main heading and description for the features section."
+        size="lg"
+        footer={
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-xs text-slate-500">
+              Changes stay local until you click Save Changes.
+            </div>
+            <AdminButton variant="secondary" onClick={() => setHeaderModalOpen(false)}>
+              Close
+            </AdminButton>
+          </div>
+        }
+      >
+        <div className="space-y-4 pt-2">
+          <AdminInput
+            label="Main Heading"
+            maxLength={113}
+            value={headerDraft.heading}
+            onChange={(event) => updateHeader("heading", event.target.value)}
+            error={headerErrors.heading}
+            counter={`${(headerDraft.heading || "").length}/113 characters (including spaces)`}
+            placeholder="Everything you need to move from prototype to production"
+          />
+          <AdminTextarea
+            label="Description"
+            maxLength={154}
+            value={headerDraft.description}
+            onChange={(event) => updateHeader("description", event.target.value)}
+            error={headerErrors.description}
+            counter={`${(headerDraft.description || "").length}/154 characters (including spaces)`}
+            placeholder="WiiZ brings together the core capabilities required to Orchestrate enterprise AI agents at scale."
+          />
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        open={headerDiscardDialog}
+        title="Discard all unsaved changes?"
+        description="This will restore the last saved feature header content."
+        confirmLabel="Discard All"
+        onConfirm={handleDiscardHeader}
+        onClose={() => setHeaderDiscardDialog(false)}
+      />
+
       <SectionHeader
         title="Features"
         description="Manage the homepage feature blocks, feature items, media links, ordering, and visibility from one place."
@@ -628,9 +891,7 @@ export default function AdminFeaturesPage() {
                           />
                         )
                       ) : null}
-                      <div className="min-w-0 truncate text-sm text-slate-500">
-                        {getFeatureMediaPreviewUrl(row.mediaUrl) ?? row.mediaUrl}
-                      </div>
+
                     </div>
                   ) : (
                     <div className="truncate text-sm text-slate-500">No media linked</div>
@@ -691,6 +952,8 @@ export default function AdminFeaturesPage() {
               value={form.label}
               onChange={(event) => updateForm("label", event.target.value)}
               error={errors.label}
+              maxLength={30}
+              counter={`${(form.label || "").length}/30 characters (including spaces)`}
               placeholder="ai-agents"
             />
             <AdminInput
@@ -698,6 +961,8 @@ export default function AdminFeaturesPage() {
               value={form.title}
               onChange={(event) => updateForm("title", event.target.value)}
               error={errors.title}
+              maxLength={54}
+              counter={`${(form.title || "").length}/54 characters (including spaces)`}
               placeholder="WiiZ Built AI Agents"
             />
           </div>
@@ -803,6 +1068,8 @@ export default function AdminFeaturesPage() {
             label="Description"
             value={form.description}
             onChange={(event) => updateForm("description", event.target.value)}
+            maxLength={167}
+            counter={`${(form.description || "").length}/167 characters (including spaces)`}
             placeholder="Short supporting copy for this feature block."
           />
 

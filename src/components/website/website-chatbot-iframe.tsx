@@ -43,7 +43,7 @@ export default function WebsiteChatbotIframe() {
 
           <div className="h-[calc(100%-61px)]">
             <iframe
-              src="https://hub.wiiz.it/aistudio/agent/chat/16802a64-618d-4c64-a6a5-ab4d588d8079"
+              src="https://test.wiiz.it/aistudio/agent/chat/16802a64-618d-4c64-a6a5-ab4d588d8079"
               width="100%"
               height="100%"
               frameBorder="0"

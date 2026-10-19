@@ -21,7 +21,7 @@ export default function SalesBannerStrip({
 }: SalesBannerStripProps) {
   return (
     <div
-      className={`relative overflow-hidden bg-gradient-to-r from-[#6D1843] via-[#B4286E] to-[#912059] ${className}`.trim()}
+      className={`relative overflow-hidden bg-gradient-to-r from-[#6d1843] via-[#440d28] to-[#570c31] ${className}`.trim()}
     >
       <div
         className="absolute bottom-0 top-0 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent md:w-1/4"

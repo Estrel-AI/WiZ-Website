@@ -10,19 +10,20 @@ type OgImage = {
 type WebsiteOgConfig = {
   title: string | { absolute: string };
   description: string;
+  keywords?: string | string[];
   path: string;
   image: OgImage;
   type?: "website" | "article";
 };
 
 export const websiteOgImages = {
-  about: { url: "/images/icon-light.png", width: 1812, height: 897 },
-  blog: { url: "/images/icon-light.png", width: 1813, height: 901 },
-  contact: { url: "/images/icon-light.png", width: 1819, height: 907 },
-  home: { url: "/images/icon-light.png", width: 1893, height: 903 },
-  partner: { url: "/images/icon-light.png", width: 1759, height: 901 },
-  pricing: { url: "/images/icon-light.png", width: 1792, height: 906 },
-  usecase: { url: "/images/icon-light.png", width: 1893, height: 903 },
+  about: { url: "/images/og-tag/icon-light.png", width: 1812, height: 897 },
+  blog: { url: "/images/og-tag/icon-light.png", width: 1813, height: 901 },
+  contact: { url: "/images/og-tag/icon-light.png", width: 1819, height: 907 },
+  home: { url: "/images/og-tag/icon-light.png", width: 1893, height: 903 },
+  partner: { url: "/images/og-tag/icon-light.png", width: 1759, height: 901 },
+  pricing: { url: "/images/og-tag/icon-light.png", width: 1792, height: 906 },
+  usecase: { url: "/images/og-tag/icon-light.png", width: 1893, height: 903 },
 } as const;
 
 const absoluteUrl = (path: string) => new URL(path, `${FRONTEND_BASE_URL}/`).toString();
@@ -36,7 +37,7 @@ export function WebsiteOgTags({
 }: WebsiteOgConfig) {
   const pageUrl = absoluteUrl(path);
   const imageUrl = absoluteUrl(image.url);
-  const logoUrl = absoluteUrl("/images/new-logo.png");
+  const logoUrl = absoluteUrl("/api/assets/dummy_image/new-logo.png");
   const plainTitle = typeof title === "string" ? title : title.absolute;
 
   return (
@@ -91,6 +92,7 @@ export function WebsiteOgTags({
 export function buildWebsiteMetadata({
   title,
   description,
+  keywords,
   path,
   image,
   type = "website",
@@ -99,6 +101,7 @@ export function buildWebsiteMetadata({
   return {
     title,
     description,
+    keywords: Array.isArray(keywords) ? keywords.join(", ") : keywords,
     alternates: {
       canonical: absoluteUrl(path),
     },
@@ -116,7 +119,7 @@ export function buildWebsiteMetadata({
           alt: plainTitle,
         },
         {
-          url: absoluteUrl("/images/new-logo.png"),
+          url: absoluteUrl("/api/assets/dummy_image/new-logo.png"),
           width: 1200,
           height: 630,
           alt: "WiiZ Logo",
@@ -127,7 +130,7 @@ export function buildWebsiteMetadata({
       card: "summary_large_image",
       title: plainTitle,
       description,
-      images: [absoluteUrl(image.url), absoluteUrl("/images/new-logo.png")],
+      images: [absoluteUrl(image.url), absoluteUrl("/api/assets/dummy_image/new-logo.png")],
     },
   };
 }

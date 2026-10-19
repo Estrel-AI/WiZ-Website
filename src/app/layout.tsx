@@ -1,8 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { PolicyModalProvider } from "@/src/components/website/policy-modal-provider";
 import { FRONTEND_BASE_URL, GA_MEASUREMENT_ID } from "@/src/config/public-env";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(FRONTEND_BASE_URL),
@@ -27,7 +34,7 @@ export const metadata: Metadata = {
     siteName: "WiiZ",
     images: [
       {
-        url: "/images/new-logo.png",
+        url: "/api/assets/logos/primary-white-logo.png",
         width: 1200,
         height: 630,
         alt: "WiiZ Logo",
@@ -38,7 +45,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "WiiZ",
     description: "AI orchestration and automation",
-    images: ["/images/new-logo.png"],
+    images: ["/api/assets/logos/primary-white-logo.png"],
   },
 };
 
@@ -50,6 +57,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
         {GA_MEASUREMENT_ID ? (
           <>
             <Script

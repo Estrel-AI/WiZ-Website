@@ -32,6 +32,7 @@ type HierarchyDbRow = RowDataPacket & {
   type: HierarchyNodeType;
   description: string | null;
   slug: string | null;
+  sort_order: number;
   created_at: Date | string;
   updated_at: Date | string;
 };
@@ -62,6 +63,7 @@ const hierarchySortMap = {
   created_at: "child.created_at",
   updated_at: "child.updated_at",
   type: "child.type",
+  sortOrder: "child.sort_order",
 } as const;
 
 function toIso(value: Date | string) {
@@ -77,6 +79,7 @@ function mapHierarchyRow(row: HierarchyDbRow): HierarchyRow {
     type: row.type,
     description: sanitizeNullablePlainText(row.description),
     slug: row.slug ? sanitizePlainText(row.slug) : null,
+    sortOrder: row.sort_order ?? 0,
     createdAt: toIso(row.created_at),
     updatedAt: toIso(row.updated_at),
   };
@@ -158,12 +161,13 @@ export async function listHierarchy(
             child.type,
             child.description,
             child.slug,
+            child.sort_order,
             child.created_at,
             child.updated_at
      FROM industry_hierarchy AS child
      LEFT JOIN industry_hierarchy AS parent ON parent.id = child.parent_id
      WHERE ${whereSql}
-     ORDER BY ${queryState.sortBy} ${queryState.sortOrder}
+     ORDER BY child.sort_order ASC, ${queryState.sortBy} ${queryState.sortOrder}
      LIMIT ? OFFSET ?`,
     [...params, queryState.limit, queryState.offset],
   );
@@ -202,12 +206,13 @@ export async function listUseCaseCombo(search?: string): Promise<SelectOption[]>
             child.type,
             child.description,
             child.slug,
+            child.sort_order,
             child.created_at,
             child.updated_at
      FROM industry_hierarchy AS child
      LEFT JOIN industry_hierarchy AS parent ON parent.id = child.parent_id
      WHERE ${conditions.join(" AND ")}
-     ORDER BY child.title ASC`,
+     ORDER BY child.sort_order ASC, child.title ASC`,
     params,
   );
 
@@ -224,7 +229,7 @@ async function getHierarchyNodeById(
   id: number,
 ) {
   const [rows] = await connection.query<HierarchyDbRow[]>(
-    `SELECT id, parent_id, title, type, description, slug, created_at, updated_at
+    `SELECT id, parent_id, title, type, description, slug, sort_order, created_at, updated_at
      FROM industry_hierarchy
      WHERE id = ?`,
     [id],
@@ -519,7 +524,7 @@ export async function deleteUseCase(id: number) {
 
 export async function listUseCaseDetailsByUseCase(useCaseId: number) {
   const useCases = await queryRows<HierarchyDbRow>(
-    `SELECT id, parent_id, title, type, description, slug, created_at, updated_at
+    `SELECT id, parent_id, title, type, description, slug, sort_order, created_at, updated_at
      FROM industry_hierarchy
      WHERE id = ? AND type = 'usecase' AND is_active = 1`,
     [useCaseId],
@@ -705,7 +710,7 @@ export async function updateUseCaseDetailFilePath(id: number, filePath: string |
 
 export async function getIndustryFunctionsUseCases(industryId: number) {
   const industries = await queryRows<HierarchyDbRow>(
-    `SELECT id, parent_id, title, type, description, slug, created_at, updated_at
+    `SELECT id, parent_id, title, type, description, slug, sort_order, created_at, updated_at
      FROM industry_hierarchy
      WHERE id = ? AND type = 'industry' AND is_active = 1`,
     [industryId],
@@ -717,20 +722,20 @@ export async function getIndustryFunctionsUseCases(industryId: number) {
   }
 
   const functions = await queryRows<HierarchyDbRow>(
-    `SELECT id, parent_id, title, type, description, slug, created_at, updated_at
+    `SELECT id, parent_id, title, type, description, slug, sort_order, created_at, updated_at
      FROM industry_hierarchy
      WHERE parent_id = ? AND type = 'function' AND is_active = 1
-     ORDER BY title ASC`,
+     ORDER BY sort_order ASC, title ASC`,
     [industryId],
   );
 
   const functionIds = functions.map((item) => item.id);
   const useCases = functionIds.length
     ? await queryRows<HierarchyDbRow>(
-        `SELECT id, parent_id, title, type, description, slug, created_at, updated_at
+        `SELECT id, parent_id, title, type, description, slug, sort_order, created_at, updated_at
          FROM industry_hierarchy
          WHERE parent_id IN (${functionIds.map(() => "?").join(", ")}) AND type = 'usecase' AND is_active = 1
-         ORDER BY title ASC`,
+         ORDER BY sort_order ASC, title ASC`,
         functionIds,
       )
     : [];
@@ -756,8 +761,29 @@ export async function getIndustryFunctionsUseCases(industryId: number) {
   };
 }
 
+export async function updateHierarchySortOrder(
+  items: Array<{ id: number; sortOrder: number }>,
+): Promise<void> {
+  if (!items.length) return;
 
+  const connection = await getMysqlPool().getConnection();
+  try {
+    await connection.beginTransaction();
 
+    for (const item of items) {
+      await connection.execute(
+        `UPDATE industry_hierarchy SET sort_order = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND is_active = 1`,
+        [item.sortOrder, item.id],
+      );
+    }
 
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
 
 

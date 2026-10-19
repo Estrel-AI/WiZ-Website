@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Pencil, Plus, Trash2, Key, Monitor, Database, CheckCircle2, XCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AdminCard,
@@ -19,6 +19,7 @@ import {
   StatusPill,
 } from "@/src/components/admin/admin-ui";
 import { useAdminToast } from "@/src/components/admin/admin-toast";
+import PlanCodesRegistryTab from "@/src/app/plan-codes-tab";
 import type { ApiResponse, ListData, PlanRow } from "@/src/types/admin-api";
 
 type PlanListFilter = "all" | "visible" | "hidden";
@@ -106,6 +107,34 @@ function extractFeatureItems(value: string, emptyMessage: string) {
 function htmlToList(value: string) {
   const items = extractFeatureItems(value, "").filter(Boolean);
   return items.length ? items : [""];
+}
+
+export type PlanCodeRow = {
+  id: number;
+  planKey: string;
+  planCode: string;
+  description: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type PlanCodeForm = {
+  id: number;
+  planKey: string;
+  planCode: string;
+  description: string;
+  isActive: boolean;
+};
+
+function emptyPlanCodeForm(): PlanCodeForm {
+  return {
+    id: 0,
+    planKey: "",
+    planCode: "",
+    description: "",
+    isActive: true,
+  };
 }
 
 function PlanListEditor({
@@ -199,7 +228,14 @@ function PlanFeatureCard({
     <div className="flex h-full flex-col rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,#2a0f1f_0%,#341126_100%)] p-6 shadow-[0_24px_60px_rgba(20,6,16,0.45)]">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h3 className="truncate text-lg font-semibold text-white">{plan.planCode || "Custom Plan"}</h3>
+          <h3 className="truncate text-lg font-semibold text-white">
+            {plan.planCode ? (
+              <span className="text-xs font-mono bg-white/10 px-2 py-0.5 rounded mr-2">
+                {plan.planCode}
+              </span>
+            ) : null}
+            {plan.planCode ? "Custom Plan" : "Custom Plan"}
+          </h3>
           {plan.shortDescription ? (
             <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/72">{plan.shortDescription}</p>
           ) : null}
@@ -218,10 +254,10 @@ function PlanFeatureCard({
           </button>
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-white/12 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-blue-200 bg-white text-blue-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
             onClick={onEdit}
             aria-label="Edit plan"
-            title="Edit"
+            title="Edit Plan Code"
           >
             <Pencil className="h-4 w-4 stroke-[1.9]" />
           </button>
@@ -262,7 +298,11 @@ function PlanFeatureCard({
       </div>
       <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/8 pt-4">
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/75">
-          {plan.planCode || "Custom"}
+          {plan.planCode ? (
+            <code className="font-mono text-xs bg-white/10 px-1 py-0.5 rounded">
+              {plan.planCode}
+            </code>
+          ) : "Custom"}
         </span>
         <span className="text-[11px] text-white/40">Admin pricing card</span>
       </div>
@@ -271,6 +311,19 @@ function PlanFeatureCard({
 }
 
 export default function AdminPricingPage() {
+  const [tab, setTab] = useState<"frontend" | "codes">("frontend");
+  return (
+    <div className="space-y-8">
+      <div className="flex gap-2 border-b border-slate-200 pb-1">
+        <button onClick={() => setTab("frontend")} className={`px-4 py-2 text-sm font-medium rounded-t-lg transition ${tab === "frontend" ? "bg-[#98235f] text-white" : "text-slate-600 hover:text-[#98235f] hover:bg-[#98235f]/10"}`}>Frontend Plan Cards</button>
+        <button onClick={() => setTab("codes")} className={`px-4 py-2 text-sm font-medium rounded-t-lg transition ${tab === "codes" ? "bg-[#98235f] text-white" : "text-slate-600 hover:text-[#98235f] hover:bg-[#98235f]/10"}`}>Billing Codes Registry</button>
+      </div>
+      {tab === "frontend" ? <FrontendPlansTab /> : <PlanCodesRegistryTab />}
+    </div>
+  );
+}
+
+function FrontendPlansTab() {
   const { showToast } = useAdminToast();
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -284,7 +337,36 @@ export default function AdminPricingPage() {
     highlightedFeatures: [""],
     features: [""],
   });
+  const [remotePlans, setRemotePlans] = useState<{ id: string, name: string, price: number, type: 'plan' | 'addon' }[]>([]);
   const requestRef = useRef<AbortController | null>(null);
+
+  const loadRemotePlans = useCallback(async () => {
+    try {
+      const res = await fetch("/api/pricing/plans", { method: "POST" });
+      const data = await res.json();
+      if (data && (data.plans || data.addons_packs)) {
+        const mappedPlans = (data.plans || []).map((p: any) => ({
+          id: p.plan_code || "",
+          name: p.name || "",
+          price: p.price || 0,
+          type: "plan" as const,
+        }));
+        const mappedAddons = (data.addons_packs || []).map((p: any) => ({
+          id: p.addon_code || "",
+          name: p.name || "",
+          price: p.price || 0,
+          type: "addon" as const,
+        }));
+        setRemotePlans([...mappedPlans, ...mappedAddons]);
+      }
+    } catch (error) {
+      console.error("Failed to load remote plans:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadRemotePlans();
+  }, [loadRemotePlans]);
 
   const loadPlans = useCallback(async (query: string, nextFilter: PlanListFilter) => {
     requestRef.current?.abort();
@@ -490,8 +572,6 @@ export default function AdminPricingPage() {
 
   return (
     <div className="space-y-8">
-      <SectionHeader title="Pricing" description="" />
-
       <AdminCard className="overflow-hidden rounded-[10px] border border-slate-200/90 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
         <AdminTableToolbar
           search={
@@ -569,12 +649,24 @@ export default function AdminPricingPage() {
       >
         <div className="space-y-5">
           <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_220px]">
-            <AdminInput
+            <AdminSelect
               label="Plan Code"
               value={form.planCode}
               onChange={(event) => setForm((current) => ({ ...current, planCode: event.target.value }))}
-              placeholder="starter_monthly"
-            />
+            >
+              <option value="">Select a Plan Code</option>
+              {remotePlans.map((p) => {
+                const isUsed = rows.some((row) => row.planCode === p.id && row.id !== form.id);
+                return (
+                  <option key={p.id} value={p.id} disabled={isUsed} className={isUsed ? "text-slate-400 bg-slate-50" : ""}>
+                    {isUsed ? `✓ Used — ${p.name} (${p.id})` : `${p.name} — ${p.id} (${p.type})`}
+                  </option>
+                );
+              })}
+              {!remotePlans.find((p) => p.id === form.planCode) && form.planCode ? (
+                <option value={form.planCode}>{form.planCode}</option>
+              ) : null}
+            </AdminSelect>
             <label className="flex items-center justify-between rounded-[10px] border border-slate-200 bg-slate-50 px-4 py-3">
               <div>
                 <div className="text-sm font-medium text-slate-900">Show Plan</div>
@@ -583,7 +675,7 @@ export default function AdminPricingPage() {
               <button
                 type="button"
                 onClick={() => setForm((current) => ({ ...current, show: !current.show }))}
-                className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${form.show ? "bg-slate-950" : "bg-slate-300"}`}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition shrink-0 ${form.show ? "bg-[#98235f]" : "bg-slate-300"}`}
                 aria-pressed={form.show}
               >
                 <span

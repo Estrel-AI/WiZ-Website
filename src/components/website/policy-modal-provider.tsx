@@ -17,6 +17,7 @@ import {
   renderPolicyContent,
 } from "@/src/components/website/policy-content";
 import CookieConsentBanner from "@/src/components/website/cookie-consent-banner";
+import type { ApiResponse, LegalPolicyRow } from "@/src/types/admin-api";
 
 type PolicyModalContextValue = {
   openPolicy: (key: PolicyKey) => void;
@@ -29,24 +30,58 @@ const fallbackPolicyModalContext: PolicyModalContextValue = {
   closePolicy: () => {},
 };
 
+type DynamicPolicyStore = Record<string, { title: string; content: string }>;
+
 export function PolicyModalProvider({ children }: { children: ReactNode }) {
   const [activePolicy, setActivePolicy] = useState<PolicyKey | null>(null);
+  const [dynamicPolicies, setDynamicPolicies] = useState<DynamicPolicyStore>({});
   const pathname = usePathname();
   const showCookieBanner = !pathname.startsWith("/admin");
 
+  useEffect(() => {
+    let active = true;
+    fetch("/api/legal-policies")
+      .then(async (res) => {
+        const payload = (await res.json()) as ApiResponse<LegalPolicyRow[]>;
+        if (active && payload.success && payload.data && payload.data.length > 0) {
+          const map: DynamicPolicyStore = {};
+          for (const item of payload.data) {
+            map[item.policyKey] = {
+              title: item.title,
+              content: item.content,
+            };
+          }
+          setDynamicPolicies(map);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const activeEntry = useMemo(() => {
+    if (!activePolicy) return null;
+    const dynamic = dynamicPolicies[activePolicy];
+    if (dynamic && dynamic.content) {
+      return dynamic;
+    }
+    return policyRegistry[activePolicy] || null;
+  }, [activePolicy, dynamicPolicies]);
+
   const handleDownload = () => {
-    if (!activePolicy) {
+    if (!activePolicy || !activeEntry) {
       return;
     }
 
-    const entry = policyRegistry[activePolicy];
     const fileName =
       activePolicy === "terms"
         ? "wiiz-terms-and-conditions.txt"
         : activePolicy === "privacy"
           ? "wiiz-privacy-policy.txt"
           : "wiiz-cookie-policy.txt";
-    const blob = new Blob([entry.content], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([activeEntry.content], { type: "text/plain;charset=utf-8" });
     const url = window.URL.createObjectURL(blob);
     const anchor = document.createElement("a");
 
@@ -85,68 +120,59 @@ export function PolicyModalProvider({ children }: { children: ReactNode }) {
       openPolicy: (key: PolicyKey) => setActivePolicy(key),
       closePolicy: () => setActivePolicy(null),
     }),
-    []
+    [],
   );
 
-  const activeEntry = activePolicy ? policyRegistry[activePolicy] : null;
-
   return (
-      <PolicyModalContext.Provider value={value}>
-        {children}
+    <PolicyModalContext.Provider value={value}>
+      {children}
       {showCookieBanner ? <CookieConsentBanner openPolicy={value.openPolicy} /> : null}
 
       {activeEntry ? (
         <div
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 px-4 py-6"
-          onClick={() => setActivePolicy(null)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="policy-modal-title"
             className="relative w-full max-w-5xl overflow-hidden rounded-[1rem] md:rounded-[2rem] border border-white/20 bg-primary shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
             onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>) => {
               if (event.key === "Escape") {
                 setActivePolicy(null);
               }
             }}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-white/10 px-4 md:px-6 py-4 md:py-5 lg:px-8">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-secondary">
-                  Legal
-                </p>
-                <h2
-                  id="policy-modal-title"
-                  className="mt-2 text-xl md:text-2xl font-semibold text-white"
-                >
-                  {activeEntry.title}
-                </h2>
-              </div>
-
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#0F1115]/95 px-6 py-4 backdrop-blur-md">
+              <h2 className="text-xl font-bold text-white md:text-2xl">
+                {activeEntry.title}
+              </h2>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleDownload}
-                  className="inline-flex h-10 items-center gap-2 rounded-full border border-white/10 px-4 text-sm font-medium text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/15 hover:text-white"
+                  title="Download as text file"
                 >
-                  <Download className="h-4 w-4" />
-                  Download
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setActivePolicy(null)}
-                  aria-label="Close policy modal"
-                  className="flex h-10 w-10 items-center justify-center rounded-full  text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
+                  className="rounded-lg p-2 text-gray-400 hover:bg-white/10 hover:text-white transition"
+                  aria-label="Close dialog"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
             </div>
 
-            <div className="max-h-[75vh] space-y-2 md:space-y-5 overflow-y-auto px-4 md:px-6 py-4 md:py-6 lg:px-8 [scrollbar-color:#8b3d67_#221520] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#8b3d67] [&::-webkit-scrollbar-track]:bg-[#221520] [&::-webkit-scrollbar]:w-1.5">
-              {renderPolicyContent(activeEntry.content)}
+            <div className="overflow-y-auto px-6 py-6 font-sans text-gray-300 h-[80vh] md:h-[600px] lg:h-[600px]">
+              <div className="space-y-4">
+                {renderPolicyContent(activeEntry.content)}
+              </div>
             </div>
           </div>
         </div>
@@ -157,5 +183,5 @@ export function PolicyModalProvider({ children }: { children: ReactNode }) {
 
 export function usePolicyModal() {
   const context = useContext(PolicyModalContext);
-  return context ?? fallbackPolicyModalContext;
+  return context || fallbackPolicyModalContext;
 }

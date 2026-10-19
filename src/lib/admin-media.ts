@@ -6,11 +6,10 @@ import {
   IMPACT_VIDEO_MAX_SIZE_BYTES,
   IMPACT_VIDEO_MAX_SIZE_MB,
 } from "@/src/lib/admin-media-constraints";
+import type { MediaFolder } from "@/src/types/admin-api";
 
-export type MediaFolder = "hero" | "impact" | "blog" | "feature";
-
-const MEDIA_ROOT = path.join(process.cwd(), "backend");
-const ALLOWED_FOLDERS: ReadonlySet<MediaFolder> = new Set(["hero", "impact", "blog", "feature"]);
+const MEDIA_ROOT = path.join(process.cwd(), "assets");
+const ALLOWED_FOLDERS: ReadonlySet<MediaFolder> = new Set(["hero", "impact", "blog", "feature", "trusted-by", "testimonials", "team", "section-bg"]);
 const MIME_EXTENSION_MAP: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
@@ -53,7 +52,7 @@ function validateFolder(value: string): MediaFolder {
     return value as MediaFolder;
   }
 
-  throw new Error("folder must be one of hero, impact, blog, or feature.");
+  throw new Error("folder must be one of hero, impact, blog, feature, trusted-by, testimonials, team, or section-bg.");
 }
 
 function validateMediaFile(file: File) {
@@ -124,6 +123,33 @@ export async function saveAdminMediaFile(input: {
   return {
     folder,
     rowId,
+    fileName,
+    filePath,
+    absolutePath,
+  };
+}
+
+export async function saveGeneralAdminMediaFile(input: {
+  folder: string;
+  file: File;
+}) {
+  const folder = validateFolder(input.folder);
+  const file = input.file;
+  validateMediaFile(file);
+
+  const extension = resolveExtension(file);
+  const randomSuffix = Math.random().toString(36).substring(2, 9);
+  const fileName = `${Date.now()}_${randomSuffix}${extension}`;
+  const uploadDirectory = getMediaDirectory(folder);
+  const absolutePath = path.join(uploadDirectory, fileName);
+  const filePath = getRelativeMediaPath(folder, fileName);
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  await fs.mkdir(uploadDirectory, { recursive: true });
+  await fs.writeFile(absolutePath, buffer);
+
+  return {
+    folder,
     fileName,
     filePath,
     absolutePath,

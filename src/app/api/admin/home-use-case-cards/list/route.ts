@@ -2,6 +2,8 @@ import { assertAdmin, badRequest, ok } from "@/src/lib/admin-api";
 import { listHomeUseCaseCards } from "@/src/lib/admin-home-use-case-cards";
 import type { HomeUseCaseCardListPayload } from "@/src/types/admin-api";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   const unauthorized = await assertAdmin();
   if (unauthorized) {

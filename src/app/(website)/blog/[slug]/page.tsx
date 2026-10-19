@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarDays } from "lucide-react";
 import { getPublishedBlogBySlug } from "@/src/lib/admin-blog";
 import { normalizeRichHtml, stripHtml } from "@/src/lib/html-content";
 import { buildWebsiteMetadata, websiteOgImages } from "@/src/lib/website-og";
+import { BlogArticleContent, BlogInteractiveImage } from "@/src/components/website/blog-image-modal";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-IN", {
@@ -82,41 +83,48 @@ export default async function BlogDetailPage({
           </Link>
 
           <article className="mt-10">
-            <div className="max-w-5xl">
-              <div className="flex items-center gap-3 text-sm text-white/60">
-                <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                  Published
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
-                  {formatDate(row.updatedAt)}
-                </span>
+            <div className="grid gap-6 md:grid-cols-2 md:gap-10">
+              <div className="md:flex md:flex-col md:justify-center">
+                <div className="flex items-center gap-3 text-sm text-white/60">
+                  <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                    Published
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4" />
+                    {formatDate(row.updatedAt)}
+                  </span>
+                </div>
+                <h1 className="mt-6 text-3xl font-bold leading-tight md:text-4xl xl:text-5xl">{row.title}</h1>
+                {row.shortDescription ? (
+                  <p className="mt-6 text-lg leading-8 text-white/70 md:text-xl">
+                    {row.shortDescription}
+                  </p>
+                ) : null}
               </div>
-              <h1 className="mt-6 text-3xl font-bold leading-tight md:text-4xl lg:text-5xl">{row.title}</h1>
-              {row.shortDescription ? (
-                <p className="mt-6 text-lg leading-8 text-white/70 md:text-xl">
-                  {row.shortDescription}
-                </p>
-              ) : null}
-            </div>
 
-            <div className="mt-10 overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-white/[0.04]">
               {imageUrl ? (
-                <img src={imageUrl} alt={row.title} className="h-auto w-full" />
+                <BlogInteractiveImage
+                  src={imageUrl}
+                  alt={row.title}
+                  title={row.title}
+                  aspectRatioClassName="aspect-[3/2] sm:aspect-[16/9] md:aspect-[4/3] xl:aspect-[16/10] md:min-h-[300px] md:self-center"
+                />
               ) : (
-                <div className="flex min-h-[280px] items-end bg-[radial-gradient(circle_at_top,#b94f83_0%,#4f1737_45%,#180913_100%)] p-8 md:min-h-[380px]">
-                  <div className="rounded-[1.5rem] border border-white/10 bg-black/15 px-5 py-4 backdrop-blur-sm">
-                    <div className="text-xs uppercase tracking-[0.25em] text-secondary">WiiZ Blog</div>
-                    <div className="mt-3 text-2xl font-semibold text-white">{row.title}</div>
+                <div className="relative aspect-[3/2] md:min-h-[300px] overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-white/[0.04] sm:aspect-[16/9] md:aspect-[4/3] md:self-center xl:aspect-[16/10]">
+                  <div className="flex h-full items-end bg-[radial-gradient(circle_at_top,#b94f83_0%,#4f1737_45%,#180913_100%)] p-8">
+                    <div className="rounded-[1.5rem] border border-white/10 bg-black/15 px-5 py-4 backdrop-blur-sm">
+                      <div className="text-xs uppercase tracking-[0.25em] text-secondary">WiiZ Blog</div>
+                      <div className="mt-3 text-2xl font-semibold text-white">{row.title}</div>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
             <div className="mt-10 overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-white/[0.04] px-6 py-8 md:px-10 md:py-10">
-              <div
-                className="mx-auto text-base leading-8 text-white/80 [&>*+*]:mt-4 [&_.ql-align-center]:text-center [&_.ql-align-justify]:text-justify [&_.ql-align-right]:text-right [&_a]:text-white [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-white/25 [&_blockquote]:pl-4 [&_li]:ml-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_p]:min-h-[1.75rem] [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:space-y-2"
-                dangerouslySetInnerHTML={{ __html: contentHtml }}
+              <BlogArticleContent
+                html={contentHtml}
+                className="mx-auto text-base leading-8 text-white/80 [&>*+*]:mt-4 [&_.ql-align-center]:text-center [&_.ql-align-justify]:text-justify [&_.ql-align-right]:text-right [&_a]:text-white [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-white/25 [&_blockquote]:pl-4 [&_img]:h-auto [&_img]:max-w-full [&_img]:cursor-pointer [&_img]:rounded-xl [&_img]:transition-transform [&_img]:duration-200 hover:[&_img]:scale-[1.01] [&_li]:ml-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_p]:min-h-[1.75rem] [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:space-y-2"
               />
             </div>
           </article>

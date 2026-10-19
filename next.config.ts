@@ -3,6 +3,20 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   devIndicators: false,
   output: "standalone",
+  async redirects() {
+    return [
+      {
+        source: "/admin/home-use-case-header",
+        destination: "/admin/home-use-cases",
+        permanent: true,
+      },
+      {
+        source: "/admin/home-use-case-cards",
+        destination: "/admin/home-use-cases",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

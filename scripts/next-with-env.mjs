@@ -65,7 +65,7 @@ function loadEnvFile(relativePath) {
 
 function getEnvFiles(command, envName) {
   if (command === "dev") {
-    return [".env.dev", ".env.local"];
+    return [".env.dev"];
   }
 
   if (envName === "testing") {

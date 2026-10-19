@@ -13,6 +13,8 @@ export type WebsiteAuthTokenPayload = {
   password: string | null;
   zoho_customer_id: string;
   name?: string | null;
+  org_id?: string | null;
+  team_id?: string | null;
   subscription_status?: string | null;
   subscription_plan_code?: string | null;
   iat?: number;
@@ -118,6 +120,12 @@ export function getTokenFromRequest(request: NextRequest) {
 
   if (authorizationHeader?.startsWith("Bearer ")) {
     return authorizationHeader.slice("Bearer ".length).trim();
+  }
+
+  // Backend sends cookie as access_token; support both names
+  const accessTokenCookie = request.cookies.get("access_token")?.value ?? null;
+  if (accessTokenCookie) {
+    return accessTokenCookie;
   }
 
   return request.cookies.get(JWT_COOKIE_NAME)?.value ?? null;

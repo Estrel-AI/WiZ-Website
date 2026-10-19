@@ -123,6 +123,31 @@ CREATE TABLE IF NOT EXISTS home_use_case_cards (
     ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS home_use_case_header (
+  id TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  badge_text VARCHAR(20) NOT NULL,
+  heading VARCHAR(120) NOT NULL,
+  description VARCHAR(300) NOT NULL,
+  button_text VARCHAR(30) NOT NULL,
+  button_url VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS trusted_by_logos (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  logo_image VARCHAR(1024) NOT NULL,
+  sort_order INT UNSIGNED NOT NULL DEFAULT 0,
+  status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_trusted_by_logos_logo_image (logo_image),
+  KEY idx_trusted_by_logos_sort_order (sort_order),
+  KEY idx_trusted_by_logos_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS blog_posts (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   title VARCHAR(255) NOT NULL,
@@ -163,7 +188,7 @@ CREATE TABLE IF NOT EXISTS cookie_consent_events (
 -- 2. Re-running it preserves existing rows and only adds missing tables/columns.
 -- 3. hero_section.data stores JSON with salesBarText, image, heroHeading,
 --    highlightedHeading, shortDescription, buttonText, buttonText2, and filepath.
--- 4. Uploaded media files should be stored in backend/hero and backend/impact,
+-- 4. Uploaded media files should be stored in assets/hero and assets/impact,
 --    while hero_section.data.filepath and use_case_details.file_path store
 --    only the relative file path.
 -- 5. blog_posts is intentionally simple and keeps only the basic blog fields

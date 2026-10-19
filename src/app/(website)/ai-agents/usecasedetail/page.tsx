@@ -337,7 +337,7 @@ export default function UseCaseDetailPage() {
                 )
               ) : (
                 <img
-                  src="/images/workflow.png"
+                  src="/api/assets/dummy_image/workflow.png"
                   alt="workflow"
                   className="mt-4 mb-10 block h-56 w-full rounded-2xl object-cover object-center sm:h-72 lg:h-[420px]"
                 />

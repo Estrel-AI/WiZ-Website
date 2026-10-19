@@ -2,6 +2,7 @@ import { buildPublicApiUrl, AUTH_API_BASE_URL } from "@/src/config/public-env";
 import type {
   AuthApiPayload,
   GenerateOtpRequest,
+  VerifyOtpRequest,
   PasswordResetRequest,
   SigninRequest,
   SignupRequest,
@@ -10,6 +11,44 @@ import type {
 
 async function parseJsonResponse<T extends AuthApiPayload>(response: Response): Promise<T | null> {
   return (await response.json().catch(() => null)) as T | null;
+}
+
+function toStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function extractApiErrorMessage(responseData: AuthApiPayload | null): string | null {
+  if (!responseData) {
+    return null;
+  }
+
+  const { message, errors, detail } = responseData;
+
+  if (typeof message === "string" && message.trim()) {
+    return message;
+  }
+
+  const errorList = toStringList(errors);
+  if (errorList.length > 0) {
+    return errorList.join(" ");
+  }
+
+  const strength = responseData.strength as { suggestions?: unknown } | undefined;
+  const suggestions = toStringList(strength?.suggestions);
+  if (suggestions.length > 0) {
+    return suggestions.join(" ");
+  }
+
+  const detailList = toStringList(detail);
+  if (detailList.length > 0) {
+    return detailList.join(" ");
+  }
+
+  if (typeof detail === "string" && detail.trim()) {
+    return detail;
+  }
+
+  return null;
 }
 
 async function postAuthEndpoint<T extends AuthApiPayload>(
@@ -21,13 +60,14 @@ async function postAuthEndpoint<T extends AuthApiPayload>(
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 
   const responseData = await parseJsonResponse<T>(response);
 
   if (!response.ok) {
-    throw new Error(responseData?.message || "The request could not be completed.");
+    throw new Error(extractApiErrorMessage(responseData) || "The request could not be completed.");
   }
 
   return (responseData ?? {}) as T;
@@ -37,9 +77,16 @@ export function requestSignupOtp(payload: GenerateOtpRequest) {
   return postAuthEndpoint("generate_otp", payload);
 }
 
+export function verifyOtp(payload: VerifyOtpRequest) {
+  return postAuthEndpoint("is_valid_otp", payload);
+}
+
+export { generateBusinessOtp, verifyBusinessOtp, submitBusinessSignup } from "./auth.service";
+
 export function submitSignup(payload: SignupRequest) {
   return postAuthEndpoint("signup", payload);
 }
+
 
 export function submitSignin(payload: SigninRequest) {
   return postAuthEndpoint("signin", payload);

@@ -452,25 +452,25 @@ function AdminHomePageInner() {
         }
       />
 
-      <AdminCard className="overflow-hidden p-3 md:p-4">
-        <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+      <AdminCard className="overflow-hidden p-4 md:p-6 backdrop-blur-xl bg-white/80 border border-white/80 shadow-[0_12px_40px_rgba(15,23,42,0.06)]">
+        <div className="mb-5 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <div className="text-sm font-bold uppercase tracking-[0.24em] text-slate-600">Hero Preview</div>
-            <h3 className="mt-2 text-xl font-semibold text-slate-950">Edit the sales bar and hero section only</h3>
+            <div className="text-xs font-bold uppercase tracking-[0.24em] text-[#98235f]">Hero Preview</div>
+            <h3 className="mt-1.5 text-2xl font-bold text-slate-950">Edit the sales bar and hero section only</h3>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600">
-              <Layers3 className="h-4 w-4" />
+          <div className="flex flex-wrap gap-2.5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 backdrop-blur-md px-4 py-2 text-xs font-semibold text-slate-700 shadow-xs">
+              <Layers3 className="h-4 w-4 text-[#98235f]" />
               API-backed hero
             </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-pink-100 px-4 py-2 text-sm font-medium text-pink-700">
-              <Sparkles className="h-4 w-4" />
+            {/* <span className="inline-flex items-center gap-2 rounded-full border border-pink-200/60 bg-pink-50/70 backdrop-blur-md px-4 py-2 text-xs font-semibold text-pink-700 shadow-xs">
+              <Sparkles className="h-4 w-4 text-pink-600" />
               No CMS dependency
-            </span>
+            </span> */}
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[30px] border border-slate-200 bg-[#120711] shadow-inner">
+        <div className="overflow-hidden rounded-[30px] border border-white/40 bg-[#120711] shadow-2xl">
           <section className="relative overflow-hidden bg-[#1D0612] font-sans">
             <OverlayButton
               label="Sales Bar"
@@ -499,6 +499,7 @@ function AdminHomePageInner() {
                         src={heroBackgroundImage}
                         alt={workingHero.data.heroHeading || "Hero background"}
                         fill
+                        unoptimized
                         className="object-cover opacity-55"
                         sizes="100vw"
                       />
@@ -644,6 +645,8 @@ function AdminHomePageInner() {
                   data: { ...draft.data, heroHeading: event.target.value },
                 }))
               }
+              maxLength={67}
+              counter={`${(workingHero.data.heroHeading || "").length}/67 characters (including spaces)`}
             />
             <AdminInput
               label="Highlighted Heading"
@@ -654,6 +657,8 @@ function AdminHomePageInner() {
                   data: { ...draft.data, highlightedHeading: event.target.value },
                 }))
               }
+              maxLength={70}
+              counter={`${(workingHero.data.highlightedHeading || "").length}/70 characters (including spaces)`}
             />
             <AdminTextarea
               label="Short Description"
@@ -664,6 +669,8 @@ function AdminHomePageInner() {
                   data: { ...draft.data, shortDescription: event.target.value },
                 }))
               }
+              maxLength={146}
+              counter={`${(workingHero.data.shortDescription || "").length}/146 characters (including spaces)`}
             />
             <div className="grid gap-5 md:grid-cols-2">
               <AdminInput
@@ -675,6 +682,8 @@ function AdminHomePageInner() {
                     data: { ...draft.data, buttonText: event.target.value },
                   }))
                 }
+                maxLength={47}
+                counter={`${(workingHero.data.buttonText || "").length}/47 characters (including spaces)`}
               />
               <AdminInput
                 label="Button Text 2"
@@ -685,6 +694,8 @@ function AdminHomePageInner() {
                     data: { ...draft.data, buttonText2: event.target.value },
                   }))
                 }
+                maxLength={35}
+                counter={`${(workingHero.data.buttonText2 || "").length}/35 characters (including spaces)`}
               />
             </div>
           </div>

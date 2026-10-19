@@ -4,7 +4,8 @@ import {
   AUTH_EVENT_NAME,
   AUTH_TOKEN_KEY,
   AUTH_USER_KEY,
-  HUB_LOGIN_URL,
+  DEVELOPER_LOGIN_URL,
+  BUSINESS_LOGIN_URL,
 } from "@/src/features/auth/website-auth";
 import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
@@ -38,11 +39,28 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState("");
   const pathname = usePathname();
 
   useEffect(() => {
     const syncAuthState = () => {
-      setIsAuthenticated(Boolean(localStorage.getItem(AUTH_TOKEN_KEY)));
+      const token = Boolean(localStorage.getItem(AUTH_TOKEN_KEY));
+      setIsAuthenticated(token);
+      if (token) {
+        try {
+          const raw = localStorage.getItem(AUTH_USER_KEY);
+          if (raw) {
+            const u = JSON.parse(raw);
+            setUserName(String(u.display_name || u.first_name || u.username || "User"));
+          } else {
+            setUserName("User");
+          }
+        } catch {
+          setUserName("User");
+        }
+      } else {
+        setUserName("");
+      }
     };
 
     syncAuthState();
@@ -97,7 +115,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between md:h-18">
               <Link href="/" className="flex flex-shrink-0 items-center cursor-pointer">
-                <img src="/images/white-new-logo.png" alt="WiZ Logo" className="lg:h-16 h-12 w-auto" />
+                <img src="/api/assets/logos/primary-logo.png" alt="WiZ Logo" className="lg:h-16 h-12 w-auto" />
               </Link>
               <div className="hidden lg:flex items-center space-x-4 md:space-x-8">
                 {navLinks.map((nav) => (
@@ -111,13 +129,10 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                   </Link>
                 ))}
                 {isAuthenticated ? (
-                  <button                             
-                    type="button"
-                    onClick={handleSignOut}
-                    className="bg-gradient-to-r from-tertiary to-quaternary rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:scale-105 hover:bg-opacity-90 md:text-base"
-                  >
-                    Sign Out
-                  </button>
+                  <>
+                    <Link href="/profile" className="text-sm font-medium text-gray-700 hover:text-tertiary transition" title="Your profile">{userName || "Profile"}</Link>
+                    <button type="button" onClick={handleSignOut} className="bg-gradient-to-r from-tertiary to-quaternary rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:scale-105 hover:bg-opacity-90 md:text-base">Sign Out</button>
+                  </>
                 ) : (
                   <>
                     <a
@@ -145,7 +160,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                           Website Login
                         </Link> */}
                         <Link
-                          href="https://sandbox.wiiz.it"
+                          href={DEVELOPER_LOGIN_URL}
                           target="_blank"
                           rel="noreferrer"
                           title="Log in to the hub"
@@ -154,7 +169,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                           WiiZ for Developer
                         </Link>
                           <Link
-                          href="https://testwbs.wiiz.it"
+                          href={BUSINESS_LOGIN_URL}
                           target="_blank"
                           rel="noreferrer"
                           title="Log in to the hub"
@@ -194,7 +209,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
             className="flex flex-shrink-0 items-center cursor-pointer"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <img src="/images/white-new-logo.png" alt="WiZ Logo" className="h-12 w-auto" />
+            <img src="/api/assets/logos/primary-logo.png" alt="WiZ Logo" className="h-12 w-auto" />
           </Link>
 
           <button
@@ -235,7 +250,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
             </Link> */}
             
             <Link
-              href="https://sandbox.wiiz.it"
+              href={DEVELOPER_LOGIN_URL}
               target="_blank"
               rel="noreferrer"
               onClick={() => setMobileMenuOpen(false)}
@@ -244,7 +259,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                WiiZ for Developer
             </Link>
               <Link
-              href="https://testwbs.wiiz.it"
+              href={BUSINESS_LOGIN_URL}
               target="_blank"
               rel="noreferrer"
               onClick={() => setMobileMenuOpen(false)}

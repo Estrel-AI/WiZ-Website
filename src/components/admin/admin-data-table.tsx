@@ -23,6 +23,10 @@ export function AdminDataTable<T>({
   emptyDescription,
   pageSize = 6,
   toolbar,
+  totalCount,
+  page: externalPage,
+  onPageChange,
+  rowProps,
 }: {
   rows: T[];
   columns: Column<T>[];
@@ -32,10 +36,16 @@ export function AdminDataTable<T>({
   emptyDescription: string;
   pageSize?: number;
   toolbar?: React.ReactNode;
+  totalCount?: number;
+  page?: number;
+  onPageChange?: (page: number) => void;
+  rowProps?: (row: T, index: number) => React.HTMLAttributes<HTMLTableRowElement>;
 }) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [page, setPage] = useState(1);
+  const [internalPage, setInternalPage] = useState(1);
+
+  const isExternalPagination = typeof totalCount === "number" && typeof onPageChange === "function";
 
   const sortedRows = useMemo(() => {
     if (!sortKey) {
@@ -61,9 +71,10 @@ export function AdminDataTable<T>({
     });
   }, [columns, rows, sortDirection, sortKey]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const pageRows = sortedRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalItemsCount = isExternalPagination ? totalCount : sortedRows.length;
+  const totalPages = Math.max(1, Math.ceil(totalItemsCount / pageSize));
+  const currentPage = isExternalPagination ? Math.min(externalPage ?? 1, totalPages) : Math.min(internalPage, totalPages);
+  const pageRows = isExternalPagination ? sortedRows : sortedRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -73,6 +84,24 @@ export function AdminDataTable<T>({
 
     setSortKey(key);
     setSortDirection("asc");
+  };
+
+  const handlePrevPage = () => {
+    const prev = Math.max(1, currentPage - 1);
+    if (isExternalPagination) {
+      onPageChange(prev);
+    } else {
+      setInternalPage(prev);
+    }
+  };
+
+  const handleNextPage = () => {
+    const next = Math.min(totalPages, currentPage + 1);
+    if (isExternalPagination) {
+      onPageChange(next);
+    } else {
+      setInternalPage(next);
+    }
   };
 
   return (
@@ -112,36 +141,43 @@ export function AdminDataTable<T>({
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {pageRows.map((row, index) => (
-                  <tr key={rowKey(row)} className="border-b border-slate-100 align-top transition hover:bg-slate-50/60">
-                    {columns.map((column) => (
-                      <td key={column.key} className="px-4 py-4 text-sm text-slate-700">
-                        {column.render(row, index)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {pageRows.map((row, index) => {
+                  const extraProps = rowProps?.(row, index) ?? {};
+                  return (
+                    <tr
+                      key={rowKey(row)}
+                      {...extraProps}
+                      className={cn("border-b border-slate-100 align-top transition hover:bg-slate-50/60", extraProps.className)}
+                    >
+                      {columns.map((column) => (
+                        <td key={column.key} className="px-4 py-4 text-sm text-slate-700">
+                          {column.render(row, index)}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
           <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3.5">
             <div className="text-sm text-slate-500">
-              Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, sortedRows.length)} of {sortedRows.length}
+              Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalItemsCount)} of {totalItemsCount}
             </div>
             <div className="flex gap-2">
               <AdminButton
                 variant="secondary"
                 className="h-10 rounded-[10px] px-3"
-                onClick={() => setPage((value) => Math.max(1, value - 1))}
-                disabled={currentPage === 1}
+                onClick={handlePrevPage}
+                disabled={currentPage <= 1}
               >
                 <ChevronLeft className="h-4 w-4" />
               </AdminButton>
               <AdminButton
                 variant="secondary"
                 className="h-10 rounded-[10px] px-3"
-                onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
-                disabled={currentPage === totalPages}
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages}
               >
                 <ChevronRight className="h-4 w-4" />
               </AdminButton>

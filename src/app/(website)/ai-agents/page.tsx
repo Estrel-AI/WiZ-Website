@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ThemeToggle from "@/src/components/website/theme-toggle";
-import type { ApiResponse, HierarchyRow, ListData } from "@/src/types/admin-api";
+import type { ApiResponse, HierarchyRow, ListData, SectionHeaderData } from "@/src/types/admin-api";
 
 type IndustrySummary = Pick<HierarchyRow, "id" | "title" | "description">;
 type IndustryDetailResponse = {
@@ -62,6 +62,14 @@ function FunctionSectionHeading({
 }
 
 export default function UseCasePage() {
+  const defaultCardDescription = "Explore use cases by industries, business functions, and practical AI use cases designed to turn high-value workflows into clear implementation paths.";
+  const [headerData, setHeaderData] = useState<{ heading: string; description: string | null; backgroundImage: string | null; cardHeading: string | null; cardDescription: string | null }>({
+    heading: "Pre-Built Enterprise AI Agents",
+    description: "Explore industries, business functions, and practical AI use cases designed to turn high-value workflows into clear implementation paths.",
+    backgroundImage: null,
+    cardHeading: "Explore Pre-Built Enterprise AI Agents by Industry",
+    cardDescription: defaultCardDescription,
+  });
   const [industries, setIndustries] = useState<IndustrySummary[]>([]);
   const [selectedIndustryId, setSelectedIndustryId] = useState<number | null>(null);
   const [selectedIndustryDetail, setSelectedIndustryDetail] = useState<IndustryDetailResponse | null>(null);
@@ -72,6 +80,27 @@ export default function UseCasePage() {
   const [error, setError] = useState<string | null>(null);
   const industryScrollerRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/section-headers/AI_AGENTS_HEADER")
+      .then(async (res) => {
+        const payload = (await res.json()) as ApiResponse<SectionHeaderData>;
+        if (active && payload.success && payload.data) {
+          setHeaderData({
+            heading: payload.data.heading,
+            description: payload.data.description,
+            backgroundImage: payload.data.backgroundImage ?? null,
+            cardHeading: payload.data.buttonText ?? null,
+            cardDescription: payload.data.buttonUrl?.trim() || defaultCardDescription,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -191,18 +220,31 @@ export default function UseCasePage() {
       <div className="min-h-screen bg-[#f5f6f8] font-sans text-gray-700 transition-colors duration-300 dark:bg-primary dark:text-slate-200">
         <section className="min-h-[30vh] relative mb-10 flex min-h-[48vh] items-center justify-center overflow-hidden border-b border-[#f0c8d8] bg-gradient-to-b from-[#f8fafc] via-[#f3f5f8] to-[#edf2f7] px-4 py-14 dark:border-white/10 dark:bg-gradient-to-b dark:from-[#08060a] dark:via-[#160d14] dark:to-[#240d1a] md:py-20">
           <div className="absolute inset-0 bg-primary dark:hidden" />
-          <div className="absolute left-0 top-1/2 h-[100%] w-[240%] -translate-x-1/2 -translate-y-1/2 bg-[url('/texture.svg')] bg-cover bg-center opacity-45 mix-blend-screen pointer-events-none dark:opacity-100 dark:mix-blend-normal md:w-[160%] [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_55%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_55%)]" />
-          <div className="absolute right-0 top-1/2 h-[100%] w-[240%] translate-x-1/2 -translate-y-1/2 bg-[url('/texture.svg')] bg-cover bg-center opacity-45 mix-blend-screen pointer-events-none dark:opacity-100 dark:mix-blend-normal md:w-[160%] [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_55%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_55%)]" />
-          <div className="absolute -top-[230px] left-1/2 h-[520px] w-[620px] -translate-x-1/2 rounded-full bg-gradient-about blur-[180px] pointer-events-none dark:bg-gradient-about dark:blur-[200px]" />
+          {/* Dynamic background image layer */}
+          {headerData.backgroundImage ? (
+            <div className="absolute inset-0 z-0">
+              <img
+                src={headerData.backgroundImage}
+                alt=""
+                aria-hidden="true"
+                className="h-full w-full object-cover opacity-25"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#08060a]/70 via-[#160d14]/70 to-[#240d1a]/70" />
+            </div>
+          ) : null}
+          <div className="absolute left-0 top-1/2 h-[100%] w-[240%] -translate-x-1/2 -translate-y-1/2 bg-[url('/texture.svg')] bg-cover bg-center opacity-45 mix-blend-screen pointer-events-none dark:opacity-100 dark:mix-blend-normal md:w-[160%] [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_55%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_55%)] z-[1]" />
+          <div className="absolute right-0 top-1/2 h-[100%] w-[240%] translate-x-1/2 -translate-y-1/2 bg-[url('/texture.svg')] bg-cover bg-center opacity-45 mix-blend-screen pointer-events-none dark:opacity-100 dark:mix-blend-normal md:w-[160%] [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_55%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_55%)] z-[1]" />
+          <div className="absolute -top-[230px] left-1/2 h-[520px] w-[620px] -translate-x-1/2 rounded-full bg-gradient-about blur-[180px] pointer-events-none dark:bg-gradient-about dark:blur-[200px] z-[1]" />
 
           <div className="relative z-10 mx-auto max-w-5xl text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl leading-tight md:leading-[1.1] font-semibold text-white mb-3 md:mb-6 tracking-tight md:px-10 mx-auto">
-              Pre-Built Enterprise AI Agents
+              {headerData.heading}
             </h1>
-            <p className="text-base md:text-lg text-[#FDFDFD] max-w-4xl mx-auto md:px-16">
-              Explore industries, business functions, and practical AI use cases designed to turn high-value workflows
-              into clear implementation paths.
-            </p>
+            {headerData.description ? (
+              <p className="text-base md:text-lg text-[#FDFDFD] max-w-4xl mx-auto md:px-16">
+                {headerData.description}
+              </p>
+            ) : null}
           </div>
         </section>
 
@@ -223,11 +265,13 @@ export default function UseCasePage() {
           <div className="mb-8 w-full rounded-[2rem] border border-gray-200 bg-white p-5 shadow-[0_24px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-gradient-to-br dark:from-[#20131c] dark:via-[#1a1118] dark:to-[#120c12] dark:shadow-[0_30px_80px_rgba(0,0,0,0.28)] lg:mb-10 lg:p-7">
             <div className="mb-0">
               <h2 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white md:text-3xl">
-                Explore Pre-Built Enterprise AI Agents by Industry
+                {headerData.cardHeading || "Explore Pre-Built Enterprise AI Agents by Industry"}
               </h2>
-              <p className="mb-5 max-w-3xl text-sm leading-relaxed text-gray-500 dark:text-slate-400 md:text-base">
-                Explore use cases by industries, business functions, and practical AI use cases designed to turn high-value workflows into clear implementation paths.
-              </p>
+              {headerData.cardDescription ? (
+                <p className="mb-5 max-w-3xl text-sm leading-relaxed text-gray-500 dark:text-slate-400 md:text-base">
+                  {headerData.cardDescription}
+                </p>
+              ) : null}
               <h3 className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">
                 Industries
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-gray-200 to-transparent dark:from-white/10 md:hidden" />
@@ -372,7 +416,7 @@ export default function UseCasePage() {
                               className="group flex h-full flex-col rounded-[1.75rem] border border-gray-200 bg-white p-5 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-secondary/30 hover:shadow-[0_20px_40px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-gradient-to-br dark:from-[#22131d] dark:via-[#1b1118] dark:to-[#160d14] dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.26)] md:p-6"
                             >
                               <div className="mb-auto">
-                                <span className="mb-3 inline-block rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-[10px] font-medium text-gray-600 transition-all group-hover:border-secondary/30 group-hover:bg-secondary/10 group-hover:text-[#771c48] dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:group-hover:text-secondary md:mb-4 md:text-[11px]">
+                                <span className="mb-3 inline-block rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-600 transition-all group-hover:border-secondary/30 group-hover:bg-secondary/10 group-hover:text-[#771c48] dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:group-hover:text-secondary md:mb-4 text-[11px]">
                                   {selectedIndustryDetail.industry.title}
                                 </span>
                                 <h3 className="mb-2 text-base font-bold text-gray-900 transition-colors group-hover:text-[#771c48] dark:text-white dark:group-hover:text-secondary md:text-lg">

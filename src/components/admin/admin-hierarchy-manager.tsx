@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus, Trash2, Upload } from "lucide-react";
+import { GripVertical, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -367,6 +367,8 @@ export function AdminHierarchyManager({ view }: { view: HierarchyAdminView }) {
   const industryAbortRef = useRef<AbortController | null>(null);
   const functionAbortRef = useRef<AbortController | null>(null);
   const useCaseAbortRef = useRef<AbortController | null>(null);
+  const draggedRowIdRef = useRef<number | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   const industries = useMemo(() => industryRows, [industryRows]);
   const functions = useMemo(() => functionRows, [functionRows]);
@@ -1005,6 +1007,85 @@ export function AdminHierarchyManager({ view }: { view: HierarchyAdminView }) {
     showToast({ tone: "success", title: "Entry deleted", description: "The selected item has been removed." });
   }
 
+  function handleDragStart(id: number) {
+    draggedRowIdRef.current = id;
+  }
+
+  async function handleDrop(type: "industry" | "function" | "usecase", targetId: number) {
+    const sourceId = draggedRowIdRef.current;
+    draggedRowIdRef.current = null;
+
+    if (!sourceId || sourceId === targetId) return;
+
+    let items: HierarchyRow[];
+    let setItems: React.Dispatch<React.SetStateAction<HierarchyRow[]>>;
+
+    if (type === "industry") {
+      items = industryRows;
+      setItems = setIndustryRows;
+    } else if (type === "function") {
+      items = functionRows;
+      setItems = setFunctionRows;
+    } else {
+      items = useCaseRows;
+      setItems = setUseCaseRows;
+    }
+
+    const sourceIndex = items.findIndex((r) => r.id === sourceId);
+    const targetIndex = items.findIndex((r) => r.id === targetId);
+
+    if (sourceIndex < 0 || targetIndex < 0) return;
+
+    const nextItems = [...items];
+    const [moved] = nextItems.splice(sourceIndex, 1);
+    nextItems.splice(targetIndex, 0, moved);
+
+    const updatedItems = nextItems.map((item, index) => ({
+      ...item,
+      sortOrder: index,
+    }));
+
+    setItems(updatedItems);
+    setReordering(true);
+
+    try {
+      const payload = {
+        items: updatedItems.map((r) => ({
+          id: r.id,
+          sortOrder: r.sortOrder,
+        })),
+      };
+
+      const response = await fetch("/api/admin/hierarchy/sort-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = (await response.json()) as ApiResponse<null>;
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.message || "Unable to update sort order.");
+      }
+
+      showToast({ tone: "success", title: "Order Saved", description: "Display order updated successfully." });
+    } catch (error) {
+      showToast({
+        tone: "error",
+        title: "Reorder Failed",
+        description: error instanceof Error ? error.message : "Unable to update sort order.",
+      });
+      if (type === "industry") {
+        await loadIndustries(industrySearch.trim());
+      } else if (type === "function") {
+        await loadFunctions(functionSearch.trim());
+      } else {
+        await loadUseCases(useCaseSearch.trim());
+      }
+    } finally {
+      setReordering(false);
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div className="grid gap-8">
@@ -1021,15 +1102,32 @@ export function AdminHierarchyManager({ view }: { view: HierarchyAdminView }) {
                 <AdminTableToolbar
                   search={<div className="max-w-[520px]"><SearchField value={industrySearch} onChange={setIndustrySearch} placeholder="Search industry" /></div>}
                   primaryAction={
-                    <AdminButton className="h-11 rounded-2xl bg-blue-600 px-5 hover:bg-blue-500" onClick={openIndustryCreateDrawer}>
+                    <AdminButton className="h-11 rounded-2xl px-5" onClick={openIndustryCreateDrawer}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Industry
                     </AdminButton>
                   }
                 />
               }
+              rowProps={(row) => ({
+                draggable: !reordering,
+                onDragStart: () => handleDragStart(row.id),
+                onDragOver: (event) => event.preventDefault(),
+                onDrop: () => handleDrop("industry", row.id),
+                className: "cursor-grab active:cursor-grabbing",
+              })}
               columns={[
-                { key: "serial", label: "S. No.", render: (row) => <div className="font-medium text-slate-600">{industries.findIndex((item) => item.id === row.id) + 1}</div> },
+                {
+                  key: "order",
+                  label: "Order",
+                  className: "w-20",
+                  render: (row) => (
+                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-slate-600">
+                      <GripVertical className="h-4 w-4 cursor-grab text-slate-400 hover:text-slate-700" />
+                      <span>#{(row.sortOrder ?? 0) + 1}</span>
+                    </div>
+                  ),
+                },
                 { key: "name", label: "Name", sortable: true, sortValue: (row) => row.title, render: (row) => <div className="font-medium text-slate-950">{row.title}</div> },
                 { key: "date", label: "Date", sortable: true, sortValue: (row) => row.updatedAt, render: (row) => <span className="text-sm text-slate-500">{formatTableDate(row.updatedAt)}</span> },
                 {
@@ -1061,15 +1159,32 @@ export function AdminHierarchyManager({ view }: { view: HierarchyAdminView }) {
                 <AdminTableToolbar
                   search={<div className="max-w-[520px]"><SearchField value={functionSearch} onChange={setFunctionSearch} placeholder="Search function" /></div>}
                   primaryAction={
-                    <AdminButton className="h-11 rounded-2xl bg-blue-600 px-5 hover:bg-blue-500" onClick={() => void openFunctionCreateDrawer()}>
+                    <AdminButton className="h-11 rounded-2xl px-5" onClick={() => void openFunctionCreateDrawer()}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Function
                     </AdminButton>
                   }
                 />
               }
+              rowProps={(row) => ({
+                draggable: !reordering,
+                onDragStart: () => handleDragStart(row.id),
+                onDragOver: (event) => event.preventDefault(),
+                onDrop: () => handleDrop("function", row.id),
+                className: "cursor-grab active:cursor-grabbing",
+              })}
               columns={[
-                { key: "serial", label: "S. No.", render: (_row, index) => <span className="text-sm text-slate-500">{index + 1}</span> },
+                {
+                  key: "order",
+                  label: "Order",
+                  className: "w-20",
+                  render: (row) => (
+                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-slate-600">
+                      <GripVertical className="h-4 w-4 cursor-grab text-slate-400 hover:text-slate-700" />
+                      <span>#{(row.sortOrder ?? 0) + 1}</span>
+                    </div>
+                  ),
+                },
                 { key: "name", label: "Name", sortable: true, sortValue: (row) => row.title, render: (row) => <div className="font-medium text-slate-950">{row.title}</div> },
                 { key: "industry", label: "Industry", render: (row) => row.parentTitle ?? "-" },
                 { key: "date", label: "Date", sortable: true, sortValue: (row) => row.updatedAt, render: (row) => <span className="text-sm text-slate-500">{formatTableDate(row.updatedAt)}</span> },
@@ -1102,15 +1217,32 @@ export function AdminHierarchyManager({ view }: { view: HierarchyAdminView }) {
                 <AdminTableToolbar
                   search={<div className="max-w-[520px]"><SearchField value={useCaseSearch} onChange={setUseCaseSearch} placeholder="Search use case" /></div>}
                   primaryAction={
-                    <AdminButton className="h-11 rounded-2xl bg-blue-600 px-5 hover:bg-blue-500" onClick={() => openUseCase()}>
+                    <AdminButton className="h-11 rounded-2xl px-5" onClick={() => openUseCase()}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Use Case
                     </AdminButton>
                   }
                 />
               }
+              rowProps={(row) => ({
+                draggable: !reordering,
+                onDragStart: () => handleDragStart(row.id),
+                onDragOver: (event) => event.preventDefault(),
+                onDrop: () => handleDrop("usecase", row.id),
+                className: "cursor-grab active:cursor-grabbing",
+              })}
               columns={[
-                { key: "serial", label: "S. No.", render: (_row, index) => <span className="text-sm text-slate-500">{index + 1}</span> },
+                {
+                  key: "order",
+                  label: "Order",
+                  className: "w-20",
+                  render: (row) => (
+                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-slate-600">
+                      <GripVertical className="h-4 w-4 cursor-grab text-slate-400 hover:text-slate-700" />
+                      <span>#{(row.sortOrder ?? 0) + 1}</span>
+                    </div>
+                  ),
+                },
                 { key: "title", label: "Name", sortable: true, sortValue: (row) => row.title, render: (row) => <div className="font-medium text-slate-950">{row.title}</div> },
                 { key: "function", label: "Function", render: (row) => row.parentTitle ?? "-" },
                 { key: "date", label: "Date", sortable: true, sortValue: (row) => row.updatedAt, render: (row) => <span className="text-sm text-slate-500">{formatTableDate(row.updatedAt)}</span> },

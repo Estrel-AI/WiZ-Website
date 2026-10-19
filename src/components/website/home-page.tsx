@@ -4,8 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import type {
   HeroSectionData,
+  HomeFeatureHeader,
   HomeFeatureRow,
+  HomeFaqRow,
+  HomeTestimonialRow,
+  HomeUseCaseHeader,
   HomeUseCasePublicRow,
+  SectionHeaderData,
 } from "@/src/types/admin-api";
 import type { HomePageContent } from "@/src/types/admin-cms";
 import { ComplianceChatbotPreview } from "@/src/components/website/compliance-chatbot-preview";
@@ -13,28 +18,55 @@ import { WEBSITE_CHATBOT_OPEN_EVENT } from "@/src/components/website/website-cha
 import WebsiteCtaButton, {
   resolveWebsiteCtaHref,
 } from "@/src/components/website/website-cta-button";
-import { partnerLogos } from "@/src/data/partners";
+import { TrustedBySection } from "@/src/components/website/trusted-by-section";
 import {
   Activity,
   ArrowRight,
   Check,
-  CheckCircle2,
   ChevronDown,
   CreditCard,
   ChartNoAxesColumnIncreasing,
   ClipboardList,
   Layers,
+  Maximize2,
+  Play,
   Plug,
   ShieldCheck,
+  X,
 } from "lucide-react";
 import AOS from "aos";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import type { ReactNode } from "react";
+
+import type { HomeAiAdoptionCardRow } from "@/src/types/admin-api";
+
+const DEFAULT_HOME_SECTION_ORDER = [
+  "HERO",
+  "TRUSTED_BY",
+  "FEATURES",
+  "USE_CASES",
+  "AI_ADOPTION",
+  "OPERATIONALIZE",
+  "TESTIMONIALS",
+  "FAQS",
+  "CTA",
+];
 
 type HomePageProps = {
   managedContent: HomePageContent;
   heroSection?: HeroSectionData | null;
   homeFeatures?: HomeFeatureRow[];
+  homeFeatureHeader?: HomeFeatureHeader | null;
   homeUseCases?: HomeUseCasePublicRow[];
+  homeUseCaseHeader?: HomeUseCaseHeader | null;
+  homeTestimonialHeader?: SectionHeaderData | null;
+  homeTestimonials?: HomeTestimonialRow[];
+  homeFaqHeader?: SectionHeaderData | null;
+  homeFaqs?: HomeFaqRow[];
+  homeAiAdoptionHeader?: SectionHeaderData | null;
+  homeAiAdoptionCards?: HomeAiAdoptionCardRow[];
+  sectionOrder?: string[];
 };
 
 function getHeroMediaUrl(filepath: string | null) {
@@ -53,6 +85,21 @@ function getHeroMediaUrl(filepath: string | null) {
 function getFeatureMediaUrl(filepathOrUrl: string | null) {
   if (!filepathOrUrl) {
     return null;
+  }
+
+  // If the URL is an obsolete wiiz.it video asset, map to local video asset
+  if (filepathOrUrl.includes("wiiz.it/assets/img/videos/")) {
+    const lower = filepathOrUrl.toLowerCase();
+    if (lower.includes("workflow")) {
+      return "/api/assets/dummy_image/videos-home/workflow-builder.mp4";
+    }
+    if (lower.includes("guardrail")) {
+      return "/api/assets/dummy_image/videos-home/guardrail.mp4";
+    }
+    if (lower.includes("mcp")) {
+      return "/api/assets/dummy_image/videos-home/mcp.mp4";
+    }
+    return "/api/assets/dummy_image/videos-home/multi-agent.mp4";
   }
 
   if (filepathOrUrl.startsWith("/")) {
@@ -77,8 +124,13 @@ function isVideoMedia(path: string | null) {
     return false;
   }
 
-  const normalized = path.toLowerCase();
-  return normalized.endsWith(".mp4") || normalized.endsWith(".webm") || normalized.endsWith(".mov") || normalized.endsWith(".ogv");
+  const cleanPath = path.split("?")[0].split("#")[0].toLowerCase();
+  return (
+    cleanPath.endsWith(".mp4") ||
+    cleanPath.endsWith(".webm") ||
+    cleanPath.endsWith(".mov") ||
+    cleanPath.endsWith(".ogv")
+  );
 }
 
 type ResolvedFeatureMedia =
@@ -175,6 +227,10 @@ function resolveFeatureMedia(mediaType: string | null, mediaUrl: string | null):
     return null;
   }
 
+  if (isVideoMedia(resolvedUrl)) {
+    return { kind: "video", src: resolvedUrl };
+  }
+
   if (mediaType !== "video") {
     try {
       const parsedUrl = new URL(resolvedUrl);
@@ -187,10 +243,6 @@ function resolveFeatureMedia(mediaType: string | null, mediaUrl: string | null):
     } catch {
       return { kind: "image", src: resolvedUrl };
     }
-  }
-
-  if (isVideoMedia(resolvedUrl)) {
-    return { kind: "video", src: resolvedUrl };
   }
 
   try {
@@ -229,7 +281,7 @@ const defaultServiceTabs = [
       "Faster prototyping and deployment",
     ],
     icon: Check,
-    video: "/images/videos-home/workflow-builder.mp4",
+    video: "/api/assets/dummy_image/videos-home/workflow-builder.mp4",
   },
   {
     id: "tab-governance-ai",
@@ -243,7 +295,7 @@ const defaultServiceTabs = [
       "Reliable workflow execution",
     ],
     icon: ShieldCheck,
-    video: "/images/videos-home/multi-agent.mp4",
+    video: "/api/assets/dummy_image/videos-home/multi-agent.mp4",
   },
   {
     id: "tab-multimodal",
@@ -270,7 +322,7 @@ const defaultServiceTabs = [
       "Audit trails and compliance visibility",
     ],
     icon: Activity,
-    video: "/images/videos-home/guardrail.mp4",
+    video: "/api/assets/dummy_image/videos-home/guardrail.mp4",
   },
   {
     id: "tab-integrations",
@@ -284,7 +336,7 @@ const defaultServiceTabs = [
       "Controlled enterprise data connectivity",
     ],
     icon: Plug,
-    video: "/images/videos-home/mcp.mp4",
+    video: "/api/assets/dummy_image/videos-home/mcp.mp4",
   },
   {
     id: "tab-handling",
@@ -320,8 +372,7 @@ const testimonials = [
     id: "card-1",
     name: "Sai Shruthi",
     role: "Agentic AI Developer",
-    image:
-      "https://ui-avatars.com/api/?name=Sai+Shruthi&background=912059&color=ffffff&bold=true",
+    image: null,
     quote:
       "WiiZ has been instrumental in bridging the gap between AI capabilities and business applications. It supports practical implementation, making it easier to deliver scalable and impactful solutions.",
   },
@@ -329,8 +380,7 @@ const testimonials = [
     id: "card-2",
     name: "Paarth",
     role: "AI Engineer",
-    image:
-      "https://ui-avatars.com/api/?name=Paarth&background=D87AAA&color=ffffff&bold=true",
+    image: null,
     quote:
       "Using WiiZ has significantly improved the way I build and manage AI workflows. The platform is intuitive yet powerful, reducing manual effort and accelerating workflow development.",
   },
@@ -338,8 +388,7 @@ const testimonials = [
     id: "card-3",
     name: "Gowtham Sai",
     role: "AI Engineer",
-    image:
-      "https://ui-avatars.com/api/?name=Gowtham+Sai&background=7a314f&color=ffffff&bold=true",
+    image: null,
     quote:
       "WiiZ redefines the integration of automation and AI through a highly intuitive and scalable platform. It transformed complex concepts into efficient real-world workflows with speed and flexibility.",
   },
@@ -347,8 +396,7 @@ const testimonials = [
     id: "card-4",
     name: "Aravind",
     role: "Software Engineer",
-    image:
-      "https://ui-avatars.com/api/?name=Aravind&background=4f2238&color=ffffff&bold=true",
+    image: null,
     quote:
       "WiiZ transforms the complexity of AI orchestration into an intuitive, streamlined process. It has been a significant catalyst in advancing my technical expertise and understanding of enterprise AI efficiency.",
   },
@@ -356,8 +404,7 @@ const testimonials = [
     id: "card-5",
     name: "Ankur",
     role: "AI Engineer",
-    image:
-      "https://ui-avatars.com/api/?name=Ankur&background=aa5b7f&color=ffffff&bold=true",
+    image: null,
     quote:
       "WiiZ is a strong platform for building AI workflows in a clear and structured way. It simplifies complex automation while still allowing full control over how systems are designed.",
   },
@@ -444,7 +491,7 @@ const faqs = [
 const audienceCards = [
   {
     title: "Enterprise Business Teams",
-    image: "/images/Product_builder.jpg",
+    image: "/api/assets/dummy_image/Product_builder.jpg",
     desc: "Adopt AI confidently across your everyday business operations with visibility, governance, and measurable performance.",
     bullets: [
       "Difficulty moving AI from pilots to daily operations",
@@ -456,7 +503,7 @@ const audienceCards = [
   },
   {
     title: "Enterprise IT & AI Governance",
-    image: "/images/Enterprice_it.jpg",
+    image: "/api/assets/dummy_image/Enterprice_it.jpg",
     desc: "Design, Deploy, Maintain centralized control, governance, security, and compliance across enterprise AI operations.",
     bullets: [
       "Shadow AI and unmanaged agents",
@@ -468,7 +515,7 @@ const audienceCards = [
   },
   {
     title: "System Integrators & Partners",
-    image: "/images/system_integrator.jpg",
+    image: "/api/assets/dummy_image/system_integrator.jpg",
     desc: "Deliver enterprise AI transformation faster with a unified orchestration and governance platform.",
     bullets: [
       "Complex enterprise integrations",
@@ -480,7 +527,7 @@ const audienceCards = [
   },
   {
     title: "Legacy Product Enhancement",
-    image: "/images/Ai_Team.jpg",
+    image: "/api/assets/dummy_image/Ai_Team.jpg",
     desc: "Enhance your existing platforms with ease using the Embedded WiiZ Platform",
     bullets: [
       "Multi-agent orchestration complexity",
@@ -519,30 +566,674 @@ function MissingArtwork({
   );
 }
 
+function WebsiteAuthorAvatar({
+  name,
+  image,
+  className = "w-12 h-12 rounded-full border border-white/10 text-xs font-bold",
+}: {
+  name: string;
+  image?: string | null;
+  className?: string;
+}) {
+  const [imgError, setImgError] = useState(false);
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : parts[0]?.slice(0, 2).toUpperCase() || "U";
+
+  useEffect(() => {
+    setImgError(false);
+  }, [image]);
+
+  const nonCircularClassName = className.replace(/\brounded-full\b/g, "");
+
+  if (!image || imgError) {
+    return (
+      <div className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#98235f] to-[#5e1439] font-bold text-white shadow-md ${className}`}>
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={image}
+      alt={name}
+      onError={() => setImgError(true)}
+      className={`shrink-0 object-cover ${nonCircularClassName}`}
+    />
+  );
+}
+
+type ServiceTab = {
+  id: string;
+  mobile: string;
+  desktop: string;
+  title: string;
+  body: string;
+  points: string[];
+  icon: React.ComponentType<{ className?: string }>;
+  mediaType: string | null;
+  mediaUrl: string | null;
+};
+
+type FeatureVideoModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  media: {
+    kind: "video" | "embed" | "image";
+    src: string;
+    title: string;
+  } | null;
+};
+
+function FeatureVideoModal({ isOpen, onClose, media }: FeatureVideoModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!mounted || !isOpen || !media) {
+    return null;
+  }
+
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 md:p-8 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="feature-video-modal-title"
+    >
+      <div
+        className="relative w-full max-w-4xl max-h-[92vh] bg-[#120F1D] border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header with Title and Close Button */}
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-white/10 bg-white/[0.03]">
+          <div className="flex items-center gap-2.5 min-w-0 pr-4">
+            <div className="w-2.5 h-2.5 rounded-full bg-secondary flex-shrink-0 animate-pulse" />
+            <h3
+              id="feature-video-modal-title"
+              className="text-sm sm:text-base md:text-lg font-semibold text-white truncate"
+            >
+              {media.title}
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 sm:p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        </div>
+
+        {/* Responsive Media Area */}
+        <div className="relative w-full bg-black flex items-center justify-center aspect-video max-h-[75vh]">
+          {media.kind === "video" ? (
+            <video
+              key={media.src}
+              src={media.src}
+              controls
+              autoPlay
+              playsInline
+              className="w-full h-full object-contain"
+            >
+              <source src={media.src} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          ) : media.kind === "embed" ? (
+            <iframe
+              src={media.src.includes("?") ? `${media.src}&autoplay=1` : `${media.src}?autoplay=1`}
+              title={media.title}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          ) : (
+            <img
+              src={media.src}
+              alt={media.title}
+              className="w-full h-full object-contain"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  return createPortal(modalContent, document.body);
+}
+
+type FeatureSliderControlsProps = {
+  serviceTabs: ServiceTab[];
+  currentIndex: number;
+  onPrev: () => void;
+  onNext: () => void;
+  onSelect: (index: number) => void;
+  className?: string;
+};
+
+function FeatureSliderControls({
+  serviceTabs,
+  currentIndex,
+  onPrev,
+  onNext,
+  onSelect,
+  className = "",
+}: FeatureSliderControlsProps) {
+  if (serviceTabs.length <= 1) return null;
+
+  return (
+    <div className={`items-center justify-center gap-3 sm:gap-4 ${className}`}>
+      <button
+        type="button"
+        onClick={onPrev}
+        className="p-2 sm:p-2.5 rounded-full bg-black/40 border border-white/15 text-white hover:bg-secondary hover:border-secondary transition-all duration-300 shadow-lg focus:outline-none focus:ring-2 focus:ring-secondary/70 cursor-pointer"
+        aria-label="Previous slide"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <div className="flex items-center gap-2 px-1 sm:px-2">
+        {serviceTabs.map((_, index) => (
+          <button
+            key={index}
+            type="button"
+            onClick={() => onSelect(index)}
+            className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+              index === currentIndex
+                ? "bg-secondary w-6"
+                : "bg-white/30 hover:bg-white/60 w-2"
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={onNext}
+        className="p-2 sm:p-2.5 rounded-full bg-black/40 border border-white/15 text-white hover:bg-secondary hover:border-secondary transition-all duration-300 shadow-lg focus:outline-none focus:ring-2 focus:ring-secondary/70 cursor-pointer"
+        aria-label="Next slide"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+type FeatureMobileDropdownProps = {
+  serviceTabs: ServiceTab[];
+  currentActiveService: string;
+  setActiveService: (id: string) => void;
+  onHoverChange?: (isHovered: boolean) => void;
+  containerRef?: React.RefObject<HTMLDivElement | null>;
+};
+
+function FeatureMobileDropdown({
+  serviceTabs,
+  currentActiveService,
+  setActiveService,
+  onHoverChange,
+  containerRef,
+}: FeatureMobileDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const activeTab = useMemo(() => {
+    return serviceTabs.find((tab) => tab.id === currentActiveService) ?? serviceTabs[0];
+  }, [serviceTabs, currentActiveService]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      onHoverChange?.(true);
+    } else {
+      onHoverChange?.(false);
+    }
+  }, [isOpen, onHoverChange]);
+
+  if (serviceTabs.length === 0) return null;
+
+  return (
+    <div
+      ref={containerRef}
+      className="md:hidden w-full max-w-md mx-auto mb-6 px-1 relative z-30"
+      onMouseEnter={() => onHoverChange?.(true)}
+      onMouseLeave={() => {
+        if (!isOpen) {
+          onHoverChange?.(false);
+        }
+      }}
+    >
+      <div ref={dropdownRef} className="relative">
+        <button
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-white/20 bg-gradient-to-r from-[#211A25]/95 to-[#120B17]/95 backdrop-blur-md text-white shadow-xl focus:outline-none focus:ring-2 focus:ring-secondary/70 transition-all duration-300 cursor-pointer group"
+        >
+          <div className="flex items-center gap-2.5 min-w-0 pr-2">
+            <span className="w-2 h-2 rounded-full bg-secondary shrink-0" />
+            <span className="text-sm sm:text-base font-semibold text-white tracking-wide truncate">
+              {activeTab?.mobile}
+            </span>
+          </div>
+          <ChevronDown
+            className={`w-5 h-5 text-gray-300 transition-transform duration-300 shrink-0 group-hover:text-white ${
+              isOpen ? "rotate-180 text-secondary" : ""
+            }`}
+          />
+        </button>
+
+        {isOpen && (
+          <div
+            role="listbox"
+            className="absolute left-0 right-0 top-full mt-2 py-2 px-1.5 rounded-xl border border-white/20 bg-[#160B18]/95 backdrop-blur-xl shadow-2xl z-50 max-h-72 overflow-y-auto hide-scrollbar space-y-1"
+          >
+            {serviceTabs.map((tab) => {
+              const isSelected = currentActiveService === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  data-active={isSelected ? "true" : "false"}
+                  onClick={() => {
+                    setActiveService(tab.id);
+                    setIsOpen(false);
+                    onHoverChange?.(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm transition-all duration-200 text-left cursor-pointer ${
+                    isSelected
+                      ? "bg-gradient-to-r from-quaternary to-[#D87AAA] text-white font-semibold shadow-md"
+                      : "text-gray-300 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <span className="truncate">{tab.mobile}</span>
+                  {isSelected && <Check className="w-4 h-4 shrink-0 text-white ml-2" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type FeatureSliderProps = {
+  serviceTabs: ServiceTab[];
+  currentActiveService: string;
+  setActiveService: (id: string) => void;
+  resolveFeatureMedia: (mediaType: string | null, mediaUrl: string | null) => ResolvedFeatureMedia | null;
+  isExternalHovered?: boolean;
+};
+
+function FeatureSlider({
+  serviceTabs,
+  currentActiveService,
+  setActiveService,
+  resolveFeatureMedia,
+  isExternalHovered = false,
+}: FeatureSliderProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [modalMedia, setModalMedia] = useState<{
+    kind: "video" | "embed" | "image";
+    src: string;
+    title: string;
+  } | null>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [sliderHeight, setSliderHeight] = useState<number | undefined>(undefined);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const activeTabIndex = serviceTabs.findIndex((tab) => tab.id === currentActiveService);
+  const currentIndex = activeTabIndex >= 0 ? activeTabIndex : 0;
+
+  const isPlaying = !isHovered && !isExternalHovered && !modalMedia;
+
+  const goToSlide = (index: number) => {
+    if (serviceTabs.length === 0) return;
+    const clampedIndex = (index + serviceTabs.length) % serviceTabs.length;
+    const targetTab = serviceTabs[clampedIndex];
+    if (targetTab) {
+      setActiveService(targetTab.id);
+    }
+  };
+
+  const goToPrev = () => {
+    goToSlide(currentIndex - 1);
+  };
+
+  const goToNext = () => {
+    goToSlide(currentIndex + 1);
+  };
+
+  useEffect(() => {
+    const activeSlide = slideRefs.current[currentIndex];
+    if (!activeSlide) return;
+
+    const updateHeight = () => {
+      if (activeSlide) {
+        setSliderHeight(activeSlide.offsetHeight);
+      }
+    };
+
+    updateHeight();
+
+    const ro = new ResizeObserver(updateHeight);
+    ro.observe(activeSlide);
+    window.addEventListener("resize", updateHeight);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, [currentIndex, serviceTabs]);
+
+  useEffect(() => {
+    if (!isPlaying || serviceTabs.length <= 1) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      const nextIndex = (currentIndex + 1) % serviceTabs.length;
+      const nextTab = serviceTabs[nextIndex];
+      if (nextTab) {
+        setActiveService(nextTab.id);
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [isPlaying, serviceTabs, currentIndex, setActiveService]);
+
+  if (serviceTabs.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div
+        ref={sliderRef}
+        className="overflow-hidden transition-[height] duration-500 ease-out"
+        style={sliderHeight ? { height: `${sliderHeight}px` } : undefined}
+      >
+        <div
+          className="flex items-start transition-transform duration-500 ease-out"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {serviceTabs.map((tab, index) => {
+            const TabIcon = tab.icon;
+            const tabMedia = resolveFeatureMedia(tab.mediaType, tab.mediaUrl);
+            return (
+              <div
+                key={tab.id}
+                ref={(el) => {
+                  slideRefs.current[index] = el;
+                }}
+                className="w-full flex-shrink-0 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 lg:gap-12 items-start content-start md:items-center px-1 sm:px-2"
+              >
+                <div className="order-1 md:order-0 flex flex-col justify-start md:justify-center py-0 md:py-0">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 lg:mb-3">
+                    <span className="md:hidden">{tab.mobile || tab.title}</span>
+                    <span className="hidden md:inline">{tab.title}</span>
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-300 mb-3 lg:mb-5 leading-relaxed">
+                    {tab.body}
+                  </p>
+                  <ul className="space-y-2 sm:space-y-2.5">
+                    {tab.points.map((point) => (
+                      <li key={point} className="flex items-start text-sm sm:text-base">
+                        <TabIcon
+                          className="w-4 h-4 sm:w-5 sm:h-5 mr-2.5 sm:mr-3 mt-0.5 flex-shrink-0 text-secondary"
+                        />
+                        <span className="text-gray-300">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="order-0 md:order-1 w-full self-start">
+                  {tabMedia ? (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() =>
+                        setModalMedia({
+                          kind: tabMedia.kind,
+                          src: tabMedia.src,
+                          title: tab.title,
+                        })
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setModalMedia({
+                            kind: tabMedia.kind,
+                            src: tabMedia.src,
+                            title: tab.title,
+                          });
+                        }
+                      }}
+                      className="group relative w-full aspect-video max-h-[340px] lg:max-h-[380px] overflow-hidden rounded-xl border border-white/10 shadow-2xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary/70 transition-all duration-300"
+                      aria-label={`Open ${tab.title} video`}
+                    >
+                      {tabMedia.kind === "video" ? (
+                        <video
+                          key={tabMedia.src}
+                          src={tabMedia.src}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          preload="auto"
+                          className="block h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        >
+                          <source src={tabMedia.src} type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      ) : tabMedia.kind === "embed" ? (
+                        <>
+                          <iframe
+                            src={tabMedia.src}
+                            title={tab.title}
+                            className="block h-full w-full pointer-events-none"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                          />
+                        </>
+                      ) : (
+                        <img
+                          src={tabMedia.src}
+                          alt={tab.title}
+                          className="block h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                        />
+                      )}
+
+                      {/* Hover Overlay with Play Button */}
+                      <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 pointer-events-none z-10">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-secondary/90 text-white flex items-center justify-center shadow-2xl backdrop-blur transform group-hover:scale-110 transition-transform duration-300">
+                          <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-white ml-0.5 text-white" />
+                        </div>
+                        <span className="text-xs font-semibold text-white bg-black/70 px-3.5 py-1 rounded-full backdrop-blur border border-white/15">
+                          Click to watch video
+                        </span>
+                      </div>
+
+                      {/* Corner Badge */}
+                      <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 z-10 pointer-events-none">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-medium text-white backdrop-blur group-hover:bg-black/80 group-hover:border-secondary transition-all">
+                          <Maximize2 className="w-3.5 h-3.5 text-secondary" />
+                          <span>Watch Video</span>
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative w-full aspect-video max-h-[340px] lg:max-h-[380px] overflow-hidden bg-[linear-gradient(145deg,#09090b_20%,#3b1429_65%,#a0386c_100%)] rounded-xl">
+                      <div className="absolute inset-0 bg-[url('/images/texture.png')] bg-cover bg-center opacity-20" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      <div className="relative z-10 flex h-full items-center justify-center p-6 text-center">
+                        <div className="text-xl sm:text-2xl font-bold text-white">
+                          {tab.desktop}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <FeatureSliderControls
+        serviceTabs={serviceTabs}
+        currentIndex={currentIndex}
+        onPrev={goToPrev}
+        onNext={goToNext}
+        onSelect={goToSlide}
+        className="hidden md:flex mt-6 sm:mt-8"
+      />
+
+
+      {/* Video Modal Popup */}
+      <FeatureVideoModal
+        isOpen={Boolean(modalMedia)}
+        onClose={() => setModalMedia(null)}
+        media={modalMedia}
+      />
+    </div>
+  );
+}
+
 export default function HomePage({
   managedContent,
   heroSection,
   homeFeatures = [],
+  homeFeatureHeader = null,
   homeUseCases = [],
+  homeUseCaseHeader = null,
+  homeTestimonialHeader = null,
+  homeTestimonials = [],
+  homeFaqHeader = null,
+  homeFaqs = [],
+  homeAiAdoptionHeader = null,
+  homeAiAdoptionCards = [],
+  sectionOrder = DEFAULT_HOME_SECTION_ORDER,
 }: HomePageProps) {
+  const orderedSections = sectionOrder.length > 0 ? sectionOrder : DEFAULT_HOME_SECTION_ORDER;
   const hero = managedContent.hero;
-  const serviceTabs = homeFeatures.length
-    ? homeFeatures.map((feature) => ({
-      id: `feature-${feature.id}`,
-      mobile: feature.label,
-      desktop: feature.label,
-      title: feature.title,
-      body: feature.description ?? "",
-      points: feature.features,
-      icon: Check,
-      mediaType: feature.mediaType,
-      mediaUrl: feature.mediaUrl,
-    }))
-    : defaultServiceTabs.map((tab) => ({
-      ...tab,
-      mediaType: tab.video ? "video" : null,
-      mediaUrl: tab.video ?? null,
-    }));
+  const activeTestimonials = homeTestimonials.length
+    ? homeTestimonials.map((item) => ({
+        id: `card-${item.id}`,
+        name: item.name,
+        role: item.role,
+        image: item.image
+          ? /^(testimonials|trusted-by|hero|blog|feature|impact)\//i.test(item.image)
+            ? `/api/media/${item.image}`
+            : item.image
+          : null,
+        quote: item.quote,
+      }))
+    : testimonials;
+  const serviceTabs = useMemo(() => {
+    return homeFeatures.length
+      ? homeFeatures.map((feature) => {
+          let mediaType = feature.mediaType;
+          let mediaUrl = feature.mediaUrl;
+
+          // Provide matching fallback video if mediaUrl is missing or points to legacy wiiz.it
+          if (!mediaUrl || mediaUrl.includes("wiiz.it/assets/img/videos/")) {
+            mediaType = "video";
+            const lowerLabel = (feature.label + " " + feature.title).toLowerCase();
+            if (lowerLabel.includes("workflow") || lowerLabel.includes("builder")) {
+              mediaUrl = "/api/assets/dummy_image/videos-home/workflow-builder.mp4";
+            } else if (lowerLabel.includes("guardrail")) {
+              mediaUrl = "/api/assets/dummy_image/videos-home/guardrail.mp4";
+            } else if (lowerLabel.includes("mcp") || lowerLabel.includes("integrat")) {
+              mediaUrl = "/api/assets/dummy_image/videos-home/mcp.mp4";
+            } else {
+              mediaUrl = "/api/assets/dummy_image/videos-home/multi-agent.mp4";
+            }
+          }
+
+          return {
+            id: `feature-${feature.id}`,
+            mobile: feature.label,
+            desktop: feature.label,
+            title: feature.title,
+            body: feature.description ?? "",
+            points: feature.features,
+            icon: Check,
+            mediaType,
+            mediaUrl,
+          };
+        })
+      : defaultServiceTabs.map((tab) => ({
+          ...tab,
+          mediaType: tab.video ? "video" : null,
+          mediaUrl: tab.video ?? null,
+        }));
+  }, [homeFeatures]);
   const heroPrimaryButton =
     hero.buttons.find((button) => button.variant === "primary") ?? hero.buttons[0];
   const heroSecondaryButton =
@@ -561,14 +1252,54 @@ export default function HomePage({
   const currentActiveService = serviceTabs.some((tab) => tab.id === activeService)
     ? activeService
     : serviceTabs[0]?.id ?? "";
-  const testimonialLoopOffset = testimonials.length * 2;
-  const testimonialLoopItems = [
-    ...testimonials,
-    ...testimonials,
-    ...testimonials,
-    ...testimonials,
-    ...testimonials,
-  ];
+  const [isTabsHovered, setIsTabsHovered] = useState(false);
+  const mobileTabsRef = useRef<HTMLDivElement | null>(null);
+  const desktopTabsRef = useRef<HTMLDivElement | null>(null);
+
+  const activeFeatureIndex = serviceTabs.findIndex((tab) => tab.id === currentActiveService);
+  const currentFeatureIndex = activeFeatureIndex >= 0 ? activeFeatureIndex : 0;
+
+  const goToFeatureSlide = (index: number) => {
+    if (serviceTabs.length === 0) return;
+    const clampedIndex = (index + serviceTabs.length) % serviceTabs.length;
+    const targetTab = serviceTabs[clampedIndex];
+    if (targetTab) {
+      setActiveService(targetTab.id);
+    }
+  };
+
+  const goToPrevFeature = () => {
+    goToFeatureSlide(currentFeatureIndex - 1);
+  };
+
+  const goToNextFeature = () => {
+    goToFeatureSlide(currentFeatureIndex + 1);
+  };
+
+  useEffect(() => {
+    if (serviceTabs.length > 0 && !serviceTabs.some((tab) => tab.id === activeService)) {
+      setActiveService(serviceTabs[0].id);
+    }
+  }, [serviceTabs, activeService]);
+
+  useEffect(() => {
+    const scrollActiveTabIntoView = (container: HTMLDivElement | null) => {
+      if (!container || container.scrollWidth <= container.clientWidth) return;
+      const activeBtn = container.querySelector<HTMLElement>('[data-active="true"]');
+      if (activeBtn) {
+        const left = activeBtn.offsetLeft - container.clientWidth / 2 + activeBtn.clientWidth / 2;
+        container.scrollTo({ left, behavior: "smooth" });
+      }
+    };
+
+    scrollActiveTabIntoView(mobileTabsRef.current);
+    scrollActiveTabIntoView(desktopTabsRef.current);
+  }, [currentActiveService]);
+  const testimonialLoopOffset = activeTestimonials.length * 2;
+  // Limit duplication - only 3 copies needed for smooth looping
+  const testimonialLoopItems = useMemo(() => {
+    return [...activeTestimonials, ...activeTestimonials, ...activeTestimonials];
+  }, [activeTestimonials]);
   const [activeTestimonial, setActiveTestimonial] = useState(
     testimonialLoopOffset,
   );
@@ -577,6 +1308,10 @@ export default function HomePage({
   );
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showAllFaqs, setShowAllFaqs] = useState(false);
+  const activeFaqs = homeFaqs.length
+    ? homeFaqs.map((f) => ({ question: f.question, answer: f.answer }))
+    : faqs;
+  const visibleFaqs = showAllFaqs ? activeFaqs : activeFaqs.slice(0, 5);
   const testimonialTabsRef = useRef<HTMLDivElement | null>(null);
   const testimonialBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const mobileTestimonialsRef = useRef<HTMLDivElement | null>(null);
@@ -584,26 +1319,22 @@ export default function HomePage({
   const mobileHasInitializedRef = useRef(false);
   const mobileIsSyncingRef = useRef(false);
   const currentTestimonial =
-    testimonials[activeTestimonial % testimonials.length];
+    activeTestimonials[activeTestimonial % activeTestimonials.length] ?? activeTestimonials[0];
   const currentMobileTestimonial =
-    testimonials[mobileActiveTestimonial % testimonials.length];
+    activeTestimonials[mobileActiveTestimonial % activeTestimonials.length] ?? activeTestimonials[0];
 
   useEffect(() => {
-    AOS.init({ duration: 800, once: false, offset: 100, mirror: true });
+    AOS.init({ duration: 800, once: true, offset: 100, mirror: false });
   }, []);
 
   useEffect(() => {
     const id = window.setInterval(() => {
       setActiveTestimonial((prev) => prev + 1);
-    }, 2500);
-    return () => window.clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
       setMobileActiveTestimonial((prev) => prev + 1);
     }, 2500);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+    };
   }, []);
 
   useEffect(() => {
@@ -762,15 +1493,13 @@ export default function HomePage({
     }, 120);
   };
 
-  const visibleFaqs = faqs.slice(0, 3);
-
-  return (
-    <>
+  const sectionsByKey: Record<string, ReactNode> = {
+    HERO: (
       <main className="bg-[#1D0612] min-h-[70vh] lg:min-h-[calc(100vh-80px)] flex items-center justify-center relative overflow-hidden px-4 py-8 md:py-20 font-sans">
         {heroBackgroundMedia ? (
           <div className="absolute inset-0">
             {isVideoMedia(heroBackgroundMedia) ? (
-              <video className="h-full w-full object-cover opacity-55" autoPlay muted loop playsInline>
+              <video className="h-full w-full object-cover opacity-55" autoPlay muted loop playsInline preload="metadata">
                 <source src={heroBackgroundMedia} />
               </video>
             ) : (
@@ -778,6 +1507,7 @@ export default function HomePage({
                 src={heroBackgroundMedia}
                 alt={resolvedHeroHeading}
                 fill
+                unoptimized
                 className="object-cover opacity-55"
                 sizes="100vw"
               />
@@ -830,45 +1560,13 @@ export default function HomePage({
           </div>
         </div>
       </main>
+    ),
+    TRUSTED_BY: (
+      <TrustedBySection />
+    ),
 
-      <section className="border-y border-gray-200 bg-white flex items-stretch font-sans">
-        <div className="container mx-auto flex items-center justify-start w-full overflow-hidden relative py-6 md:py-8 lg:py-10">
-          <div className="flex-shrink-0 hidden md:flex items-center justify-center w-40 xl:w-64 border-r border-gray-200 bg-white z-10">
-            <span className="text-sm md:text-base font-medium text-gray-800 tracking-[0.15em] uppercase">
-              Trusted By
-            </span>
-          </div>
-          <div className="flex-1 flex items-center overflow-hidden relative">
-            <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-            <div className="flex animate-scroll whitespace-nowrap items-center w-max">
-              {[0, 1].map((copy) => (
-                <div
-                  key={copy}
-                  className="flex items-center space-x-12 md:space-x-10 px-6 md:px-8"
-                >
-                  {partnerLogos.map((partner, index) => (
-                    <span
-                      key={`${copy}-${partner.name}-${partner.logoPath}-${index}`}
-                      className="relative flex h-10 w-36 items-center justify-center md:h-12 md:w-44"
-                    >
-                      <Image
-                        src={partner.logoPath}
-                        alt={`${partner.name} logo`}
-                        fill
-                        sizes="176px"
-                        className={`object-contain transition-transform ${partner.homepageLogoClassName ?? ""}`}
-                      />
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-primary py-10 md:py-16 xl:py-24 relative overflow-hidden font-sans">
+    FEATURES: (
+      <section className="bg-primary py-10 md:py-12 xl:py-16 relative overflow-hidden font-sans">
         <div className="absolute top-0 left-0 w-full max-w-[500px] h-full bg-[url('/images/side-left.png')] bg-no-repeat bg-left-top pointer-events-none" />
         <div className="absolute top-0 right-0 w-full max-w-[500px] h-full bg-[url('/images/side-right.png')] bg-no-repeat bg-right-top pointer-events-none" />
         <div className="md:block hidden absolute top-1/2 -translate-y-1/2 left-0 -translate-x-1/2 w-[400px] h-[400px] bg-quaternary/10 rounded-[50%] blur-[60px] pointer-events-none z-0" />
@@ -880,38 +1578,40 @@ export default function HomePage({
               data-aos-duration="700"
               className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 md:mb-4 tracking-tight"
             >
-              Everything you need to move from prototype to production
+              {homeFeatureHeader?.heading?.trim() || "Everything you need to move from prototype to production"}
             </h2>
             <p
               data-aos="fade-up"
               data-aos-delay="150"
               className="text-base md:text-lg font-light text-[#EBEBEB] md:px-20"
             >
-              WiiZ brings together the core capabilities required to Orchestrate enterprise AI agents at scale.
+              {homeFeatureHeader?.description?.trim() ||
+                "WiiZ brings together the core capabilities required to Orchestrate enterprise AI agents at scale."}
             </p>
           </div>
-          <div className="flex md:hidden flex-wrap justify-center gap-2 items-center w-max mx-auto mb-8 overflow-x-auto max-w-full hide-scrollbar">
-            {serviceTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveService(tab.id)}
-                className={`px-4 py-2 rounded-full text-sm border border-white/10 transition-all duration-300 ${currentActiveService === tab.id ? "text-white bg-gradient-to-r from-quaternary to-[#D87AAA] shadow-lg bg-black/30" : "text-[#DFDFDF] bg-black/30 hover:text-white"}`}
-              >
-                {tab.mobile}
-              </button>
-            ))}
-          </div>
+          <FeatureMobileDropdown
+            serviceTabs={serviceTabs}
+            currentActiveService={currentActiveService}
+            setActiveService={setActiveService}
+            onHoverChange={setIsTabsHovered}
+            containerRef={mobileTabsRef}
+          />
           <div
             data-aos="fade-up"
             data-aos-delay="300"
             className="bg-gradient-to-t from-[#FFFFFF0D] to-[#0D0A1947] backdrop-blur-lg border border-white/20 rounded-2xl md:rounded-2xl md:rounded-3xl p-4 md:p-4 lg:p-10 shadow-2xl relative"
           >
-            <div className="hidden md:flex flex-wrap justify-center items-center bg-black/30 rounded-full p-2 xl:p-2 lg:w-max lg:mx-auto mb-6 lg:mb-12 border border-white/5 overflow-x-auto max-w-full">
+            <div
+              ref={desktopTabsRef}
+              onMouseEnter={() => setIsTabsHovered(true)}
+              onMouseLeave={() => setIsTabsHovered(false)}
+              className="hidden md:flex flex-wrap justify-center items-center bg-black/30 rounded-full p-2 xl:p-2 lg:w-max lg:mx-auto mb-6 lg:mb-12 border border-white/5 overflow-x-auto max-w-full"
+            >
               {serviceTabs.map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
+                  data-active={currentActiveService === tab.id ? "true" : "false"}
                   onClick={() => setActiveService(tab.id)}
                   className={`px-2 lg:px-5 xl:px-6 py-2 lg:py-2.5 rounded-full text-base md:text-[13px] lg:text-sm transition-all duration-300 ${currentActiveService === tab.id ? "text-white bg-gradient-to-r from-quaternary to-[#D87AAA] shadow-lg" : "text-[#DFDFDF] hover:text-white"}`}
                 >
@@ -919,98 +1619,33 @@ export default function HomePage({
                 </button>
               ))}
             </div>
-            <div className="relative grid grid-cols-1 grid-rows-1 w-full items-start">
-              {serviceTabs.map((tab) => {
-                const Icon = tab.icon;
-                const active = currentActiveService === tab.id;
-                const resolvedMedia = resolveFeatureMedia(tab.mediaType, tab.mediaUrl);
-                return (
-                  <div
-                    key={tab.id}
-                    className={`row-start-1 col-start-1 grid md:grid-cols-2 gap-0 md:gap-12 items-center md:items-stretch transition-all duration-500 ${active ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"}`}
-                  >
-                    <div className="order-1 md:order-0 flex flex-col justify-center py-4 md:py-0">
-                      <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2 lg:mb-4">
-                        {tab.title}
-                      </h3>
-                      <p className="text-gray-300 mb-4 lg:mb-8 leading-relaxed">
-                        {tab.body}
-                      </p>
-                      <ul className="space-y-2 lg:space-y-4">
-                        {tab.points.map((point) => (
-                          <li key={point} className="flex items-start">
-                            <Icon
-                              className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-secondary"
-                            />
-                            <span className="text-gray-300">{point}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="order-0 md:order-1 h-full min-h-[260px] overflow-hidden">
-                      {resolvedMedia ? (
-                        <div className="relative h-[260px] w-full overflow-hidden rounded-xl border border-white/10 shadow-2xl md:h-full md:min-h-[320px] md:max-h-[460px]">
-                          {resolvedMedia.kind === "video" ? (
-                            <video
-                              autoPlay
-                              loop
-                              muted
-                              playsInline
-                              className="block h-full w-full max-w-full object-cover"
-                            >
-                              <source src={resolvedMedia.src} type="video/mp4" />
-                              Your browser does not support the video tag.
-                            </video>
-                          ) : resolvedMedia.kind === "embed" ? (
-                            <>
-                              <iframe
-                                src={resolvedMedia.src}
-                                title={tab.title}
-                                className="block h-full min-h-[260px] w-full max-w-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerPolicy="strict-origin-when-cross-origin"
-                                allowFullScreen
-                              />
-                              <div className="absolute bottom-3 right-3">
-                                <Link
-                                  href={tab.mediaUrl ?? resolvedMedia.src}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex items-center rounded-full border border-white/15 bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur"
-                                >
-                                  Open media
-                                </Link>
-                              </div>
-                            </>
-                          ) : (
-                            <img
-                              src={resolvedMedia.src}
-                              alt={tab.title}
-                              className="block h-full w-full max-w-full object-cover object-center"
-                            />
-                          )}
-                        </div>
-                      ) : (
-                        <div className="relative h-full w-full overflow-hidden bg-[linear-gradient(145deg,#09090b_20%,#3b1429_65%,#a0386c_100%)] rounded-xl">
-                          <div className="absolute inset-0 bg-[url('/images/texture.png')] bg-cover bg-center opacity-20" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                          <div className="relative z-10 flex h-full min-h-[260px] items-center justify-center p-8 text-center">
-                            <div className="text-2xl font-bold text-white">
-                              {tab.desktop}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <FeatureSlider
+              serviceTabs={serviceTabs}
+              currentActiveService={currentActiveService}
+              setActiveService={setActiveService}
+              resolveFeatureMedia={resolveFeatureMedia}
+              isExternalHovered={isTabsHovered}
+            />
+          </div>
+
+          <div
+            onMouseEnter={() => setIsTabsHovered(true)}
+            onMouseLeave={() => setIsTabsHovered(false)}
+          >
+            <FeatureSliderControls
+              serviceTabs={serviceTabs}
+              currentIndex={currentFeatureIndex}
+              onPrev={goToPrevFeature}
+              onNext={goToNextFeature}
+              onSelect={goToFeatureSlide}
+              className="flex md:hidden mt-6"
+            />
           </div>
         </div>
       </section>
-
-      <section className="bg-primary py-10 md:py-16 xl:py-24 relative overflow-hidden font-sans">
+    ),
+    USE_CASES: (
+      <section className="bg-primary py-10 md:py-12 xl:py-16 relative overflow-hidden font-sans">
         {/* <div className="absolute top-0 md:top-1/2 md:left-0 -translate-y-1/2 -translate-x-1/2 w-full h-[70%] md:h-[80%] md:w-[80%] lg:w-[88%] lg:h-[88%] bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
         <div className="absolute top-0 md:top-1/2 md:right-0 -translate-y-1/2 translate-x-1/2 w-full h-[70%] md:h-[80%] md:w-[80%] lg:w-[88%] lg:h-[88%] bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" /> */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -1021,22 +1656,21 @@ export default function HomePage({
             <div className="flex flex-col md:items-start items-center">
               <div className="inline-block px-3 py-1 rounded-full border border-white/40 bg-[#211A2533] mb-2 md:mb-4">
                 <span className="text-[12px] font-bold text-secondary tracking-widest uppercase">
-                  Use Cases
+                  {homeUseCaseHeader?.badgeText || "Use Cases"}
                 </span>
               </div>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center md:text-left text-white tracking-tight">
-                Leaderboard of WiiZ Built AI Agents
+                {homeUseCaseHeader?.heading || "Leaderboard of WiiZ Built AI Agents"}
               </h2>
               <p className="text-base lg:text-lg mt-3 text-center md:text-left font-light text-[#EBEBEB]">
-                Examples of AI agents built on WiiZ for real enterprise
-                workflows.
+                {homeUseCaseHeader?.description || "Examples of AI agents built on WiiZ for real enterprise workflows."}
               </p>
             </div>
             <Link
-              href="/ai-agents"
+              href={homeUseCaseHeader?.buttonUrl || "/ai-agents"}
               className="flex-shrink-0 hidden md:inline-flex items-center justify-center border border-secondary text-secondary hover:bg-secondary hover:text-primary px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 group"
             >
-              View All Agents
+              {homeUseCaseHeader?.buttonText || "View All Agents"}
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -1172,17 +1806,18 @@ export default function HomePage({
 
           <div className="md:hidden flex w-full items-center justify-center">
             <Link
-              href="/ai-agents"
+              href={homeUseCaseHeader?.buttonUrl || "/ai-agents"}
               className="inline-flex items-center justify-center border border-secondary text-secondary hover:bg-secondary hover:text-primary px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 mt-6 group"
             >
-              View All Agents
+              {homeUseCaseHeader?.buttonText || "View All Agents"}
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
       </section>
-
-      <section className="bg-primary py-8 md:py-12 xl:py-20 relative overflow-hidden font-sans">
+    ),
+    AI_ADOPTION: (
+      <section className="bg-primary py-8 md:py-12 xl:py-16 relative overflow-hidden font-sans">
         <div className="absolute top-0 md:top-1/2 md:left-0 -translate-y-1/2 -translate-x-1/2 w-full lg:w-[65%] h-[45%] md:h-[60%] lg:h-[65%] bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
         <div className="absolute top-0 md:top-1/2 md:right-0 -translate-y-1/2 translate-x-1/2 w-full lg:w-[65%] h-[45%] md:h-[60%] lg:h-[65%] bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -1191,14 +1826,33 @@ export default function HomePage({
             className="text-center max-w-3xl mx-auto mb-8 md:mb-16"
           >
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 md:mb-4 tracking-tight">
-              Accelerating Enterprise AI Adoption{" "}
-              <span className="text-secondary"></span>
+              {homeAiAdoptionHeader?.heading || "Accelerating Enterprise AI Adoption"}
             </h2>
+            {homeAiAdoptionHeader?.description ? (
+              <p className="text-base text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                {homeAiAdoptionHeader.description}
+              </p>
+            ) : null}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-6 xl:gap-8">
-            {audienceCards.map((card) => (
+            {(homeAiAdoptionCards.length > 0
+              ? homeAiAdoptionCards.map((c) => ({
+                  title: c.title,
+                  image: c.image,
+                  desc: c.description,
+                  cta: c.ctaText || "Book an Appointment",
+                  ctaUrl: c.ctaUrl || "/contact",
+                }))
+              : audienceCards.map((c) => ({
+                  title: c.title,
+                  image: c.image,
+                  desc: c.desc,
+                  cta: c.cta,
+                  ctaUrl: audienceCardCtaHrefMap[c.cta] ?? "/register",
+                }))
+            ).map((card, idx) => (
               <div
-                key={card.title}
+                key={card.title + idx}
                 className="rounded-2xl md:rounded-3xl overflow-hidden flex flex-col bg-[#2b1c27] border border-white/5 shadow-2xl"
               >
                 <div className="h-[260px] sm:h-[200px] xl:h-[220px] lg:h-[150px] relative">
@@ -1207,6 +1861,7 @@ export default function HomePage({
                       src={card.image}
                       alt={card.title}
                       fill
+                      unoptimized
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 50vw"
                     />
@@ -1221,19 +1876,9 @@ export default function HomePage({
                   <p className="mb-2 md:mb-4 text-base text-gray-300 text-center">
                     {card.desc}
                   </p>
-                  {/* <ul className="space-y-3 lg:space-y-6">
-                    {card.bullets.map((item) => (
-                      <li key={item} className="flex items-start">
-                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-secondary mr-2 sm:mr-4 mt-1 flex-shrink-0" />{" "}
-                        <span className="text-gray-300 text-sm md:text-base">
-                          {item}
-                        </span>
-                      </li>
-                    ))}
-                  </ul> */}
                   <div className="mt-auto pt-6 text-center">
                     <WebsiteCtaButton
-                      href={audienceCardCtaHrefMap[card.cta] ?? "/register"}
+                      href={card.ctaUrl}
                       fallbackHref="/register"
                       className="inline-flex w-fit items-center justify-center bg-gradient-to-r from-tertiary to-quaternary text-white hover:text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-sm font-semibold transition-all duration-300"
                     >
@@ -1246,7 +1891,8 @@ export default function HomePage({
           </div>
         </div>
       </section>
-
+    ),
+    OPERATIONALIZE: (
       <section className="bg-primary py-4 md:py-10 lg:py-20 relative overflow-hidden font-sans">
         <div className="container mx-auto px-4 sm:px-6 lg:px-20 relative z-10">
           <div className="relative bg-gradient-to-t to-[#4639418F] from-[#4921421A] border border-white/5 rounded-[1rem] md:rounded-[2rem] py-12 px-6 sm:px-10 md:py-12 lg:py-20 shadow-[inset_0_12px_12px_-12px_#FF8E5D4D] flex flex-col items-center text-center overflow-hidden">
@@ -1410,26 +2056,30 @@ export default function HomePage({
                 <div className="grid grid-cols-4 gap-3 mt-5 justify-items-center" data-aos="fade-up"
                   data-aos-delay="100">
                   <img
-                    src="/images/certificates/iso27001.png"
-                    alt=""
+                    src="/api/assets/dummy_image/certificates/iso27001.png"
+                    alt="ISO 27001 Certified"
+                    loading="lazy"
                     className="rounded-full md:w-20 md:h-20 h-16 w-16 object-cover"
                   />
 
                   <img
-                    src="/images/certificates/hippa.jpg"
-                    alt=""
+                    src="/api/assets/dummy_image/certificates/hippa.jpg"
+                    alt="HIPAA Compliant"
+                    loading="lazy"
                     className="rounded-full md:w-20 md:h-20 h-16 w-16 object-cover"
                   />
 
                   <img
-                    src="/images/certificates/gdpr.png"
-                    alt=""
+                    src="/api/assets/dummy_image/certificates/gdpr.png"
+                    alt="GDPR Compliant"
+                    loading="lazy"
                     className="rounded-full md:w-20 md:h-20 h-16 w-16 object-cover"
                   />
 
                   <img
-                    src="/images/certificates/aicpa.png"
-                    alt=""
+                    src="/api/assets/dummy_image/certificates/aicpa.png"
+                    alt="AICPA SOC 2 Certified"
+                    loading="lazy"
                     className="rounded-full md:w-20 md:h-20 h-16 w-16 object-cover"
                   />
                 </div>
@@ -1479,7 +2129,8 @@ export default function HomePage({
           </div>
         </div> */}
       </section>
-
+    ),
+    TESTIMONIALS: (
       <section className="bg-primary py-8 md:py-12 xl:py-20 relative overflow-hidden font-sans bg-gray-900">
         <div className="hidden md:block absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 w-[150%] lg:w-[90%] h-full bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
         <div className="hidden md:block absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 w-[150%] lg:w-[90%] h-full bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
@@ -1489,37 +2140,36 @@ export default function HomePage({
               className="flex flex-col justify-center items-center md:items-start "
               data-aos="fade-right"
             >
-              <div className="inline-flex max-w-[120px] px-3 py-1 rounded-full border border-white/30 bg-[#211A2533] mb-4">
-                <span className="text-[12px] font-bold text-secondary tracking-widest uppercase">
-                  TESTIMONIAL
+              <div className="inline-flex max-w-[180px] px-3.5 py-1 rounded-full border border-[#5E4A47] bg-[#211A2533] mb-4">
+                <span className="text-[12px] font-bold text-[#E68F17] tracking-widest uppercase">
+                  {homeTestimonialHeader?.badgeText?.trim() || "TESTIMONIAL"}
                 </span>
               </div>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 md:mb-6 leading-tight font-sans text-center md:text-left">
-                What our
-                <br />
-                builders say
+                {homeTestimonialHeader?.heading?.trim() || "What our builders say"}
               </h2>
-              <p className="text-base md:text-lg text-gray-300 max-w-lg lg:max-w-md font-sans text-center md:text-left">
-                Real feedback from engineers and developers building practical
-                AI workflows with WiiZ.
+              <p className="text-base md:text-lg text-gray-300 max-w-lg lg:max-w-md font-sans text-center md:text-left font-light">
+                {homeTestimonialHeader?.description?.trim() ||
+                  "Real feedback from engineers and developers building practical AI workflows with WiiZ."}
               </p>
             </div>
+
             <div
               className="relative w-full h-full hidden md:flex items-center mt-16 lg:mt-0"
               data-aos="fade-left"
               data-aos-delay="100"
             >
-              {testimonials.map((item) => (
+              {activeTestimonials.map((item) => (
                 <div
                   key={item.id}
                   className={`absolute w-full transition-all duration-500 ${item.id === currentTestimonial.id ? "opacity-100 translate-y-0 z-10" : "opacity-0 translate-y-4 pointer-events-none z-0"}`}
                 >
                   <div className="bg-gradient-to-t from-[#2A0E1C] to-[#00000000] border border-white/10 rounded-xl md:rounded-2xl p-6 lg:p-10 shadow-2xl lg:h-[320px] h-[240px] overflow-hidden">
                     <div className="flex items-center gap-4 mb-6">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-12 h-12 rounded-full border border-white/10 object-cover"
+                      <WebsiteAuthorAvatar
+                        name={item.name}
+                        image={item.image}
+                        className="w-12 h-12 rounded-full border border-white/10"
                       />
                       <div>
                         <h4 className="text-white font-semibold text-lg">
@@ -1550,10 +2200,10 @@ export default function HomePage({
                   >
                     <div className="min-h-[200px] bg-gradient-to-t from-[#2A0E1C] to-[#00000000] border border-white/10 rounded-[1rem] md:rounded-[1.5rem] p-6 shadow-xl">
                       <div className="flex items-center gap-4 mb-4">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-10 h-10 rounded-full object-cover"
+                        <WebsiteAuthorAvatar
+                          name={item.name}
+                          image={item.image}
+                          className="w-10 h-10 rounded-full"
                         />
                         <div className="flex flex-col">
                           <h3 className="text-[16px] font-semibold text-white leading-tight">
@@ -1572,7 +2222,7 @@ export default function HomePage({
                 ))}
               </div>
               <div className="mt-5 flex justify-center gap-2">
-                {testimonials.map((item) => {
+                {activeTestimonials.map((item) => {
                   const isActive = item.id === currentMobileTestimonial.id;
 
                   return (
@@ -1583,7 +2233,7 @@ export default function HomePage({
                       onClick={() =>
                         setMobileActiveTestimonial(
                           testimonialLoopOffset +
-                          testimonials.findIndex(
+                          activeTestimonials.findIndex(
                             (testimonial) => testimonial.id === item.id,
                           ),
                         )
@@ -1609,7 +2259,7 @@ export default function HomePage({
               className="flex overflow-x-auto snap-x snap-mandatory cursor-grab select-none no-scrollbar transition-all"
             >
               {testimonialLoopItems.map((item, index) => {
-                const normalizedIndex = index % testimonials.length;
+                const normalizedIndex = index % activeTestimonials.length;
                 const active = index === activeTestimonial;
                 return (
                   <button
@@ -1625,10 +2275,10 @@ export default function HomePage({
                     }
                     className={`group flex-shrink-0 w-full md:w-1/3 xl:w-1/5 flex items-center gap-4 px-8 py-4 border-b-2 snap-start transition-all ${active ? "bg-gradient-to-t from-white/15 to-transparent border-secondary" : "hover:bg-white/5 border-transparent"}`}
                   >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className={`w-12 h-12 rounded-full border-2 object-cover transition-colors ${active ? "border-secondary/50" : "border-transparent"}`}
+                    <WebsiteAuthorAvatar
+                      name={item.name}
+                      image={item.image}
+                      className={`w-12 h-12 rounded-full border-2 transition-colors ${active ? "border-secondary/50" : "border-transparent"}`}
                     />
                     <div className="text-left overflow-hidden">
                       <span className="block text-white font-medium truncate">
@@ -1645,45 +2295,46 @@ export default function HomePage({
           </div>
         </div>
       </section>
-
+    ),
+    FAQS: (
       <section className="bg-primary py-8 md:py-12 lg:py-24 font-sans bg-gray-900 font-sans">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12">
             <div className="col-span-1 md:col-span-5 pr-0 md:pr-12">
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 md:mb-6 tracking-tight leading-[1.1] text-center md:text-left">
-                Frequently Asked
-                <br />
-                Questions
+                {homeFaqHeader?.heading?.trim() || "Frequently Asked Questions"}
               </h2>
+              {homeFaqHeader?.description ? (
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed hidden md:block">
+                  {homeFaqHeader.description}
+                </p>
+              ) : null}
             </div>
             <div className="col-span-1 md:col-span-7 gap-3 md:gap-0 flex flex-col md:border-t border-white/10">
               {visibleFaqs.map((item, index) => {
-                const actualIndex = faqs.findIndex(
-                  (faq) => faq.question === item.question,
-                );
-                const open = openFaq === actualIndex;
+                const open = openFaq === index;
                 return (
                   <div
-                    key={item.question}
+                    key={`${item.question}-${index}`}
                     className="border md:border-0 rounded-xl md:rounded-none md:border-b border-white/10 faq-item px-4 md:px-0 bg-gradient-to-r from-[#B15081b8] to-[#632243b8] md:bg-none"
                     data-aos="fade-up"
                     data-aos-delay={index * 100}
                   >
                     <button
                       type="button"
-                      onClick={() => setOpenFaq(open ? null : actualIndex)}
-                      className="w-full flex justify-between items-center py-3 md:py-6 text-left group focus:outline-none"
+                      onClick={() => setOpenFaq(open ? null : index)}
+                      className="w-full flex justify-between items-center py-3 md:py-6 text-left group focus:outline-none cursor-pointer"
                     >
                       <span className="font-sans text-base md:text-lg text-gray-200 group-hover:text-white transition-colors duration-200">
                         {item.question}
                       </span>
                       <ChevronDown
-                        className={`w-5 h-5 text-[#D1CECE] transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+                        className={`w-5 h-5 text-[#D1CECE] shrink-0 ml-4 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
                       />
                     </button>
                     <div
                       className="overflow-hidden transition-all duration-300 ease-in-out"
-                      style={{ maxHeight: open ? 160 : 0 }}
+                      style={{ maxHeight: open ? 300 : 0 }}
                     >
                       <p className="font-sans pb-6 text-gray-300 text-base leading-relaxed">
                         {item.answer}
@@ -1695,32 +2346,39 @@ export default function HomePage({
               <div
                 className="mt-4 md:mt-8 flex justify-center md:justify-end"
                 data-aos="fade-up"
-                data-aos-delay="500"
+                data-aos-delay="300"
               >
                 <button
                   type="button"
-                  onClick={() => window.dispatchEvent(new Event(WEBSITE_CHATBOT_OPEN_EVENT))}
-                  className="flex items-center gap-2 text-sm md:text-base px-6 py-2 md:py-2.5 rounded-full border border-white/20 text-white font-medium hover:bg-white/10 transition-colors duration-300 focus:outline-none"
+                  onClick={() => {
+                    if (activeFaqs.length > 5) {
+                      setShowAllFaqs(!showAllFaqs);
+                    } else {
+                      window.dispatchEvent(new Event(WEBSITE_CHATBOT_OPEN_EVENT));
+                    }
+                  }}
+                  className="flex items-center gap-2 text-sm md:text-base px-6 py-2 md:py-2.5 rounded-full border border-white/20 text-white font-medium hover:bg-white/10 transition-colors duration-300 focus:outline-none cursor-pointer"
                 >
-                  <span>View More</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <span>{activeFaqs.length > 5 && showAllFaqs ? "Show Less" : "View More"}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${activeFaqs.length > 5 && showAllFaqs ? "rotate-180" : ""}`} />
                 </button>
               </div>
             </div>
           </div>
         </div>
       </section>
-
+    ),
+    CTA: (
       <section className="relative min-h-[380px] overflow-hidden bg-primary px-4 py-12 font-sans flex items-center justify-center sm:min-h-[420px] sm:py-14 md:min-h-[450px] md:py-12 lg:py-24">
         <div className="absolute top-1/2 left-0 h-[120px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] bg-quaternary blur-[60px] pointer-events-none z-0 sm:w-[360px] md:w-[400px]" />
         <div className="absolute top-1/2 right-0 h-[120px] w-[260px] translate-x-1/2 -translate-y-1/2 rounded-[50%] bg-quaternary blur-[60px] pointer-events-none z-0 sm:w-[360px] md:w-[400px]" />
         <div className="absolute top-1/2 left-0 h-full w-[220%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_70%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_70%)] z-0 sm:w-[150%] lg:w-[86%]" />
         <div className="absolute top-1/2 right-0 h-full w-[220%] translate-x-1/2 -translate-y-1/2 rounded-full bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_70%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_70%)] z-0 sm:w-[150%] lg:w-[86%]" />
         <div className="absolute left-0 top-1/2 hidden w-[110px] -translate-y-1/2 pointer-events-none z-0 sm:block md:w-[150px] lg:w-[180px] xl:w-[350px] xl:h-[300px]">
-          <img src="/images/cta-svg-left.png" alt="" className="h-full" />
+          <img src="/api/assets/dummy_image/cta-svg-left.png" alt="" className="h-full" />
         </div>
         <div className="absolute right-0 top-1/2 hidden w-[110px] -translate-y-1/2 pointer-events-none z-0 sm:block md:w-[150px] lg:w-[180px] xl:w-auto xl:h-[300px]">
-          <img src="/images/cta-svg-right.png" alt="" className="h-full" />
+          <img src="/api/assets/dummy_image/cta-svg-right.png" alt="" className="h-full" />
         </div>
         <div className="relative z-10 w-full max-w-2xl text-center sm:px-6">
           <h2
@@ -1762,6 +2420,14 @@ export default function HomePage({
         </div>
 
       </section>
+    ),
+  };
+
+  return (
+    <>
+      {orderedSections.map((key, index) => (
+        <Fragment key={key ?? `unknown-${index}`}>{sectionsByKey[key] ?? null}</Fragment>
+      ))}
 
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {

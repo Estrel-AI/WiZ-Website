@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { RECAPTCHA_SITE_KEY, UTILITY_API_BASE_URL, buildPublicApiUrl } from "@/src/config/public-env";
 import { partnerLogos } from "@/src/data/partners";
 import {
@@ -9,6 +10,8 @@ import {
   sanitizePhoneInput,
   sanitizeWebsiteInput,
 } from "@/src/lib/input-sanitization";
+
+const DEFAULT_PARTNER_SECTION_ORDER = ["BANNER", "PATHWAY", "BENEFITS", "FORM", "FIND_PARTNER"];
 
 type PartnerForm = {
   first_name: string;
@@ -32,64 +35,6 @@ const initialFormData: PartnerForm = {
   primary_industry: "",
 };
 
-const findPartnerCards = [
-  {
-    name: "Alphadata",
-    logoPath: "/images/partner-logos/alpha_data.jpg",
-    logoPanelClassName: "bg-white",
-    infoPanelClassName: "bg-primary hover:bg-gradient-to-br hover:from-[#240D1A] hover:via-[#240D1A] hover:to-[#9120595d]",
-    titleClassName: "text-white",
-  },
-  {
-    name: "AWS",
-    logoPath: "/images/partner-logos/aws.png",
-    logoPanelClassName: "bg-white",
-    infoPanelClassName: "bg-primary hover:bg-gradient-to-br hover:from-[#240D1A] hover:via-[#240D1A] hover:to-[#9120595d]",
-    titleClassName: "text-white",
-  },
-  {
-    name: "Google Cloud",
-    logoPath: "/images/partner-logos/google-cloud.png",
-    logoPanelClassName: "bg-white",
-    infoPanelClassName: "bg-primary hover:bg-gradient-to-br hover:from-[#240D1A] hover:via-[#240D1A] hover:to-[#9120595d]",
-    titleClassName: "text-white",
-  },
-  {
-    name: "Nangia",
-    logoPath: "/images/partner-logos/nangia.png",
-    logoPanelClassName: "bg-white",
-    infoPanelClassName: "bg-primary hover:bg-gradient-to-br hover:from-[#240D1A] hover:via-[#240D1A] hover:to-[#9120595d]",
-    titleClassName: "text-white",
-  },
-  {
-    name: "NVIDIA",
-    logoPath: "/images/partner-logos/nvidia.png",
-    logoPanelClassName: "bg-white",
-    infoPanelClassName: "bg-primary hover:bg-gradient-to-br hover:from-[#240D1A] hover:via-[#240D1A] hover:to-[#9120595d]",
-    titleClassName: "text-white",
-  },
-  {
-    name: "Raqmiyat",
-    logoPath: "/images/partner-logos/raqmiyat.png",
-    logoPanelClassName: "bg-white",
-    infoPanelClassName: "bg-primary hover:bg-gradient-to-br hover:from-[#240D1A] hover:via-[#240D1A] hover:to-[#9120595d]",
-    titleClassName: "text-white",
-  },
-  {
-    name: "SISL",
-    logoPath: "/images/partner-logos/sisl.png",
-    logoPanelClassName: "bg-white",
-    infoPanelClassName: "bg-primary hover:bg-gradient-to-br hover:from-[#240D1A] hover:via-[#240D1A] hover:to-[#9120595d]",
-    titleClassName: "text-white",
-  },
-  {
-    name: "Harrier",
-    logoPath: "/images/partner-logos/Harrier.png",
-    logoPanelClassName: "bg-white",
-    infoPanelClassName: "bg-primary hover:bg-gradient-to-br hover:from-[#240D1A] hover:via-[#240D1A] hover:to-[#9120595d]",
-    titleClassName: "text-white",
-  },
-];
 
 declare global {
   interface Window {
@@ -125,11 +70,55 @@ export default function PartnerPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
+
+  const [partnerHeader, setPartnerHeader] = useState<{
+    heading: string;
+    description: string | null;
+    buttonText: string | null;
+    buttonUrl: string | null;
+    backgroundImage: string | null;
+  } | null>(null);
+  const [pathwaysHeader, setPathwaysHeader] = useState<{ heading: string; description: string | null } | null>(null);
+  const [pathways, setPathways] = useState<
+    Array<{ id: number; title: string; description: string; points: string[]; buttonText: string }>
+  >([]);
+  const [benefitsHeader, setBenefitsHeader] = useState<{ heading: string; description: string | null } | null>(null);
+  const [benefits, setBenefits] = useState<
+    Array<{ id: number; title: string; description: string; image: string }>
+  >([]);
+  const [sectionKeys, setSectionKeys] = useState<string[]>(DEFAULT_PARTNER_SECTION_ORDER);
+
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetIdRef = useRef<number | null>(null);
   const formSectionRef = useRef<HTMLElement | null>(null);
   const pathwaySectionRef = useRef<HTMLElement | null>(null);
   const findPartnerSectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      fetch("/api/admin/section-headers/PARTNER_HEADER").then((r) => r.json()).catch(() => null),
+      fetch("/api/admin/section-headers/PARTNER_PATHWAYS").then((r) => r.json()).catch(() => null),
+      fetch("/api/admin/section-headers/PARTNER_BENEFITS").then((r) => r.json()).catch(() => null),
+      fetch("/api/partner-pathways").then((r) => r.json()).catch(() => null),
+      fetch("/api/partner-benefits").then((r) => r.json()).catch(() => null),
+      fetch("/api/section-order?pageKey=PARTNER").then((r) => r.json()).catch(() => null),
+    ]).then(([hRes, pHeadRes, bHeadRes, pathRes, benRes, orderRes]) => {
+      if (!active) return;
+      if (hRes?.success && hRes?.data) setPartnerHeader(hRes.data);
+      if (pHeadRes?.success && pHeadRes?.data) setPathwaysHeader(pHeadRes.data);
+      if (bHeadRes?.success && bHeadRes?.data) setBenefitsHeader(bHeadRes.data);
+      if (pathRes?.success && Array.isArray(pathRes?.data)) setPathways(pathRes.data);
+      if (benRes?.success && Array.isArray(benRes?.data)) setBenefits(benRes.data);
+      if (orderRes?.success && Array.isArray(orderRes?.data) && orderRes.data.length > 0) {
+        setSectionKeys(orderRes.data);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const markRecaptchaAsLoaded = () => {
     if (window.grecaptcha && typeof window.grecaptcha.render === "function") {
@@ -360,397 +349,252 @@ export default function PartnerPage() {
     });
   };
 
-  return (
-    <main>
-      {/* Banner */}
-    
-   <main className="bg-primary min-h-[60vh] flex items-center justify-center relative overflow-hidden px-4 py-10 lg:py-20 font-sans">
-        <div className="md:block hidden absolute top-1/2  left-0 -translate-y-1/2 -translate-x-1/2 w-[160%] lg:w-[120%] xl:w-[90%] h-[100%] bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none  [-webkit-mask-image:radial-gradient(circle_at_center, quaternary_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0"></div>
-        <div className="md:block hidden absolute top-1/2  right-0 -translate-y-1/2 translate-x-1/2 w-[160%] lg:w-[120%] xl:w-[90%] h-[100%]  bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none [-webkit-mask-image:radial-gradient(circle_at_center,quaternary_0_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0"></div>
-        <div className="absolute -top-[250px] left-1/2 transform -translate-x-1/2 w-[600px] h-[500px] bg-gradient-about blur-[200px] rounded-full pointer-events-none"></div>
-  <div className="container mx-auto py-8 md:py-12 lg:pb-24 px-4 md:px-6 lg:px-8">
+  const parsedButtons = (() => {
+    const raw = partnerHeader?.buttonText;
+    if (raw && raw.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          primaryText: parsed.primaryText || "Explore and Apply",
+          primaryUrl: parsed.primaryUrl || "#pathway",
+          secondaryText: parsed.secondaryText || "Find a Partner",
+          secondaryUrl: parsed.secondaryUrl || "#find-partner",
+        };
+      } catch {
+        // ignore
+      }
+    }
+    return {
+      primaryText: raw || "Explore and Apply",
+      primaryUrl: "#pathway",
+      secondaryText: "Find a Partner",
+      secondaryUrl: "#find-partner",
+    };
+  })();
+
+  const handleButtonClick = (url: string, defaultScroll: () => void) => {
+    if (!url || url === "#pathway") {
+      scrollToPathway();
+    } else if (url === "#find-partner") {
+      scrollToFindPartner();
+    } else if (url.startsWith("#")) {
+      const el = document.querySelector(url);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+      else defaultScroll();
+    } else {
+      window.location.href = url;
+    }
+  };
+
+  const orderedSections = sectionKeys.length > 0 ? sectionKeys : DEFAULT_PARTNER_SECTION_ORDER;
+
+  const sectionsByKey: Record<string, ReactNode> = {
+    BANNER: (
+      <main className="bg-primary min-h-[60vh] flex items-center justify-center relative overflow-hidden px-4 py-10 lg:py-20 font-sans">
+        {/* Dynamic background image — rendered at the base layer */}
+        {partnerHeader?.backgroundImage ? (
+          <div className="absolute inset-0 z-0">
+            <img
+              src={partnerHeader.backgroundImage}
+              alt=""
+              aria-hidden="true"
+              className="h-full w-full object-cover opacity-20"
+            />
+            <div className="absolute inset-0 bg-primary/70" />
+          </div>
+        ) : null}
+        <div className="md:block hidden absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 w-[160%] lg:w-[120%] xl:w-[90%] h-[100%] bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none [-webkit-mask-image:radial-gradient(circle_at_center, quaternary_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-[1]"></div>
+        <div className="md:block hidden absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 w-[160%] lg:w-[120%] xl:w-[90%] h-[100%] bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none [-webkit-mask-image:radial-gradient(circle_at_center,quaternary_0_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-[1]"></div>
+        <div className="absolute -top-[200px] left-1/2 transform -translate-x-1/2 w-[400px] h-[300px] bg-gradient-about blur-[200px] rounded-full pointer-events-none z-[1]"></div>
+
+        <div className="container mx-auto py-8 md:py-2 px-4 md:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <div className="w-full lg:w-1/2 flex flex-col justify-center relative">
-              {/* <span className="text-secondary font-medium text-xs uppercase tracking-widest mb-2 md:mb-4 block" data-aos="fade-right"
-                data-aos-duration="1000">
-                Partner Program
-              </span> */}
-
-              <h2 className="text-3xl md:text-4xl lg:text-5xl leading-tight md:leading-[1.1] font-semibold text-white mb-3 md:mb-6 tracking-tight text-center lg:text-left" data-aos="fade-right"
-                data-aos-delay="100">
-                Become a Partner
+              <h2
+                className="text-3xl md:text-4xl lg:text-5xl leading-tight md:leading-[1.1] font-semibold text-white mb-3 md:mb-6 tracking-tight text-center lg:text-left"
+                data-aos="fade-right"
+                data-aos-delay="100"
+              >
+                {partnerHeader?.heading || "Become a Partner"}
               </h2>
 
-              <p className="text-gray-300 text-base md:text-lg md:leading-relaxed mb-4 md:mb-8 lg:max-w-lg text-center lg:text-left" data-aos="fade-right"
-                data-aos-delay="150">
-                Partner with us and empower your customers by supporting them
-                in simplifying their AI journey and how they can leverage
-                Agentic AI with Governance and Orchestration.
+              <p
+                className="text-gray-300 text-base md:text-lg md:leading-relaxed mb-4 md:mb-8 lg:max-w-lg text-center lg:text-left"
+                data-aos="fade-right"
+                data-aos-delay="150"
+              >
+                {partnerHeader?.description ||
+                  "Partner with us and empower your customers by supporting them in simplifying their AI journey and how they can leverage Agentic AI with Governance and Orchestration."}
               </p>
 
-   <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <button
-                type="button"
-                onClick={scrollToPathway}
-                className="inline-flex items-center md:mx-0 mx-auto md:justify-start justify-center gap-2 bg-gradient-to-r to-[#912059] from-[#D87AAA] transition-transform hover:scale-105 duration-300 shadow-xl text-white px-4 xl:px-8 md:px-3 py-2 md:py-3 rounded-full font-medium transition-colors w-fit"
-                data-aos="fade-right"
-                data-aos-delay="200"
-              >
-                Explore and Apply
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <button
+                  type="button"
+                  onClick={() => handleButtonClick(parsedButtons.primaryUrl, scrollToPathway)}
+                  className="inline-flex items-center md:mx-0 mx-auto md:justify-start justify-center gap-2 bg-gradient-to-r to-[#912059] from-[#D87AAA] transition-transform hover:scale-105 duration-300 shadow-xl text-white px-6 py-3 rounded-full font-medium transition-colors w-fit cursor-pointer"
+                  data-aos="fade-right"
+                  data-aos-delay="200"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M7 17L17 7M7 7h10v10"
-                  />
-                </svg>
-              </button>
-               <button
-                type="button"
-                onClick={scrollToFindPartner}
-                className="inline-flex items-center md:mx-0 mx-auto md:justify-start justify-center gap-2 border border-secondary text-secondary hover:bg-secondary hover:text-primary transition-transform hover:scale-105 duration-300 shadow-xl text-white px-4 xl:px-8 md:px-3 py-2 md:py-3 rounded-full font-medium transition-colors w-fit"
-                data-aos="fade-right"
-                data-aos-delay="200"
-              >
-                Find a Partner
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+                  {parsedButtons.primaryText} ↗
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleButtonClick(parsedButtons.secondaryUrl, scrollToFindPartner)}
+                  className="inline-flex items-center md:mx-0 mx-auto md:justify-start justify-center gap-2 border border-secondary text-secondary hover:bg-secondary hover:text-primary transition-transform hover:scale-105 duration-300 shadow-xl text-white px-6 py-3 rounded-full font-medium transition-colors w-fit cursor-pointer"
+                  data-aos="fade-right"
+                  data-aos-delay="200"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M7 17L17 7M7 7h10v10"
-                  />
-                </svg>
-              </button>
+                  {parsedButtons.secondaryText} ↗
+                </button>
+              </div>
             </div>
-  </div>
+
             <div className="w-full lg:w-1/2">
-              <div className="rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] lg:aspect-[16/11]">
+              <div className="rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] border border-white/10 bg-slate-900">
                 <img
-                  src="/images/partner-banner.jpg"
-                  alt="Partnership meeting"
+                  src={partnerHeader?.buttonUrl || "/api/assets/dummy_image/partners-banner-img.jpg"}
+                  alt={partnerHeader?.heading || "Partnership meeting"}
                   className="w-full h-full object-cover relative"
                 />
               </div>
             </div>
           </div>
         </div>
-       
       </main>
-
-      {/* Pathway */}
+    ),
+    PATHWAY: (
       <section ref={pathwaySectionRef} className="bg-primary relative overflow-hidden py-8 md:py-12 lg:py-16 font-sans">
         <div className="container mx-auto px-4 md:px-6 lg:px-8 ">
           <div className="text-center max-w-3xl mx-auto mb-8 md:mb-16">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight text-white mb-2" data-aos="fade-up"
               data-aos-duration="800">
-              Find Your Partnership Pathway
+              {pathwaysHeader?.heading || "Find Your Partnership Pathway"}
             </h2>
-            <p className="text-gray-300  text-base md:text-lg" data-aos="fade-up"
+            <p className="text-gray-300 text-base md:text-lg" data-aos="fade-up"
               data-aos-delay="100">
-              We offer distinct partnership models designed to align with your
-              business goals.
+              {pathwaysHeader?.description || "We offer distinct partnership models designed to align with your business goals."}
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className=" bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-5 xl:p-8 flex flex-col h-full transition-transform hover:-translate-y-1 duration-300 shadow-lg">
-              <div className="w-12 md:w-14 h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-3 md:mb-6 shrink-0 shadow-inner">
-                <svg
-                  className="w-6 md:w-7 h-6 md:h-7 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+            {pathways.length > 0 ? (
+              pathways.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-gradient-to-b from-[#2B1123] to-[#1D0C18] border border-white/10 rounded-[28px] p-6 md:p-8 flex flex-col h-full shadow-2xl transition-transform hover:-translate-y-1 duration-300"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
+                  <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-6 text-slate-200 shrink-0">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      />
+                    </svg>
+                  </div>
+
+                  <h3 className="text-xl md:text-2xl font-bold text-[#F2C94C] mb-2 tracking-tight">
+                    {item.title}
+                  </h3>
+                  <p className="text-slate-300 text-[14px] md:text-base leading-relaxed mb-6">
+                    {item.description}
+                  </p>
+
+                  <ul className="space-y-3 mb-8 flex-grow text-slate-200 text-[14px] md:text-base leading-relaxed">
+                    {item.points.map((pt, pIdx) => (
+                      <li key={pIdx} className="flex items-start gap-2.5">
+                        <span className="text-slate-300 font-bold select-none">•</span>
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-auto">
+                    <button
+                      type="button"
+                      onClick={scrollToForm}
+                      className="inline-block bg-gradient-to-r from-[#A8326E] to-[#751C4B] text-white text-[14px] px-6 py-2.5 rounded-full font-semibold shadow-md transition-all hover:scale-105 duration-300 cursor-pointer"
+                    >
+                      {item.buttonText || "Register Now"}
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-6 text-gray-400 italic">
+                No partnership pathways configured yet.
               </div>
-
-              <h3 className="text-xl md:text-2xl font-semibold text-secondary mb-1 md:mb-2">
-                System Integration Partner
-              </h3>
-              <p className="text-gray-300 text-sm md:text-base mb-2 md:mb-4  leading-relaxed">
-                For software reselling and professional services
-                organization.
-              </p>
-
-              <ul className="space-y-1 lg:space-y-3 mb-4 md:mb-8 flex-grow  text-gray-300 text-sm md:text-base leading-relaxed">
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>Build and deploy robust AI solutions for clients.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>
-                    Accelerate project delivery and effectively mitigate risks
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>
-                    Receive valuable referrals and expanded co-selling
-                    opportunities to grow your business.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 shrink-0"></span>
-                  <span>Access dedicated technical and sales support.</span>
-                </li>
-              </ul>
-
-              <div className="mt-auto">
-                <button
-                  type="button"
-                  onClick={scrollToForm}
-                  className="inline-block bg-gradient-to-r from-[#912059] to-[#D87AAA] transition-transform hover:scale-105 duration-300 shadow-xl text-white text-sm px-4 md:px-6 py-2 md:py-2.5 rounded-full font-medium transition-colors duration-300"
-                >
-                  Register Now
-                </button>
-              </div>
-            </div>
-
-            <div className=" bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-5 xl:p-8 flex flex-col h-full transition-transform hover:-translate-y-1 duration-300 shadow-lg">
-              <div className="w-12 md:w-14 h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-3 md:mb-6 shrink-0 shadow-inner">
-                <svg
-                  className="w-6 md:w-7 h-6 md:h-7 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
-                  />
-                </svg>
-              </div>
-
-              <h3 className="text-xl md:text-2xl font-semibold text-secondary mb-1 md:mb-2">
-                Technology Partner
-              </h3>
-              <p className="text-gray-300  text-sm md:text-base mb-2 md:mb-4 leading-relaxed">
-                For software companies wanting to embed AI orchestration into
-                their own products.
-              </p>
-
-              <ul className="space-y-1 lg:space-y-3 mb-4 md:mb-8 flex-grow  text-gray-300 text-sm md:text-base leading-relaxed">
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>Embed WiiZ&apos;s engine directly into your platform.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>Offer unparalleled automation to your customers.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>
-                    Create new value with a seamless, integrated experience.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>Unlock new joint revenue and marketing models.</span>
-                </li>
-              </ul>
-
-              <div className="mt-auto">
-                <button
-                  type="button"
-                  onClick={scrollToForm}
-                  className="inline-block bg-gradient-to-r from-[#912059] to-[#D87AAA] transition-transform hover:scale-105 duration-300 shadow-xl text-white text-sm px-4 md:px-6 py-2 md:py-2.5 rounded-full font-medium transition-colors duration-300 "
-                >
-                  Register Now
-                </button>
-              </div>
-            </div>
-
-            <div className=" bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-5 xl:p-8 flex flex-col h-full transition-transform hover:-translate-y-1 duration-300 shadow-lg">
-              <div className="w-12 md:w-14 h-12 md:h-14 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-3 md:mb-6 shrink-0 shadow-inner">
-                <svg
-                  className="w-6 md:w-7 h-6 md:h-7 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M12 14l9-5-9-5-9 5 9 5z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M12 14v7"
-                  />
-                </svg>
-              </div>
-
-              <h3 className="text-xl md:text-2xl font-semibold text-secondary mb-1 md:mb-2">
-                Education Partner
-              </h3>
-              <p className="text-gray-300 text-sm md:text-base  mb-2 md:mb-4 leading-relaxed">
-                For institutions training AI to the next generation professionals.
-              </p>
-
-              <ul className="space-y-1 lg:space-y-3 mb-4 md:mb-8 flex-grow text-gray-300  text-sm md:text-base leading-relaxed">
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>
-                    Access full-tier platform licenses designed specifically for
-                    extensive academic use.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>
-                    Receive industry-recognized certifications that validate
-                    skills and expertise.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mt-2 shrink-0"></span>
-                  <span>
-                    Deploy a structured, ready-to-use curriculum tailored for
-                    effective learning.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 shrink-0"></span>
-                  <span>Join a global community of AI creators.</span>
-                </li>
-              </ul>
-
-              <div className="mt-auto">
-                <button
-                  type="button"
-                  onClick={scrollToForm}
-                  className="inline-block bg-gradient-to-r from-[#912059] to-[#D87AAA] transition-transform hover:scale-105 duration-300 shadow-xl text-white text-sm p-4 md:px-6 py-2 md:py-2.5 rounded-full font-medium transition-colors duration-300"
-                >
-                  Register Now
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
-
-        {/* Benefits */}
+    ),
+    BENEFITS: (
       <section className="bg-primary relative overflow-hidden py-8 md:py-12 lg:py-24 font-sans">
         <div className="absolute top-0 md:top-1/2 md:left-0 -translate-y-1/2 -translate-x-1/2 w-full lg:w-[82%] h-[60%] md:h-[60%] lg:h-[82%] bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
         <div className="absolute top-0 md:top-1/2 md:right-0 -translate-y-1/2 translate-x-1/2 w-full lg:w-[82%] h-[60%] md:h-[60%] lg:h-[82%] bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
         <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 md:mb-16">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center  text-white tracking-tight mb-2" data-aos="fade-up"
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center text-white tracking-tight mb-3" data-aos="fade-up"
               data-aos-duration="700">
-              Partner Benefits
+              {benefitsHeader?.heading || "Grow Your Business with WiiZ Ecosystem"}
             </h2>
-            <p className="text-gray-300  text-base md:text-lg md:leading-relaxed" data-aos="fade-up"
+            <p className="text-gray-300 text-base md:text-lg md:leading-relaxed" data-aos="fade-up"
               data-aos-delay="100">
-              Accelerate your success with trusted support, innovative strategies, and resources designed to maximize your growth potential.
+              {benefitsHeader?.description || "Join our partner network to deliver state-of-the-art AI solutions."}
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-2 lg:grid-rows-2 gap-6">
-            <div className="bg-[#FFFFFF0D] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 duration-300 lg:row-span-2" data-aos="fade-up"
-              data-aos-delay="100">
-              <div className="w-full h-48 md:h-44 lg:h-[340px] overflow-hidden">
-                <img
-                  src="/images/revenue_growth.jpg"
-                  alt="Revenue Growth Meeting"
-                  className="w-full h-full object-cover"
-                />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {benefits.length > 0 ? (
+              benefits.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-[#FFFFFF0D] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 duration-300 shadow-xl"
+                  data-aos="fade-up"
+                >
+                  <div className="w-full h-48 md:h-52 overflow-hidden bg-slate-900">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-5 lg:p-6 flex flex-col flex-1">
+                    <h3 className="text-xl lg:text-2xl font-semibold text-white mb-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-300 text-[14px] lg:text-base md:leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-6 text-gray-400 italic">
+                No partner benefits configured yet.
               </div>
-              <div className="p-3 lg:p-4 xl:p-8 flex flex-col flex-1">
-                <h3 className="text-xl lg:text-2xl font-semibold text-white mb-1 md:mb-2">
-                  Revenue Growth
-                </h3>
-                <p className="text-gray-300 text-sm lg:text-base md:leading-relaxed">
-                  Unlock new recurring revenue streams and scale your business sustainably.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#FFFFFF0D] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden flex flex-col lg:flex-row-reverse transition-transform hover:-translate-y-1 duration-300 h-full" data-aos="fade-up"
-              data-aos-delay="150">
-              <div className="w-full h-48 md:h-44 lg:w-2/5 lg:h-auto overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop"
-                  alt="Dedicated Support Team"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-3 lg:p-4 xl:p-8 flex-1 flex flex-col">
-                <h3 className="text-xl lg:text-2xl font-semibold text-white mb-1 md:mb-2">
-                  Dedicated Support
-                </h3>
-                <p className="text-gray-300 text-sm lg:text-base md:leading-relaxed">
-                  Get direct access to our partner success team for guidance and ongoing support.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#FFFFFF0D] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden flex flex-col lg:flex-row-reverse transition-transform hover:-translate-y-1 duration-300 h-full" data-aos="fade-up"
-              data-aos-delay="150">
-              <div className="w-full h-48 md:h-44 lg:w-2/5 lg:h-auto overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=800&auto=format&fit=crop"
-                  alt="Training and Certification"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-3 lg:p-4 xl:p-8 flex-1 flex flex-col">
-                <h3 className="text-xl lg:text-2xl font-semibold text-white mb-1 md:mb-2">
-                  Training & Certification
-                </h3>
-                <p className="text-gray-300 text-sm lg:text-base md:leading-relaxed">
-                  Become a certified WiiZ expert with hands-on training and practical learning. Gain recognized credentials to showcase your skills and boost your career.
-                </p>
-              </div>
-            </div>
+            )}
           </div>
           <div className="mt-8 md:mt-16 flex justify-center">
             <button
               type="button"
               onClick={scrollToForm}
-              className="inline-flex items-center justify-center bg-gradient-to-r from-[#912059] to-[#D87AAA] transition-transform hover:scale-105 duration-300 shadow-xl text-white px-4 md:px-6 lg:px-10 py-2 md:py-3.5 font-medium rounded-full transition-all duration-300 "
+              className="inline-flex items-center justify-center bg-gradient-to-r from-[#912059] to-[#D87AAA] transition-transform hover:scale-105 duration-300 shadow-xl text-white px-4 md:px-6 lg:px-10 py-2 md:py-3.5 font-medium rounded-full transition-all duration-300 cursor-pointer"
             >
-            Apply to Become a Partner
+              Apply to Become a Partner
             </button>
           </div>
         </div>
       </section>
-
-      {/* Form */}
+    ),
+    FORM: (
       <section
         ref={formSectionRef}
         className="bg-primary relative overflow-hidden py-8 md:py-12 lg:py-24 font-sans scroll-mt-24"
@@ -1204,8 +1048,8 @@ export default function PartnerPage() {
 
         </div>
       </section>
-
-      {/* Logos */}
+    ),
+    FIND_PARTNER: (
       <section ref={findPartnerSectionRef} className="bg-primary relative overflow-hidden py-8 md:py-12 lg:py-16 font-sans">
         <div className="absolute top-0 md:top-1/2 md:left-0 -translate-y-1/2 -translate-x-1/2 w-full lg:w-[82%] h-[45%] md:h-[60%] lg:h-[82%] bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
         <div className="absolute top-0 md:top-1/2 md:right-0 -translate-y-1/2 translate-x-1/2 w-full lg:w-[82%] h-[45%] md:h-[60%] lg:h-[82%] bg-quaternary/40 bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0" />
@@ -1242,6 +1086,12 @@ export default function PartnerPage() {
           </div>
         </div>
       </section>
+    ),
+  };
+
+  return (
+    <main>
+      {orderedSections.map((key) => <div key={key}>{sectionsByKey[key] ?? null}</div>)}
     </main>
   );
 }

@@ -1,31 +1,37 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { X, Zap } from "lucide-react";
 import Link from "next/link";
 import {
-  ADDON_PLAN_CODES,
-  BUSINESS_ENTRY_ANNUAL_PLAN_CODE,
-  BUSINESS_ENTRY_MONTHLY_PLAN_CODE,
-  ENTERPRISE_ANNUAL_PLAN_CODE,
-  BUSINESS_STANDARD_ANNUAL_PLAN_CODE,
-  BUSINESS_STANDARD_MONTHLY_PLAN_CODE,
-  FREE_TRIAL_PLAN_CODE,
+  AUTH_API_BASE_URL,
   PAYMENTS_API_BASE_URL,
   RECAPTCHA_SITE_KEY,
   STARTER_ANNUAL_PLAN_CODE,
   STARTER_MONTHLY_PLAN_CODE,
+  FREE_TRIAL_PLAN_CODE,
+  BUSINESS_ENTRY_ANNUAL_PLAN_CODE,
+  BUSINESS_ENTRY_MONTHLY_PLAN_CODE,
+  BUSINESS_STANDARD_ANNUAL_PLAN_CODE,
+  BUSINESS_STANDARD_MONTHLY_PLAN_CODE,
+  ENTERPRISE_ANNUAL_PLAN_CODE,
+  ADDON_PLAN_CODES,
   buildPublicApiUrl,
 } from "@/src/config/public-env";
+import { usePlanCodes } from "@/src/hooks/use-plan-codes";
 import {
   AUTH_USER_KEY,
   AUTH_TOKEN_KEY,
-  HUB_LOGIN_URL,
+  decodeJwtPayload,
   persistWebsiteLogin,
-} from "@/src/features/auth/website-auth"; 
+} from "@/src/features/auth/website-auth";
+import { getHubLoginUrl } from "@/src/features/auth/user-type";
 import { requestPasswordReset, submitSignin } from "@/src/services/website-auth-service";
 import type { ApiResponse, ListData, PlanRow } from "@/src/types/admin-api";
-import WebsiteCtaButton from "@/src/components/website/website-cta-button";
+import DeveloperRegistrationForm from "@/src/components/auth/developer-registration-form";
+import BusinessRegistrationForm from "@/src/components/auth/business-registration-form";
+import SocialAuthButtons from "@/src/components/website/social-auth-buttons";
+import PolicyModalTrigger from "@/src/components/website/policy-modal-trigger";
 
 const API_URL = buildPublicApiUrl(PAYMENTS_API_BASE_URL, "/plans/getSubscriptionPlans");
 const PLAN_CONTENT_API_URL = "/api/plans";
@@ -120,6 +126,10 @@ function parseApiPrice(value: number | string | null | undefined): number | null
 
 function normalizePlanCode(value: string | null | undefined) {
   return value?.trim().toUpperCase() ?? "";
+}
+
+function stripEnvSuffix(code: string): string {
+  return code.replace(/_(DEV|TEST|PROD|STAGING)$/i, "");
 }
 
 function normalizePlanName(value: string | null | undefined) {
@@ -284,6 +294,128 @@ function getStoredWebsiteUser() {
   }
 }
 
+const PENDING_ZOHO_VALUES = ["", "pending", "pending_api_sync"];
+
+function isPendingZohoId(value: string | undefined | null): boolean {
+  return PENDING_ZOHO_VALUES.includes((value ?? "").trim());
+}
+
+function readZohoIdFromStoredData(): { zohoCustomerId: string; email: string; name: string } {
+  const storedUser = getStoredWebsiteUser();
+  const token = getStoredWebsiteAuthToken();
+  const tokenPayload = token ? decodeJwtPayload(token) : null;
+
+  const readField = (key: string): string => {
+    const fromUser = storedUser?.[key as keyof typeof storedUser];
+    if (typeof fromUser === "string" && fromUser.trim()) {
+      return fromUser.trim();
+    }
+
+    const fromToken = tokenPayload?.[key];
+    return typeof fromToken === "string" ? fromToken.trim() : "";
+  };
+
+  const email = readField("email");
+  const name = readField("display_name") || readField("username") || email;
+
+  return {
+    zohoCustomerId: readField("zoho_customer_id"),
+    email,
+    name,
+  };
+}
+
+async function refreshZohoCustomerId(): Promise<{
+  zohoCustomerId: string;
+  email: string;
+  name: string;
+}> {
+  const current = readZohoIdFromStoredData();
+
+  if (!isPendingZohoId(current.zohoCustomerId)) {
+    return current;
+  }
+
+  const token = getStoredWebsiteAuthToken();
+  if (!token) {
+    return current;
+  }
+
+  try {
+    const response = await fetch(buildPublicApiUrl(AUTH_API_BASE_URL, "/me"), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return current;
+    }
+
+    const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!payload) {
+      return current;
+    }
+
+    const containers: Record<string, unknown>[] = [payload];
+    for (const key of ["data", "user", "result", "profile"]) {
+      const nested = payload[key];
+      if (typeof nested === "object" && nested !== null && !Array.isArray(nested)) {
+        containers.push(nested as Record<string, unknown>);
+      }
+    }
+
+    const pickString = (key: string): string => {
+      for (const container of containers) {
+        const value = container[key];
+        if (typeof value === "string" && value.trim()) {
+          return value.trim();
+        }
+      }
+      return "";
+    };
+
+    const freshZohoId = pickString("zoho_customer_id");
+    const freshEmail = pickString("email");
+    const freshName =
+      pickString("display_name") || pickString("first_name") || pickString("name") || freshEmail;
+
+    if (freshZohoId || freshEmail) {
+      const raw = window.localStorage.getItem(AUTH_USER_KEY);
+      let stored: Record<string, unknown> = {};
+      try {
+        stored = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+      } catch {
+        stored = {};
+      }
+
+      if (freshZohoId) {
+        stored.zoho_customer_id = freshZohoId;
+      }
+      if (freshEmail && !stored.email) {
+        stored.email = freshEmail;
+      }
+      if (freshName && !stored.display_name) {
+        stored.display_name = freshName;
+      }
+
+      window.localStorage.setItem(AUTH_USER_KEY, JSON.stringify(stored));
+      window.dispatchEvent(new Event("wiiz-auth-changed"));
+    }
+
+    return {
+      zohoCustomerId: freshZohoId || current.zohoCustomerId,
+      email: freshEmail || current.email,
+      name: freshName || current.name,
+    };
+  } catch {
+    return current;
+  }
+}
+
 function hasStoredWebsiteSession() {
   const authToken = getStoredWebsiteAuthToken();
   const storedUser = getStoredWebsiteUser();
@@ -292,6 +424,27 @@ function hasStoredWebsiteSession() {
 }
 
 export default function PricingPage() {
+  const { loading: planCodesLoading, codes: dynamicPlanCodes } = usePlanCodes();
+
+  const fallbackCodes: Record<string, string> = useMemo(
+    () => ({
+      STARTER_MONTHLY: STARTER_MONTHLY_PLAN_CODE,
+      STARTER_ANNUAL: STARTER_ANNUAL_PLAN_CODE,
+      FREE_TRIAL: FREE_TRIAL_PLAN_CODE,
+      BUSINESS_ENTRY_MONTHLY: BUSINESS_ENTRY_MONTHLY_PLAN_CODE,
+      BUSINESS_ENTRY_ANNUAL: BUSINESS_ENTRY_ANNUAL_PLAN_CODE,
+      BUSINESS_STANDARD_MONTHLY: BUSINESS_STANDARD_MONTHLY_PLAN_CODE,
+      BUSINESS_STANDARD_ANNUAL: BUSINESS_STANDARD_ANNUAL_PLAN_CODE,
+      ENTERPRISE_ANNUAL: ENTERPRISE_ANNUAL_PLAN_CODE,
+    }),
+    []
+  );
+
+  const planCode = useCallback(
+    (key: string): string =>
+      (dynamicPlanCodes && dynamicPlanCodes[key]) || fallbackCodes[key] || "",
+    [dynamicPlanCodes, fallbackCodes]
+  );
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly");
   const [plansData, setPlansData] = useState<PricingApiResponse | null>(null);
   const [planContentRows, setPlanContentRows] = useState<PlanRow[]>([]);
@@ -320,26 +473,50 @@ export default function PricingPage() {
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetIdRef = useRef<number | null>(null);
 
-  const executionOptions: ExecutionOption[] = [
+  const [registrationModal, setRegistrationModal] = useState<{
+    isOpen: boolean;
+    userType: "developer" | "business";
+    planId: number;
+    planName: string;
+  }>({
+    isOpen: false,
+    userType: "developer",
+    planId: 1,
+    planName: "Starter Plan",
+  });
+
+  const openRegistrationModal = (
+    userType: "developer" | "business",
+    planId: number,
+    planName: string
+  ) => {
+    setRegistrationModal({ isOpen: true, userType, planId, planName });
+  };
+
+  const closeRegistrationModal = () => {
+    setRegistrationModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const executionOptions: ExecutionOption[] = useMemo(() => [
     {
       id: "50k",
       label: "Business Entry",
-      monthlyPlanCode: BUSINESS_ENTRY_MONTHLY_PLAN_CODE,
-      annualPlanCode: BUSINESS_ENTRY_ANNUAL_PLAN_CODE,
+      monthlyPlanCode: planCode('BUSINESS_ENTRY_MONTHLY'),
+      annualPlanCode: planCode('BUSINESS_ENTRY_ANNUAL'),
       tokens: "50,000 Tokens (Monthly)",
     },
     {
       id: "100k",
       label: "Business Standard",
-      monthlyPlanCode: BUSINESS_STANDARD_MONTHLY_PLAN_CODE,
-      annualPlanCode: BUSINESS_STANDARD_ANNUAL_PLAN_CODE,
+      monthlyPlanCode: planCode('BUSINESS_STANDARD_MONTHLY'),
+      annualPlanCode: planCode('BUSINESS_STANDARD_ANNUAL'),
       tokens: "100,000 Tokens (Monthly)",
     },
-  ];
+  ], [planCode]);
 
-  const [selectedExecution, setSelectedExecution] = useState<ExecutionOption>(
-    executionOptions[0],
-  );
+  const [selectedExecutionId, setSelectedExecutionId] = useState<"50k" | "100k">("50k");
+
+  const selectedExecution = useMemo(() => executionOptions.find(o => o.id === selectedExecutionId) ?? executionOptions[0], [executionOptions, selectedExecutionId]);
 
   const markRecaptchaAsLoaded = () => {
     if (window.grecaptcha && typeof window.grecaptcha.render === "function") {
@@ -638,25 +815,25 @@ export default function PricingPage() {
   const starterMonthlyPlan = useMemo(
     () =>
       plansData?.plans.find(
-        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(STARTER_MONTHLY_PLAN_CODE),
+        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(planCode('STARTER_MONTHLY')),
       ) ?? null,
-    [plansData],
+    [plansData, planCodesLoading, dynamicPlanCodes],
   );
 
   const starterAnnualPlan = useMemo(
     () =>
       plansData?.plans.find(
-        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(STARTER_ANNUAL_PLAN_CODE),
+        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(planCode('STARTER_ANNUAL')),
       ) ?? null,
-    [plansData],
+    [plansData, planCodesLoading, dynamicPlanCodes],
   );
 
   const freeTrialPlan = useMemo(
     () =>
       plansData?.plans.find(
-        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(FREE_TRIAL_PLAN_CODE),
+        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(planCode('FREE_TRIAL')),
       ) ?? null,
-    [plansData],
+    [plansData, planCodesLoading, dynamicPlanCodes],
   );
 
   const starterMonthlyComparePrice = useMemo(
@@ -705,17 +882,17 @@ export default function PricingPage() {
   const selectedBusinessMonthlyPlan = useMemo(
     () =>
       plansData?.plans.find(
-        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(selectedExecution.monthlyPlanCode),
+        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(planCode(selectedExecution.id === '50k' ? 'BUSINESS_ENTRY_MONTHLY' : 'BUSINESS_STANDARD_MONTHLY')),
       ) ?? null,
-    [plansData, selectedExecution],
+    [plansData, selectedExecution, planCodesLoading, dynamicPlanCodes],
   );
 
   const selectedBusinessAnnualPlan = useMemo(
     () =>
       plansData?.plans.find(
-        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(selectedExecution.annualPlanCode),
+        (plan) => normalizePlanCode(plan.plan_code) === normalizePlanCode(planCode(selectedExecution.id === '50k' ? 'BUSINESS_ENTRY_ANNUAL' : 'BUSINESS_STANDARD_ANNUAL')),
       ) ?? null,
-    [plansData, selectedExecution],
+    [plansData, selectedExecution, planCodesLoading, dynamicPlanCodes],
   );
 
   const selectedBusinessMonthlyComparePrice = useMemo(
@@ -729,48 +906,66 @@ export default function PricingPage() {
   );
 
   const planContentByCode = useMemo(
-    () =>
-      new Map(
-        planContentRows
-          .filter((row) => row.planCode?.trim())
-          .map((row) => [row.planCode!.trim().toUpperCase(), row]),
-      ),
+    () => {
+      const map = new Map<string, PlanRow>();
+      for (const row of planContentRows) {
+        if (row.planCode?.trim()) {
+          const key = row.planCode.trim().toUpperCase();
+          map.set(key, row);
+          // Also index without env suffix for cross-environment matching
+          const baseKey = stripEnvSuffix(key);
+          if (baseKey !== key) {
+            map.set(baseKey, row);
+          }
+        }
+      }
+      return map;
+    },
     [planContentRows],
   );
 
   const starterPlanContent = useMemo(
-    () =>
-      billingPeriod === "annually"
-        ? planContentByCode.get(STARTER_ANNUAL_PLAN_CODE.trim().toUpperCase()) ??
-        planContentByCode.get(STARTER_MONTHLY_PLAN_CODE.trim().toUpperCase()) ??
-        null
-        : planContentByCode.get(STARTER_MONTHLY_PLAN_CODE.trim().toUpperCase()) ??
-        planContentByCode.get(STARTER_ANNUAL_PLAN_CODE.trim().toUpperCase()) ??
-        null,
-    [billingPeriod, planContentByCode],
+    () => {
+      const monthly = planCode('STARTER_MONTHLY');
+      const annual = planCode('STARTER_ANNUAL');
+      const keys = billingPeriod === "annually" ? [annual, monthly] : [monthly, annual];
+      for (const k of keys) {
+        if (!k) continue;
+        const exact = planContentByCode.get(k.trim().toUpperCase()) ?? null;
+        if (exact) return exact;
+        const base = planContentByCode.get(stripEnvSuffix(k.trim().toUpperCase())) ?? null;
+        if (base) return base;
+      }
+      return null;
+    },
+    [billingPeriod, planContentByCode, planCodesLoading, dynamicPlanCodes],
   );
 
-  const freeTrialPlanContent = useMemo(
-    () => planContentByCode.get(FREE_TRIAL_PLAN_CODE.trim().toUpperCase()) ?? null,
-    [planContentByCode],
-  );
+  const freeTrialPlanContent = useMemo(() => {
+    const k = planCode('FREE_TRIAL');
+    if (!k) return null;
+    return planContentByCode.get(k.trim().toUpperCase()) ?? planContentByCode.get(stripEnvSuffix(k.trim().toUpperCase())) ?? null;
+  }, [planContentByCode, planCodesLoading, dynamicPlanCodes]);
 
-  const selectedBusinessPlanContent = useMemo(
-    () =>
-      billingPeriod === "annually"
-        ? planContentByCode.get(selectedExecution.annualPlanCode.trim().toUpperCase()) ??
-        planContentByCode.get(selectedExecution.monthlyPlanCode.trim().toUpperCase()) ??
-        null
-        : planContentByCode.get(selectedExecution.monthlyPlanCode.trim().toUpperCase()) ??
-        planContentByCode.get(selectedExecution.annualPlanCode.trim().toUpperCase()) ??
-        null,
-    [billingPeriod, planContentByCode, selectedExecution],
-  );
+  const selectedBusinessPlanContent = useMemo(() => {
+    const monthly = selectedExecution.monthlyPlanCode;
+    const annual = selectedExecution.annualPlanCode;
+    const keys = billingPeriod === "annually" ? [annual, monthly] : [monthly, annual];
+    for (const k of keys) {
+      if (!k) continue;
+      const exact = planContentByCode.get(k.trim().toUpperCase()) ?? null;
+      if (exact) return exact;
+      const base = planContentByCode.get(stripEnvSuffix(k.trim().toUpperCase())) ?? null;
+      if (base) return base;
+    }
+    return null;
+  }, [billingPeriod, planContentByCode, selectedExecution]);
 
-  const enterprisePlanContent = useMemo(
-    () => planContentByCode.get(ENTERPRISE_ANNUAL_PLAN_CODE) ?? null,
-    [planContentByCode],
-  );
+  const enterprisePlanContent = useMemo(() => {
+    const k = planCode('ENTERPRISE_ANNUAL') || ENTERPRISE_ANNUAL_PLAN_CODE;
+    if (!k) return null;
+    return planContentByCode.get(k.trim().toUpperCase()) ?? planContentByCode.get(stripEnvSuffix(k.trim().toUpperCase())) ?? null;
+  }, [planContentByCode, planCodesLoading, dynamicPlanCodes]);
 
   const starterHighlightedFeatures = useMemo(() => {
     return extractFeatureItems(starterPlanContent?.highlightedFeatures);
@@ -805,7 +1000,7 @@ export default function PricingPage() {
   }, [enterprisePlanContent]);
 
   const selectedStarterPlanCode =
-    billingPeriod === "annually" ? STARTER_ANNUAL_PLAN_CODE : STARTER_MONTHLY_PLAN_CODE;
+    billingPeriod === "annually" ? planCode('STARTER_ANNUAL') : planCode('STARTER_MONTHLY');
 
   const selectedStarterPlan =
     billingPeriod === "annually" ? starterAnnualPlan : starterMonthlyPlan;
@@ -933,6 +1128,7 @@ export default function PricingPage() {
       setIsWebsiteAuthenticated(true);
       setLoginError("");
       setPendingCheckoutTarget(null);
+
       setModalView("login-success");
     } catch (error) {
       setLoginError(
@@ -1010,20 +1206,29 @@ export default function PricingPage() {
     setIsStartingCheckout(true);
 
     try {
-      const storedUser = getStoredWebsiteUser();
-      const zohoCustomerId = storedUser?.zoho_customer_id?.trim() ?? "";
-      const customerEmail = storedUser?.email?.trim() ?? "";
-      const customerName =
-        storedUser?.display_name?.trim() ||
-        storedUser?.username?.trim() ||
-        customerEmail;
+      let { zohoCustomerId, email: customerEmail, name: customerName } = readZohoIdFromStoredData();
 
-      if (!zohoCustomerId || zohoCustomerId === "pending_api_sync") {
-        throw new Error("User is not registered in Zoho. Please contact support.");
+      if (isPendingZohoId(zohoCustomerId)) {
+        const refreshed = await refreshZohoCustomerId();
+        zohoCustomerId = refreshed.zohoCustomerId;
+        if (!customerEmail) {
+          customerEmail = refreshed.email;
+        }
+        if (!customerName) {
+          customerName = refreshed.name;
+        }
+      }
+
+      if (isPendingZohoId(zohoCustomerId)) {
+        throw new Error("Your account is still being synchronized with our payment provider. Please try again in a few seconds.");
       }
 
       if (!customerEmail) {
         throw new Error("User email is missing. Please log in again.");
+      }
+
+      if (!customerName) {
+        customerName = customerEmail;
       }
 
       const params = new URLSearchParams({
@@ -1031,7 +1236,7 @@ export default function PricingPage() {
         customer_name: customerName,
         customer_email: customerEmail,
         plan_code: target.code,
-        redirect_url: HUB_LOGIN_URL,
+        redirect_url: getHubLoginUrl(),
       });
 
       setPendingCheckoutTarget(null);
@@ -1067,6 +1272,21 @@ export default function PricingPage() {
     void startCheckout(target);
   };
 
+  const handlePurchaseBusinessPlan = () => {
+    const target: CheckoutTarget = {
+      type: "plan",
+      code: billingPeriod === "annually" ? selectedExecution.annualPlanCode : selectedExecution.monthlyPlanCode,
+    };
+
+    if (!isWebsiteAuthenticated && !hasClientSession) {
+      setPendingCheckoutTarget(target);
+      setLoginModalOpen(true);
+      return;
+    }
+
+    void startCheckout(target);
+  };
+
   const handlePurchaseAddon = (addonCode: string) => {
     const target: CheckoutTarget = {
       type: "addon",
@@ -1084,7 +1304,7 @@ export default function PricingPage() {
 
   return (
     <main>
-      <section className="relative bg-primary min-h-screen py-10 md:py-12 lg:py-20 px-4 sm:px-6 lg:px-8 font-sans overflow-hidden">
+      <section className="relative bg-primary py-10 md:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 font-sans overflow-hidden">
         <div className="absolute top-[120px] left-0 -translate-y-1/2 -translate-x-1/2 w-[100%] h-[40%] md:w-[100%] md:h-[60%] lg:w-[100%] lg:h-[66%] xl:w-[94%] xl:h-[94%] bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center, quaternary_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0"></div>
         <div className="absolute top-[120px] right-0 -translate-y-1/2 translate-x-1/2 w-[100%] h-[40%] md:w-[100%] md:h-[60%] lg:w-[100%] lg:h-[66%] xl:w-[94%] xl:h-[94%] bg-[url('/texture.svg')] bg-cover bg-center pointer-events-none rounded-full [-webkit-mask-image:radial-gradient(circle_at_center,quaternary_0_0%,transparent_50%)] [mask-image:radial-gradient(circle_at_center,black_0%,transparent_50%)] z-0"></div>
         <div className="absolute -top-1/2 left-1/2 transform -translate-x-1/2 w-[84%] h-[88%] bg-gradient-hero blur-[160px] rounded-full pointer-events-none"></div>
@@ -1142,66 +1362,11 @@ export default function PricingPage() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-6 md:px-4">
-            {/* Free Plan */}
-            <div
-              key={`${billingPeriod}-free`}
-              style={getPlanCardAnimationStyle()}
-              className="w-full md:w-[calc(50%-12px)] xl:w-[calc(25%-18px)] bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-lg border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl hover:-translate-y-1 transition-transform duration-300"
-            >
-              <div className="mb-1 md:mb-2">
-                <h3 className="text-xl md:text-2xl font-bold text-white">
-                  Free Plan
-                </h3>
-              </div>
-              <div className="mb-2 md:mb-4 flex items-baseline gap-1">
-                <span className="text-3xl md:text-4xl font-bold text-white">
-                  {displayPrice(getPlanDisplayPrice(freeTrialPlan) ?? 0)}
-                </span>
-                <span className="text-gray-400 text-sm">
-                  {billingPeriod === "monthly" ? "/mo" : "/mo"}
-                </span>
-              </div>
-              <p className="text-gray-400 text-sm leading-relaxed mb-3 md:mb-6 min-h-[3rem]">
-                {freeTrialPlanContent?.shortDescription?.trim() || ""}
-              </p>
-              <Link
-                href={isWebsiteAuthenticated || hasClientSession ? HUB_LOGIN_URL : "/register"}
-                className="w-full sm:w-fit md:w-full py-2.5 md:py-3.5 px-4 md:px-6 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
-              >
-                {isWebsiteAuthenticated || hasClientSession
-                  ? "Go to Dashboard"
-                  : "Start free trial"}
-              </Link>
-
-              {freeTrialHighlightedFeatures.length > 0 || freeTrialPlanFeatures.length > 0 ? (
-                <>
-                  <div className="w-full h-px bg-white/10 my-3"></div>
-                  {freeTrialHighlightedFeatures.map((item) => (
-                    <p key={item} className="text-secondary mb-1 flex text-sm md:text-base gap-2">
-                      <span className="flex-shrink-0">
-                        <Zap size={16} />
-                      </span>
-                      {item}
-                    </p>
-                  ))}
-                  {freeTrialPlanFeatures.length > 0 ? (
-                    <>
-                      <div className="w-full h-px bg-white/10 my-3"></div>
-                      <p className="text-xs font-bold text-gray-300 uppercase tracking-wider mb-4">
-                        Features
-                      </p>
-                      <FeatureList items={freeTrialPlanFeatures} />
-                    </>
-                  ) : null}
-                </>
-              ) : null}
-            </div>
-
             {/* Starter Plan */}
             <div
               key={`${billingPeriod}-starter`}
               style={getPlanCardAnimationStyle()}
-              className="w-full md:w-[calc(50%-12px)] xl:w-[calc(25%-18px)] bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-lg border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl hover:-translate-y-1 transition-transform duration-300"
+              className="w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] max-w-sm bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-lg border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl hover:-translate-y-1 transition-transform duration-300"
             >
               <div className="mb-1 md:mb-2">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
@@ -1214,20 +1379,16 @@ export default function PricingPage() {
                     <SkeletonBlock className="h-10 w-32 md:h-12 md:w-40" />
                     <SkeletonBlock className="h-4 w-12" />
                   </div>
-                ) : selectedStarterPlan ? (
+                ) : (
                   <>
                     <span className="text-3xl md:text-4xl font-bold text-white">
-                      {displayPrice(getPlanDisplayPrice(selectedStarterPlan))}
+                      {displayPrice(getPlanDisplayPrice(selectedStarterPlan), parseApiPrice(starterAnnualPlan?.annual_billing) ?? getPlanDisplayPrice(starterAnnualPlan))}
                     </span>
-                    {selectedStarterComparePrice !== null ? (
-                      <span className="text-gray-500 text-sm line-through decoration-gray-500">
-                        {displayPrice(selectedStarterComparePrice)}
-                      </span>
-                    ) : null}
-                    <span className="text-gray-400 text-sm">/mo</span>
+                    <span className="text-gray-400 text-sm line-through decoration-gray-400">
+                      {selectedStarterComparePrice !== null ? `${selectedStarterComparePrice.toFixed(2)}` : ""}
+                    </span>
+                    <span className="text-gray-300 text-sm">/mo</span>
                   </>
-                ) : (
-                  <span className="text-sm text-amber-300">Price unavailable</span>
                 )}
               </div>
               {billingPeriod === "annually" && starterAnnualPlan ? (
@@ -1238,14 +1399,23 @@ export default function PricingPage() {
               <p className="text-gray-400 text-sm leading-relaxed mb-3 md:mb-6 min-h-[3rem]">
                 {starterPlanContent?.shortDescription?.trim() || ""}
               </p>
-              <button
-                type="button"
-                onClick={handlePurchasePlan}
-                disabled={isStartingCheckout}
-                className="w-full sm:w-fit md:w-full py-2.5 md:py-3.5 px-4 md:px-6 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)]"
-              >
-                {isStartingCheckout ? "Redirecting..." : "Purchase Plan Now"}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => openRegistrationModal("developer", 1, "Starter Plan")}
+                  className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-white font-semibold text-sm transition-all text-center"
+                >
+                  Free Trial
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePurchasePlan}
+                  disabled={isStartingCheckout}
+                  className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
+                >
+                  {isStartingCheckout ? "Redirecting..." : "Starter Plan"}
+                </button>
+              </div>
 
               {starterHighlightedFeatures.length > 0 || starterPlanFeatures.length > 0 ? (
                 <>
@@ -1275,7 +1445,7 @@ export default function PricingPage() {
             <div
               key={`${billingPeriod}-business`}
               style={getPlanCardAnimationStyle()}
-              className="w-full md:w-[calc(50%-12px)] xl:w-[calc(25%-18px)] bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-lg border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl hover:-translate-y-1 transition-transform duration-300"
+              className="w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] max-w-sm bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-lg border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl hover:-translate-y-1 transition-transform duration-300"
             >
               <div className="mb-1 md:mb-2">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
@@ -1288,20 +1458,21 @@ export default function PricingPage() {
                     <SkeletonBlock className="h-10 w-32 md:h-12 md:w-40" />
                     <SkeletonBlock className="h-4 w-12" />
                   </div>
-                ) : selectedBusinessPlan ? (
+                ) : (
                   <>
                     <span className="text-3xl md:text-4xl font-bold text-white">
-                      {displayPrice(getPlanDisplayPrice(selectedBusinessPlan))}
+                      {displayPrice(
+                        getPlanDisplayPrice(selectedBusinessMonthlyPlan),
+                        parseApiPrice(selectedBusinessAnnualPlan?.annual_billing) ?? getPlanDisplayPrice(selectedBusinessAnnualPlan),
+                      )}
                     </span>
                     {selectedBusinessComparePrice !== null ? (
-                      <span className="text-gray-500 text-sm line-through decoration-gray-500">
-                        {displayPrice(selectedBusinessComparePrice)}
+                      <span className="text-gray-400 text-sm line-through decoration-gray-400">
+                        ${selectedBusinessComparePrice.toFixed(2)}
                       </span>
                     ) : null}
-                    <span className="text-gray-400 text-sm">/mo</span>
+                    <span className="text-gray-300 text-sm">/mo</span>
                   </>
-                ) : (
-                  <span className="text-sm text-amber-300">Price unavailable</span>
                 )}
               </div>
               {billingPeriod === "annually" && selectedBusinessAnnualPlan ? (
@@ -1313,38 +1484,22 @@ export default function PricingPage() {
                 {selectedBusinessPlanContent?.shortDescription?.trim() || ""}
               </p>
 
-              <Link
-                href="/contact"
-                className="w-full sm:w-fit md:w-full py-2.5 md:py-3.5 px-4 md:px-6 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
-              >
-                Contact Sales
-              </Link>
-              <div
-                className="flex mt-4 w-full sm:w-fit md:w-full"
-                role="radiogroup"
-                aria-label="Business plan run selection"
-              >
-                <div className="flex w-full bg-[#0f0b10] rounded-full p-1 border border-white/5 shadow-inner">
-                  {executionOptions.map((option) => {
-                    const isSelected = selectedExecution.id === option.id;
-
-                    return (
-                      <button
-                        key={option.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={isSelected}
-                        onClick={() => setSelectedExecution(option)}
-                        className={`w-1/2 flex-1 sm:flex-none px-4 md:px-6 lg:px-4 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm lg:text-[13px] font-semibold tracking-wide transition-all duration-300 whitespace-nowrap ${isSelected
-                            ? "bg-[#2c2730] text-white shadow-md"
-                            : "text-gray-400 hover:text-gray-200"
-                          }`}
-                      >
-                        {option.id === "50k" ? "50K Credits" : "100K Credits"}
-                      </button>
-                    );
-                  })}
-                </div>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => openRegistrationModal("business", 2, "Business Plan")}
+                  className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-white font-semibold text-sm transition-all text-center"
+                >
+                  Free Trial
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePurchaseBusinessPlan()}
+                  disabled={isStartingCheckout}
+                  className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
+                >
+                  {isStartingCheckout ? "Redirecting..." : "Business Plan"}
+                </button>
               </div>
               {businessHighlightedFeatures.length > 0 || businessPlanFeatures.length > 0 ? (
                 <>
@@ -1374,7 +1529,7 @@ export default function PricingPage() {
             <div
               key={`${billingPeriod}-enterprise`}
               style={getPlanCardAnimationStyle()}
-              className="w-full md:w-[calc(50%-12px)] xl:w-[calc(25%-18px)] bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-lg border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl hover:-translate-y-1 transition-transform duration-300"
+              className="w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] max-w-sm bg-gradient-to-br from-[#240D1A] via-[#240D1A] to-[#9120595d] backdrop-blur-lg border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl hover:-translate-y-1 transition-transform duration-300"
             >
               <div className="mb-1 md:mb-2">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
@@ -1430,7 +1585,8 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <section className="py-10 md:py-12 lg:py-20  bg-primary relative font-sans overflow-hidden">
+      {/*
+      <section className="py-10 md:py-12 bg-primary relative font-sans overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 md:mb-4 tracking-tight" data-aos="fade-down"
@@ -1487,7 +1643,7 @@ export default function PricingPage() {
                           {displayPrice(addonPrice)}
                         </span>
                         {addonComparePrice !== null ? (
-                          <span className="text-gray-500 text-sm line-through decoration-gray-500">
+                          <span className="text-gray-400 text-sm line-through decoration-gray-400">
                             {displayPrice(addonComparePrice)}
                           </span>
                         ) : null}
@@ -1542,8 +1698,9 @@ export default function PricingPage() {
           ) : null}
         </div>
       </section>
+      */}
 
-      <section className="relative bg-primary py-10 md:py-12 xl:py-20  font-sans  px-4 overflow-hidden" >
+      <section className="relative bg-primary py-10 md:py-12 xl:py-16  font-sans  px-4 overflow-hidden" >
         <div className="container mx-auto px-0 sm:px-6 lg:px-8 relative z-10">
           <div className="w-full rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 lg:p-16 flex flex-col md:flex-row items-center justify-between border border-white/10 bg-gradient-to-b from-[#12050B] via-[#240D1A] via-[#3B16299C] to-[#912059C4] shadow-2xl overflow-hidden" data-aos="fade-down" data-aos-duration="700">
             <div className="text-center md:text-left w-full md:max-w-2xl mb-6 md:mb-0 pr-0 md:pr-10">
@@ -1767,6 +1924,55 @@ export default function PricingPage() {
                 </form>
               )}
             </div>
+          </div>
+        </div>
+      ) : null}
+      {registrationModal.isOpen ? (
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-sm px-6 sm:px-8 py-6 md:py-10 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="registration-modal-title"
+            className="relative w-full max-w-2xl lg:max-w-3xl overflow-hidden rounded-[1.5rem] md:rounded-[2rem] border border-white/20 bg-gradient-to-b from-[#251321] to-primary px-6 py-7 sm:px-10 sm:py-9 md:px-12 md:py-10 shadow-2xl my-auto max-h-[92vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          >
+            <button
+              type="button"
+              onClick={closeRegistrationModal}
+              className="absolute top-5 right-5 z-10 p-2 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex justify-center mb-4">
+              <img src="/api/assets/logos/primary-white-logo.png" alt="WiiZ Logo" className="h-12 sm:h-14 w-auto" />
+            </div>
+
+            <div className="text-center mb-6">
+              <h2 id="registration-modal-title" className="text-2xl md:text-3xl font-bold text-white mb-1 tracking-tight">
+                {registrationModal.userType === "business"
+                  ? "Create a Business Account"
+                  : "Create a Developer Account"}
+              </h2>
+            </div>
+
+            {registrationModal.userType === "developer" ? (
+              <DeveloperRegistrationForm
+                planId={registrationModal.planId}
+                planName={registrationModal.planName}
+                onClose={closeRegistrationModal}
+                showPlanBadge={true}
+              />
+            ) : (
+              <BusinessRegistrationForm
+                planId={registrationModal.planId}
+                planName={registrationModal.planName}
+                onClose={closeRegistrationModal}
+                showPlanBadge={true}
+              />
+            )}
           </div>
         </div>
       ) : null}

@@ -35,7 +35,7 @@ export const DEFAULT_ADMIN_CMS_DATA: AdminCmsData = {
       id: "blog-1",
       title: "How Enterprise Teams Operationalize Agentic Workflows",
       slug: "how-enterprise-teams-operationalize-agentic-workflows",
-      featuredImage: "/images/mission.png",
+      featuredImage: "/api/assets/dummy_image/mission.png",
       shortDescription:
         "A practical framework for moving from experiments to governed AI operations.",
       content:
@@ -103,7 +103,7 @@ export const DEFAULT_ADMIN_CMS_DATA: AdminCmsData = {
       bannerTitle: "Regulatory",
       summary:
         "Map regulatory clauses to internal policies and controls with faster analyst review.",
-      heroImage: "/images/workflow.png",
+      heroImage: "/api/assets/dummy_image/workflow.png",
       status: "published",
       publishDate: "2026-03-18",
       seo: seo(
@@ -202,7 +202,7 @@ export const DEFAULT_ADMIN_CMS_DATA: AdminCmsData = {
       highlightedText: "Agentic AI Economy",
       subheading:
         "Design, orchestrate, govern, and deploy enterprise AI agents from one unified platform.",
-      image: "/images/partner-banner.jpg",
+      image: "/api/assets/dummy_image/partners-banner-img.jpg",
       buttons: [
         { label: "Get Started", href: "/register", variant: "secondary" },
         { label: "Book Enterprise Demo", href: "/contact", variant: "primary" },
@@ -216,7 +216,7 @@ export const DEFAULT_ADMIN_CMS_DATA: AdminCmsData = {
         {
           id: "card-ai-teams",
           title: "AI Teams",
-          image: "/images/Ai_Team.jpg",
+          image: "/api/assets/dummy_image/Ai_Team.jpg",
           description: "Build and operate reliable AI agent workflows with stronger governance.",
           bullets: [
             "Reduce fragmented tooling",
@@ -229,7 +229,7 @@ export const DEFAULT_ADMIN_CMS_DATA: AdminCmsData = {
         {
           id: "card-enterprise-it",
           title: "Enterprise IT",
-          image: "/images/Enterprice_it.jpg",
+          image: "/api/assets/dummy_image/Enterprice_it.jpg",
           description: "Maintain governance, infrastructure control, and enterprise security.",
           bullets: [
             "Apply policy enforcement",
@@ -242,7 +242,7 @@ export const DEFAULT_ADMIN_CMS_DATA: AdminCmsData = {
         {
           id: "card-system-integrators",
           title: "System Integrators",
-          image: "/images/system_integrator.jpg",
+          image: "/api/assets/dummy_image/system_integrator.jpg",
           description: "Deliver scalable AI solutions for enterprise clients with repeatability.",
           bullets: [
             "Accelerate integrations",

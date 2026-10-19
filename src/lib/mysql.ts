@@ -29,6 +29,9 @@ function getPoolConfig(): PoolOptions {
     waitForConnections: true,
     connectionLimit: getServerNumberEnv("MYSQL_CONNECTION_LIMIT", 10),
     queueLimit: 0,
+    connectTimeout: 5000,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000,
   };
 }
 

@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { getMediaDirectory } from "@/src/lib/admin-media";
+import type { MediaFolder } from "@/src/types/admin-api";
 
 const MIME_TYPES: Record<string, string> = {
   ".avif": "image/avif",
@@ -17,15 +18,24 @@ const MIME_TYPES: Record<string, string> = {
   ".webp": "image/webp",
 };
 
-function isAllowedFolder(folder: string): folder is "hero" | "impact" | "blog" | "feature" {
-  return folder === "hero" || folder === "impact" || folder === "blog" || folder === "feature";
+function isAllowedFolder(folder: string): folder is MediaFolder {
+  return (
+    folder === "hero" ||
+    folder === "impact" ||
+    folder === "blog" ||
+    folder === "feature" ||
+    folder === "trusted-by" ||
+    folder === "testimonials" ||
+    folder === "team" ||
+    folder === "section-bg"
+  );
 }
 
 function isSafeFileName(fileName: string) {
   return /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/.test(fileName);
 }
 
-async function resolveExistingMediaPath(folder: "hero" | "impact" | "blog" | "feature", fileName: string) {
+async function resolveExistingMediaPath(folder: MediaFolder, fileName: string) {
   const mediaDirectory = getMediaDirectory(folder);
   const directPath = path.join(mediaDirectory, fileName);
 
@@ -67,6 +77,8 @@ async function resolveExistingMediaPath(folder: "hero" | "impact" | "blog" | "fe
   };
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _request: Request,
   context: { params: Promise<{ folder: string; fileName: string }> },
@@ -87,10 +99,11 @@ export async function GET(
 
   const fileBuffer = await readFile(resolvedMedia.absolutePath);
 
-  return new Response(fileBuffer, {
+  return new Response(new Uint8Array(fileBuffer), {
     headers: {
       "Cache-Control": "public, max-age=3600",
       "Content-Type": contentType,
+      "Content-Length": String(fileBuffer.length),
     },
   });
 }
