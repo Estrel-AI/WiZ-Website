@@ -22,10 +22,11 @@ import { usePlanCodes } from "@/src/hooks/use-plan-codes";
 import {
   AUTH_USER_KEY,
   AUTH_TOKEN_KEY,
+  BUSINESS_CHECKOUT_REDIRECT_URL,
+  DEVELOPER_LOGIN_URL,
   decodeJwtPayload,
   persistWebsiteLogin,
 } from "@/src/features/auth/website-auth";
-import { getHubLoginUrl } from "@/src/features/auth/user-type";
 import { requestPasswordReset, submitSignin } from "@/src/services/website-auth-service";
 import type { ApiResponse, ListData, PlanRow } from "@/src/types/admin-api";
 import DeveloperRegistrationForm from "@/src/components/auth/developer-registration-form";
@@ -48,10 +49,12 @@ type CheckoutTarget =
   | {
     type: "plan";
     code: string;
+    kind: "developer" | "business";
   }
   | {
     type: "addon";
     code: string;
+    kind: "developer" | "business";
   };
 
 interface ApiPlan {
@@ -288,6 +291,7 @@ function getStoredWebsiteUser() {
       username?: string;
       display_name?: string;
       zoho_customer_id?: string;
+      org_id?: string;
     };
   } catch {
     return null;
@@ -337,16 +341,18 @@ async function refreshZohoCustomerId(): Promise<{
   }
 
   const token = getStoredWebsiteAuthToken();
-  if (!token) {
+  if (!token && !current.email) {
     return current;
   }
 
   try {
     const response = await fetch(buildPublicApiUrl(AUTH_API_BASE_URL, "/me"), {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : undefined,
       credentials: "include",
       cache: "no-store",
     });
@@ -420,7 +426,11 @@ function hasStoredWebsiteSession() {
   const authToken = getStoredWebsiteAuthToken();
   const storedUser = getStoredWebsiteUser();
 
-  return Boolean(authToken && storedUser?.email);
+  return Boolean(authToken || storedUser?.email?.trim());
+}
+
+function getCheckoutRedirectUrl(kind: "developer" | "business"): string {
+  return kind === "business" ? BUSINESS_CHECKOUT_REDIRECT_URL : DEVELOPER_LOGIN_URL;
 }
 
 export default function PricingPage() {
@@ -468,6 +478,7 @@ export default function PricingPage() {
   const [isSendingResetLink, setIsSendingResetLink] = useState(false);
   const [isStartingCheckout, setIsStartingCheckout] = useState(false);
   const [pendingCheckoutTarget, setPendingCheckoutTarget] = useState<CheckoutTarget | null>(null);
+  const [pendingRegistrationType, setPendingRegistrationType] = useState<"developer" | "business">("developer");
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
@@ -1126,6 +1137,7 @@ export default function PricingPage() {
 
       persistWebsiteLogin(responseData as Record<string, unknown>);
       setIsWebsiteAuthenticated(true);
+      setHasClientSession(true);
       setLoginError("");
       setPendingCheckoutTarget(null);
 
@@ -1236,8 +1248,10 @@ export default function PricingPage() {
         customer_name: customerName,
         customer_email: customerEmail,
         plan_code: target.code,
-        redirect_url: getHubLoginUrl(),
+        redirect_url: getCheckoutRedirectUrl(target.kind),
       });
+
+      console.log(`${buildPublicApiUrl(PAYMENTS_API_BASE_URL, "/payments/checkOut")}?${params.toString()}`)
 
       setPendingCheckoutTarget(null);
       window.location.assign(
@@ -1261,10 +1275,12 @@ export default function PricingPage() {
     const target: CheckoutTarget = {
       type: "plan",
       code: selectedStarterPlanCode,
+      kind: "developer",
     };
 
     if (!isWebsiteAuthenticated && !hasClientSession) {
       setPendingCheckoutTarget(target);
+      setPendingRegistrationType("developer");
       setLoginModalOpen(true);
       return;
     }
@@ -1276,10 +1292,12 @@ export default function PricingPage() {
     const target: CheckoutTarget = {
       type: "plan",
       code: billingPeriod === "annually" ? selectedExecution.annualPlanCode : selectedExecution.monthlyPlanCode,
+      kind: "business",
     };
 
     if (!isWebsiteAuthenticated && !hasClientSession) {
       setPendingCheckoutTarget(target);
+      setPendingRegistrationType("business");
       setLoginModalOpen(true);
       return;
     }
@@ -1291,6 +1309,7 @@ export default function PricingPage() {
     const target: CheckoutTarget = {
       type: "addon",
       code: addonCode,
+      kind: "business",
     };
 
     if (!isWebsiteAuthenticated && !hasClientSession) {
@@ -1370,7 +1389,7 @@ export default function PricingPage() {
             >
               <div className="mb-1 md:mb-2">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
-                  Starter Plan
+                  WiiZ For Developer
                 </h3>
               </div>
               <div className="mb-2 md:mb-4 flex items-baseline gap-2">
@@ -1411,9 +1430,9 @@ export default function PricingPage() {
                   type="button"
                   onClick={handlePurchasePlan}
                   disabled={isStartingCheckout}
-                  className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
+                  className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {isStartingCheckout ? "Redirecting..." : "Starter Plan"}
+                  {isStartingCheckout ? "Redirecting..." : "Purchase Plan"}
                 </button>
               </div>
 
@@ -1449,7 +1468,7 @@ export default function PricingPage() {
             >
               <div className="mb-1 md:mb-2">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
-                  Business
+                  WiiZ For Business
                 </h3>
               </div>
               <div className="mb-2 md:mb-4 flex items-baseline gap-2">
@@ -1498,7 +1517,7 @@ export default function PricingPage() {
                   disabled={isStartingCheckout}
                   className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
                 >
-                  {isStartingCheckout ? "Redirecting..." : "Business Plan"}
+                  {isStartingCheckout ? "Redirecting..." : "Purchase Plan"}
                 </button>
               </div>
               {businessHighlightedFeatures.length > 0 || businessPlanFeatures.length > 0 ? (
@@ -1533,7 +1552,7 @@ export default function PricingPage() {
             >
               <div className="mb-1 md:mb-2">
                 <h3 className="text-xl md:text-2xl font-bold text-white">
-                  Enterprise
+                  WiiZ For Enterprise
                 </h3>
               </div>
               <div className="mb-2 md:mb-4 flex items-baseline gap-2">
@@ -1555,7 +1574,7 @@ export default function PricingPage() {
                 href="/contact"
                 className="w-full sm:w-fit md:w-full py-2.5 md:py-3.5 px-4 md:px-6 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
               >
-                Contact Sales
+                Purchase Plan
               </Link>
 
               {enterpriseHighlightedFeatures.length > 0 || enterprisePlanFeatures.length > 0 ? (
@@ -1760,7 +1779,7 @@ export default function PricingPage() {
             <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 md:px-6">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-secondary">
-                  Starter Plan
+                  {pendingRegistrationType === "business" ? "WiiZ for Business" : "WiiZ for Developer"}
                 </p>
                 <h2
                   id="pricing-login-modal-title"
@@ -1905,7 +1924,7 @@ export default function PricingPage() {
                     <p>
                       Don&apos;t have an account?{" "}
                       <Link
-                        href="/register"
+                        href={`/register?user_type=${pendingRegistrationType}`}
                         className="font-semibold text-secondary hover:text-white"
                       >
                         Create a new account

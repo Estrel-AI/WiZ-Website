@@ -201,10 +201,6 @@ export default function LoginPage() {
       persistWebsiteLogin(responseData as Record<string, unknown>);
       setView("success");
       setSuccessMessage("Login successful. You can continue to the hub now.");
-      // Redirect to profile after a brief delay
-      setTimeout(() => {
-        window.location.href = "/profile";
-      }, 1200);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {

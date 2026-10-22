@@ -5,8 +5,7 @@ import SocialAuthButtons from "@/src/components/website/social-auth-buttons";
 import { RECAPTCHA_SITE_KEY } from "@/src/config/public-env";
 import { BUSINESS_LOGIN_URL } from "@/src/features/auth/website-auth";
 import { generateBusinessOtp, verifyBusinessOtp, submitBusinessSignup } from "@/src/services/auth.service";
-import { isEmailAlreadyRegistered } from "@/src/services/website-auth-service";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -60,6 +59,21 @@ function getErrorMessage(error: unknown) {
   return "Something went wrong. Please try again.";
 }
 
+function mapApiErrorField(message: string): string | null {
+  const lower = message.toLowerCase();
+  if (/otp|verification code/.test(lower)) return "otp";
+  if (/email/.test(lower)) return "official_email";
+  if (/username/.test(lower)) return "preferred_system_username";
+  if (/password/.test(lower)) return "password";
+  if (/recaptcha|captcha|human/.test(lower)) return "captcha";
+  if (/tax/.test(lower)) return "tax_id";
+  if (/phone|contact/.test(lower)) return "contact_number";
+  if (/org/.test(lower)) return "organisation_name";
+  if (/first name/.test(lower)) return "first_name";
+  if (/last name/.test(lower)) return "last_name";
+  return null;
+}
+
 export default function BusinessRegistrationForm({
   planId = 2,
   planName = "Business Plan",
@@ -80,6 +94,9 @@ export default function BusinessRegistrationForm({
   const [hasAcceptedPolicies, setHasAcceptedPolicies] = useState(false);
   const [loading, setLoading] = useState<"otp" | "signup" | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
   const [recaptchaToken, setRecaptchaToken] = useState("");
@@ -127,13 +144,14 @@ export default function BusinessRegistrationForm({
           callback: (token: string) => {
             setRecaptchaToken(token);
             setErrorMessage("");
+            clearFieldError("captcha");
           },
           "expired-callback": () => {
             setRecaptchaToken("");
           },
           "error-callback": () => {
             setRecaptchaToken("");
-            setErrorMessage("reCAPTCHA could not be verified. Please try again.");
+            setFieldErrors((previous) => ({ ...previous, captcha: "reCAPTCHA could not be verified. Please try again." }));
           },
         });
       } catch {
@@ -193,23 +211,20 @@ export default function BusinessRegistrationForm({
   }, []);
 
   const sendOtp = async () => {
+    setErrorMessage("");
+    setFieldErrors({});
+
     if (!email.trim()) {
-      setErrorMessage("Please enter your official email address.");
+      setFieldErrors({ email: "Please enter your official email address." });
       return;
     }
 
     if (!emailPattern.test(email.trim())) {
-      setErrorMessage("Please enter a valid official email address.");
-      return;
-    }
-
-    if (await isEmailAlreadyRegistered(email.trim())) {
-      setErrorMessage("This email is already registered. Please log in to your existing account instead.");
+      setFieldErrors({ email: "Please enter a valid official email address." });
       return;
     }
 
     setLoading("otp");
-    setErrorMessage("");
     setSuccessMessage("");
 
     try {
@@ -218,7 +233,12 @@ export default function BusinessRegistrationForm({
       setResendCountdown(OTP_RESEND_COOLDOWN_SECONDS);
       setSuccessMessage(response?.message || "OTP sent successfully. Please check your email.");
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      const errStr = getErrorMessage(error);
+      if (mapApiErrorField(errStr) === "official_email") {
+        setFieldErrors({ email: errStr });
+      } else {
+        setErrorMessage(errStr);
+      }
     } finally {
       setLoading(null);
     }
@@ -231,13 +251,15 @@ export default function BusinessRegistrationForm({
 
   const handleOtpSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErrorMessage("");
+    setFieldErrors({});
+
     if (!otp.trim()) {
-      setErrorMessage("Please enter the OTP.");
+      setFieldErrors({ otp: "Please enter the OTP." });
       return;
     }
 
     setLoading("otp");
-    setErrorMessage("");
     setSuccessMessage("");
 
     try {
@@ -245,18 +267,32 @@ export default function BusinessRegistrationForm({
       setFormData((previous) => ({
         ...previous,
         official_email: email.trim(),
+        preferred_system_username: email.trim(),
       }));
       setStep("details");
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      const errStr = getErrorMessage(error);
+      setFieldErrors({
+        otp: errStr.includes("invalid") || errStr.includes("Invalid") ? "Invalid OTP. Please try again." : errStr,
+      });
     } finally {
       setLoading(null);
     }
   };
 
+  const clearFieldError = (field: string) => {
+    setFieldErrors((previous) => {
+      if (!previous[field]) return previous;
+      const next = { ...previous };
+      delete next[field];
+      return next;
+    });
+  };
+
   const updateField = (fieldKey: keyof BusinessFormData, value: string) => {
     setFormData((previous) => ({ ...previous, [fieldKey]: value }));
     setErrorMessage("");
+    clearFieldError(fieldKey);
   };
 
   const handleBusinessSignup = async (event: FormEvent<HTMLFormElement>) => {
@@ -267,78 +303,63 @@ export default function BusinessRegistrationForm({
     const officialEmail = (email || trimmed.official_email).trim();
 
     // Validation Rules
+    const errors: Record<string, string> = {};
     if (!trimmed.first_name) {
-      setErrorMessage("First Name is required.");
-      return;
+      errors.first_name = "First Name is required.";
     }
     if (!trimmed.last_name) {
-      setErrorMessage("Last Name is required.");
-      return;
-    }
-    if (!trimmed.preferred_system_username) {
-      setErrorMessage("Preferred System Username is required.");
-      return;
+      errors.last_name = "Last Name is required.";
     }
     if (!officialEmail) {
-      setErrorMessage("Official Email ID is required.");
-      return;
-    }
-    if (!emailPattern.test(officialEmail)) {
-      setErrorMessage("Please enter a valid official email address.");
-      return;
+      errors.official_email = "Official Email ID is required.";
+    } else if (!emailPattern.test(officialEmail)) {
+      errors.official_email = "Please enter a valid official email address.";
     }
     if (!trimmed.contact_number) {
-      setErrorMessage("Contact Number is required.");
-      return;
-    }
-    if (!phonePattern.test(trimmed.contact_number)) {
-      setErrorMessage("Please enter a valid contact number.");
-      return;
+      errors.contact_number = "Contact Number is required.";
+    } else if (!phonePattern.test(trimmed.contact_number)) {
+      errors.contact_number = "Please enter a valid contact number.";
     }
     if (!trimmed.organisation_name) {
-      setErrorMessage("Organisation Name is required.");
-      return;
+      errors.organisation_name = "Organization Name is required.";
     }
     if (!trimmed.organisation_address) {
-      setErrorMessage("Organisation Address is required.");
-      return;
-    }
-    if (!trimmed.tax_id) {
-      setErrorMessage("Tax ID is required.");
-      return;
+      errors.organisation_address = "Organization Address is required.";
     }
     if (!trimmed.password) {
-      setErrorMessage("Password is required.");
-      return;
+      errors.password = "Password is required.";
     }
     if (!trimmed.confirm_password) {
-      setErrorMessage("Confirm Password is required.");
-      return;
-    }
-    if (trimmed.password !== trimmed.confirm_password) {
-      setErrorMessage("Password and Confirm Password do not match.");
-      return;
+      errors.confirm_password = "Confirm Password is required.";
+    } else if (trimmed.password !== trimmed.confirm_password) {
+      errors.confirm_password = "Password and Confirm Password do not match.";
     }
     if (!otp.trim()) {
-      setErrorMessage("OTP is required before signup.");
-      return;
+      errors.otp = "OTP is required before signup.";
     }
     if (!recaptchaToken) {
-      setErrorMessage("Please complete the reCAPTCHA verification.");
-      return;
+      errors.captcha = "Please complete the reCAPTCHA verification.";
     }
     if (!hasAcceptedPolicies) {
-      setErrorMessage("Please accept the Terms and Conditions and Privacy Policy.");
+      errors.policies = "Please accept the Terms and Conditions and Privacy Policy.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setErrorMessage(
+        errors.otp && step !== "otp" ? errors.otp : "",
+      );
       return;
     }
 
     setLoading("signup");
     setErrorMessage("");
+    setFieldErrors({});
     setSuccessMessage("");
 
     try {
       const response = await submitBusinessSignup({
-        username: trimmed.preferred_system_username,
+        username: officialEmail,
         password: trimmed.password,
         email: officialEmail,
         first_name: trimmed.first_name,
@@ -358,6 +379,7 @@ export default function BusinessRegistrationForm({
       setHasAcceptedPolicies(false);
       setRecaptchaToken("");
       setErrorMessage("");
+      setFieldErrors({});
 
       if (window.grecaptcha && recaptchaWidgetIdRef.current !== null) {
         window.grecaptcha.reset(recaptchaWidgetIdRef.current);
@@ -370,7 +392,14 @@ export default function BusinessRegistrationForm({
       }, 2000);
     } catch (error) {
       const errStr = getErrorMessage(error);
-      setErrorMessage(errStr);
+      const field = mapApiErrorField(errStr);
+      if (field === "otp" && step !== "otp") {
+        setErrorMessage(errStr);
+      } else if (field) {
+        setFieldErrors({ [field]: errStr });
+      } else {
+        setErrorMessage(errStr);
+      }
       setRecaptchaToken("");
       if (window.grecaptcha && recaptchaWidgetIdRef.current !== null) {
         window.grecaptcha.reset(recaptchaWidgetIdRef.current);
@@ -394,24 +423,54 @@ export default function BusinessRegistrationForm({
   const renderField = (
     name: keyof BusinessFormData,
     label: string,
-    placeholder: string,
     required = true,
-  ) => (
-    <div>
-      <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1.5">
-        {label} {required ? <span className="text-white">*</span> : null}
-      </label>
-      <input
-        type={name === "password" || name === "confirm_password" ? "password" : name === "official_email" ? "email" : "text"}
-        name={name}
-        value={name === "official_email" ? email || formData[name] : formData[name]}
-        onChange={(event) => updateField(name, event.target.value)}
-        placeholder={placeholder}
-        readOnly={name === "official_email" && Boolean(email)}
-        className={`${inputClassName} ${name === "official_email" && email ? "opacity-80 cursor-not-allowed" : ""}`}
-      />
-    </div>
-  );
+  ) => {
+    const isPasswordField = name === "password" || name === "confirm_password";
+    const isPasswordVisible = name === "password" ? showPassword : showConfirmPassword;
+    const togglePasswordVisibility = () => {
+      if (name === "password") {
+        setShowPassword((previous) => !previous);
+      } else {
+        setShowConfirmPassword((previous) => !previous);
+      }
+    };
+    const isReadOnlyUsername = name === "preferred_system_username";
+    const isReadOnlyEmail = name === "official_email" && Boolean(email);
+
+    return (
+      <div>
+        <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1.5">
+          {label} {required ? <span className="text-white">*</span> : null}
+        </label>
+        <div className="relative">
+          <input
+            type={isPasswordField ? (isPasswordVisible ? "text" : "password") : name === "official_email" ? "email" : "text"}
+            name={name}
+            value={name === "official_email" ? email || formData[name] : formData[name]}
+            onChange={(event) => updateField(name, event.target.value)}
+            placeholder={label}
+            readOnly={isReadOnlyUsername || isReadOnlyEmail}
+            aria-readonly={isReadOnlyUsername || isReadOnlyEmail}
+            className={`${inputClassName} ${isPasswordField || isReadOnlyUsername ? "pr-12" : ""} ${isReadOnlyUsername || isReadOnlyEmail ? "opacity-80 cursor-not-allowed" : ""}`}
+          />
+          {isPasswordField ? (
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-gray-400 transition-colors hover:text-gray-200"
+              aria-label={isPasswordVisible ? `Hide ${label}` : `Show ${label}`}
+              title={isPasswordVisible ? "Hide password" : "Show password"}
+            >
+              {isPasswordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          ) : null}
+        </div>
+        {fieldErrors[name] ? (
+          <p className="mt-1.5 text-xs text-red-300">{fieldErrors[name]}</p>
+        ) : null}
+      </div>
+    );
+  };
 
   return (
     <div className="w-full">
@@ -445,10 +504,16 @@ export default function BusinessRegistrationForm({
               type="email"
               name="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Enter your official email"
+              onChange={(event) => {
+                setEmail(event.target.value);
+                clearFieldError("email");
+              }}
+              placeholder="Verify your Official Email ID"
               className={inputClassName}
             />
+            {fieldErrors.email ? (
+              <p className="mt-1.5 text-xs text-red-300">{fieldErrors.email}</p>
+            ) : null}
           </div>
 
           <button
@@ -510,10 +575,16 @@ export default function BusinessRegistrationForm({
               name="otp"
               maxLength={6}
               value={otp}
-              onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))}
-              placeholder="Enter 6-digit OTP"
+              onChange={(event) => {
+                setOtp(event.target.value.replace(/\D/g, ""));
+                clearFieldError("otp");
+              }}
+              placeholder="Verification Code"
               className={otpHintClassName}
             />
+            {fieldErrors.otp ? (
+              <p className="mt-1.5 text-xs text-red-300">{fieldErrors.otp}</p>
+            ) : null}
           </div>
 
           <button
@@ -536,10 +607,10 @@ export default function BusinessRegistrationForm({
           </div>
 
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
-            {renderField("first_name", "First Name", "John", true)}
-            {renderField("last_name", "Last Name", "Doe", true)}
+            {renderField("first_name", "First Name")}
+            {renderField("last_name", "Last Name")}
             <div className="md:col-span-2">
-              {renderField("preferred_system_username", "Preferred System Username", "organisation_admin", true)}
+              {renderField("preferred_system_username", "Preferred System Username")}
             </div>
           </div>
 
@@ -552,11 +623,11 @@ export default function BusinessRegistrationForm({
           </div>
 
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
-            {renderField("official_email", "Official Email ID", "name@organisation.com", true)}
-            {renderField("contact_number", "Contact Number", "+91 9876543210", true)}
-            {renderField("organisation_name", "Organization Name", "Organisation Ltd", true)}
+            {renderField("official_email", "Official Email ID")}
+            {renderField("contact_number", "Contact Number")}
+            {renderField("organisation_name", "Organization Name")}
             <div className="md:col-span-2">
-              {renderField("organisation_address", "Organization Address", "Street, building, area", true)}
+              {renderField("organisation_address", "Organization Address")}
             </div>
           </div>
 
@@ -570,10 +641,10 @@ export default function BusinessRegistrationForm({
 
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              {renderField("tax_id", "Tax ID", "Tax Identification Number", true)}
+              {renderField("tax_id", "Tax ID", false)}
             </div>
-            {renderField("password", "Password", "Enter your password", true)}
-            {renderField("confirm_password", "Confirm Password", "Confirm your password", true)}
+            {renderField("password", "Password")}
+            {renderField("confirm_password", "Confirm Password")}
           </div>
 
           <div>
@@ -586,13 +657,19 @@ export default function BusinessRegistrationForm({
                 className="inline-flex max-w-full origin-left scale-[0.92] sm:scale-100 rounded-md overflow-hidden"
               />
             </div>
+            {fieldErrors.captcha ? (
+              <p className="mt-1.5 text-xs text-red-300">{fieldErrors.captcha}</p>
+            ) : null}
           </div>
 
           <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs sm:text-sm text-gray-300">
             <input
               type="checkbox"
               checked={hasAcceptedPolicies}
-              onChange={(event) => setHasAcceptedPolicies(event.target.checked)}
+              onChange={(event) => {
+                setHasAcceptedPolicies(event.target.checked);
+                clearFieldError("policies");
+              }}
               className="mt-0.5 h-4 w-4 rounded border-white/20 bg-transparent accent-[#D87AAA]"
             />
             <span>
@@ -607,6 +684,9 @@ export default function BusinessRegistrationForm({
               <span className="text-white">*</span>
             </span>
           </label>
+          {fieldErrors.policies ? (
+            <p className="-mt-2 text-xs text-red-300">{fieldErrors.policies}</p>
+          ) : null}
 
           <button
             type="submit"

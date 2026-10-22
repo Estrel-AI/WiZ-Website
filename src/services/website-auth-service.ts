@@ -73,14 +73,6 @@ async function postAuthEndpoint<T extends AuthApiPayload>(
   return (responseData ?? {}) as T;
 }
 
-export async function isEmailAlreadyRegistered(email: string): Promise<boolean> {
-  try {
-    return await checkUserRegistered(email);
-  } catch {
-    return false;
-  }
-}
-
 export function requestSignupOtp(payload: GenerateOtpRequest) {
   return postAuthEndpoint("generate_otp", payload);
 }

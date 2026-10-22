@@ -41,13 +41,15 @@ export default function RegisterPage() {
 
     if (typeParam === "business" || typeParam === "developer") {
       setUserType(typeParam);
-      setIsLocked(true);
       if (typeParam === "developer") {
         setPlanId(planIdParam ? parseInt(planIdParam, 10) : 1);
         setPlanName(planNameParam || "Starter Plan");
       } else {
         setPlanId(planIdParam ? parseInt(planIdParam, 10) : 2);
         setPlanName(planNameParam || "Business Plan");
+      }
+      if (planIdParam || planNameParam) {
+        setIsLocked(true);
       }
     } else if (planNameParam) {
       if (planNameParam.toLowerCase().includes("business")) {

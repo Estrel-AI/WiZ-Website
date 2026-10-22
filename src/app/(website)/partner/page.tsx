@@ -559,7 +559,7 @@ export default function PartnerPage() {
                   className="bg-[#FFFFFF0D] border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden flex flex-col transition-transform hover:-translate-y-1 duration-300 shadow-xl"
                   data-aos="fade-up"
                 >
-                  <div className="w-full h-48 md:h-52 overflow-hidden bg-slate-900">
+                  <div className="w-full h-48 md:h-52 lg:h-64 overflow-hidden bg-slate-900">
                     <img
                       src={item.image}
                       alt={item.title}

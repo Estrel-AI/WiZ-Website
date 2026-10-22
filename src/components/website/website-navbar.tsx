@@ -4,8 +4,10 @@ import {
   AUTH_EVENT_NAME,
   AUTH_TOKEN_KEY,
   AUTH_USER_KEY,
-  DEVELOPER_LOGIN_URL,
   BUSINESS_LOGIN_URL,
+  DEVELOPER_LOGIN_URL,
+  getWebsiteHubUrl,
+  hasWebsiteSession,
 } from "@/src/features/auth/website-auth";
 import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
@@ -39,28 +41,14 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState("");
+  const [hubUrl, setHubUrl] = useState<string | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
     const syncAuthState = () => {
-      const token = Boolean(localStorage.getItem(AUTH_TOKEN_KEY));
-      setIsAuthenticated(token);
-      if (token) {
-        try {
-          const raw = localStorage.getItem(AUTH_USER_KEY);
-          if (raw) {
-            const u = JSON.parse(raw);
-            setUserName(String(u.display_name || u.first_name || u.username || "User"));
-          } else {
-            setUserName("User");
-          }
-        } catch {
-          setUserName("User");
-        }
-      } else {
-        setUserName("");
-      }
+      const authed = hasWebsiteSession();
+      setIsAuthenticated(authed);
+      setHubUrl(authed ? getWebsiteHubUrl() : null);
     };
 
     syncAuthState();
@@ -130,8 +118,27 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                 ))}
                 {isAuthenticated ? (
                   <>
-                    <Link href="/profile" className="text-sm font-medium text-gray-700 hover:text-tertiary transition" title="Your profile">{userName || "Profile"}</Link>
-                    <button type="button" onClick={handleSignOut} className="bg-gradient-to-r from-tertiary to-quaternary rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:scale-105 hover:bg-opacity-90 md:text-base">Sign Out</button>
+                    {hubUrl ? (
+                      <Link
+                        href={hubUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Go to your hub"
+                        className="inline-flex items-center gap-2 rounded-full border border-tertiary/30 bg-white px-6 py-2.5 text-sm font-semibold text-tertiary shadow-sm transition hover:bg-tertiary/5 md:text-base"
+                      >
+                        Go to Hub
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2m-4 0V9a1 1 0 00-1-1H8m0 0V5a2 2 0 012-2h4a2 2 0 012 2v4M7 12l-4-4m0 0l4-4m-4 4h18" />
+                        </svg>
+                      </Link>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="bg-gradient-to-r from-tertiary to-quaternary rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:scale-105 hover:bg-opacity-90 md:text-base"
+                    >
+                      Sign Out
+                    </button>
                   </>
                 ) : (
                   <>
@@ -151,28 +158,21 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                         Login
                         <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                       </button>
-                      <div className="invisible absolute right-0 top-full z-30 mt-3 w-48 translate-y-2 rounded-2xl border border-gray-100 bg-white p-2 opacity-0 shadow-[0_20px_45px_rgba(15,23,42,0.12)] transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                        {/* <Link
-                          href="/login"
-                          title="Log in with username and password"
-                          className="block rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
-                        >
-                          Website Login
-                        </Link> */}
+                      <div className="invisible absolute right-0 top-full z-30 mt-3 w-52 translate-y-2 rounded-2xl border border-gray-100 bg-white p-2 opacity-0 shadow-[0_20px_45px_rgba(15,23,42,0.12)] transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                         <Link
                           href={DEVELOPER_LOGIN_URL}
                           target="_blank"
                           rel="noreferrer"
-                          title="Log in to the hub"
+                          title="Log in to the developer hub"
                           className="block rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
                         >
                           WiiZ for Developer
                         </Link>
-                          <Link
+                        <Link
                           href={BUSINESS_LOGIN_URL}
                           target="_blank"
                           rel="noreferrer"
-                          title="Log in to the hub"
+                          title="Log in to the business hub"
                           className="block rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
                         >
                           WiiZ for Business
@@ -233,40 +233,62 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
             </Link>
           ))}
           <hr className="border-gray-100" />
-          <a
-            href="/register"
-            onClick={() => setMobileMenuOpen(false)}
-            className="text-lg font-bold text-tertiary transition hover:opacity-80"
-          >
-            Sign Up
-          </a>
+          {!isAuthenticated ? (
+            <a
+              href="/register"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-lg font-bold text-tertiary transition hover:opacity-80"
+            >
+              Sign Up
+            </a>
+          ) : null}
           <div className="space-y-3">
-            {/* <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block rounded-full border border-gray-200 px-6 py-3 text-center text-base font-semibold text-gray-800 transition hover:bg-gray-50"
-            >
-              Website Login
-            </Link> */}
-            
-            <Link
-              href={DEVELOPER_LOGIN_URL}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block bg-gradient-to-r from-tertiary to-quaternary rounded-full px-6 py-3 text-center text-base font-semibold text-white shadow-sm transition hover:bg-opacity-90"
-            >
-               WiiZ for Developer
-            </Link>
-              <Link
-              href={BUSINESS_LOGIN_URL}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block bg-gradient-to-r from-tertiary to-quaternary rounded-full px-6 py-3 text-center text-base font-semibold text-white shadow-sm transition hover:bg-opacity-90"
-            >
-               WiiZ for Business
-            </Link>
+            {isAuthenticated ? (
+              <>
+                {hubUrl ? (
+                  <Link
+                    href={hubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 rounded-full border border-tertiary/30 bg-white px-6 py-3 text-center text-base font-semibold text-tertiary shadow-sm transition hover:bg-tertiary/5"
+                  >
+                    Go to Hub
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2m-4 0V9a1 1 0 00-1-1H8m0 0V5a2 2 0 012-2h4a2 2 0 012 2v4M7 12l-4-4m0 0l4-4m-4 4h18" />
+                    </svg>
+                  </Link>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="block w-full rounded-full bg-gradient-to-r from-tertiary to-quaternary px-6 py-3 text-center text-base font-semibold text-white shadow-sm transition hover:bg-opacity-90"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={DEVELOPER_LOGIN_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block bg-gradient-to-r from-tertiary to-quaternary rounded-full px-6 py-3 text-center text-base font-semibold text-white shadow-sm transition hover:bg-opacity-90"
+                >
+                  WiiZ for Developer
+                </Link>
+                <Link
+                  href={BUSINESS_LOGIN_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block bg-gradient-to-r from-tertiary to-quaternary rounded-full px-6 py-3 text-center text-base font-semibold text-white shadow-sm transition hover:bg-opacity-90"
+                >
+                  WiiZ for Business
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -12,7 +12,7 @@ export const HUB_BASE_URL = normalizeBaseUrl(
 
 export const DEVELOPER_HUB_BASE_URL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_DEVELOPER_HUB_BASE_URL,
-  "https://dev.wiiz.it",
+  "https://sandbox.wiiz.it",
 );
 
 export const BUSINESS_HUB_BASE_URL = normalizeBaseUrl(
@@ -22,7 +22,7 @@ export const BUSINESS_HUB_BASE_URL = normalizeBaseUrl(
 
 export const AUTH_API_BASE_URL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_AUTH_API_BASE_URL,
-  "https://dev.wiiz.it/aiwf",
+  "https://sandbox.wiiz.it/aiwf",
 );
 
 export const AUTH_OAUTH_BASE_URL = normalizeBaseUrl(
@@ -42,7 +42,7 @@ export const PAYMENTS_API_BASE_URL = normalizeBaseUrl(
 
 export const FRONTEND_BASE_URL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_FRONTEND_BASE_URL,
-  "http://localhost:3000",
+  "https://test.wiiz.it",
 );
 
 export const RECAPTCHA_SITE_KEY =

@@ -4,8 +4,8 @@ import PolicyModalTrigger from "@/src/components/website/policy-modal-trigger";
 import SocialAuthButtons from "@/src/components/website/social-auth-buttons";
 import { RECAPTCHA_SITE_KEY } from "@/src/config/public-env";
 import { DEVELOPER_LOGIN_URL } from "@/src/features/auth/website-auth";
-import { isEmailAlreadyRegistered, requestSignupOtp, verifyOtp, submitSignup } from "@/src/services/website-auth-service";
-import { Check, CircleAlert, Pencil, CheckCircle2 } from "lucide-react";
+import { requestSignupOtp, verifyOtp, submitSignup } from "@/src/services/website-auth-service";
+import { CheckCircle2, CircleAlert, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -48,6 +48,18 @@ function getErrorMessage(error: unknown) {
   return "Something went wrong. Please try again.";
 }
 
+function mapApiErrorField(message: string): string | null {
+  const lower = message.toLowerCase();
+  if (/otp|verification code/.test(lower)) return "otp";
+  if (/username/.test(lower)) return "username";
+  if (/email/.test(lower)) return "email";
+  if (/password/.test(lower)) return "password";
+  if (/recaptcha|captcha|human/.test(lower)) return "captcha";
+  if (/first name/.test(lower)) return "first_name";
+  if (/last name/.test(lower)) return "last_name";
+  return null;
+}
+
 function getPasswordChecks(password: string) {
   return {
     minLength: password.length >= 8,
@@ -85,9 +97,10 @@ export default function DeveloperRegistrationForm({
   const [hasAcceptedPolicies, setHasAcceptedPolicies] = useState(false);
   const [loading, setLoading] = useState<"otp" | "signup" | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
-  const [isUsernameEditable, setIsUsernameEditable] = useState(false);
   const [showPasswordHint, setShowPasswordHint] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
@@ -128,7 +141,6 @@ export default function DeveloperRegistrationForm({
         last_name: oauthLastName ?? previous.last_name,
         username: oauthUsername ?? oauthEmail,
       }));
-      setIsUsernameEditable(false);
       setStep("details");
     }
   }, [searchParams]);
@@ -167,13 +179,14 @@ export default function DeveloperRegistrationForm({
           callback: (token: string) => {
             setRecaptchaToken(token);
             setErrorMessage("");
+            clearFieldError("captcha");
           },
           "expired-callback": () => {
             setRecaptchaToken("");
           },
           "error-callback": () => {
             setRecaptchaToken("");
-            setErrorMessage("reCAPTCHA could not be verified. Please try again.");
+            setFieldErrors((previous) => ({ ...previous, captcha: "reCAPTCHA could not be verified. Please try again." }));
           },
         });
       } catch {
@@ -232,19 +245,25 @@ export default function DeveloperRegistrationForm({
     };
   }, []);
 
-  const sendOtp = async () => {
-    if (!email.trim()) {
-      setErrorMessage("Please enter your email address.");
-      return;
-    }
+  const clearFieldError = (field: string) => {
+    setFieldErrors((previous) => {
+      if (!previous[field]) return previous;
+      const next = { ...previous };
+      delete next[field];
+      return next;
+    });
+  };
 
-    if (await isEmailAlreadyRegistered(email.trim())) {
-      setErrorMessage("This email is already registered. Please log in to your existing account instead.");
+  const sendOtp = async () => {
+    setErrorMessage("");
+    setFieldErrors({});
+
+    if (!email.trim()) {
+      setFieldErrors({ email: "Please enter your email address." });
       return;
     }
 
     setLoading("otp");
-    setErrorMessage("");
     setSuccessMessage("");
 
     try {
@@ -257,7 +276,12 @@ export default function DeveloperRegistrationForm({
     } catch (error) {
       const errStr = getErrorMessage(error);
       window.onOtpFailed?.("OTP_SEND_FAILED", errStr);
-      setErrorMessage(errStr);
+      const field = mapApiErrorField(errStr);
+      if (field === "email") {
+        setFieldErrors({ email: errStr });
+      } else {
+        setErrorMessage(errStr);
+      }
     } finally {
       setLoading(null);
     }
@@ -270,25 +294,29 @@ export default function DeveloperRegistrationForm({
 
   const handleOtpSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErrorMessage("");
+    setFieldErrors({});
+
     if (!otp.trim()) {
-      setErrorMessage("Please enter the OTP.");
+      setFieldErrors({ otp: "Please enter the OTP." });
       return;
     }
 
     setLoading("otp");
-    setErrorMessage("");
     setSuccessMessage("");
 
     try {
       await verifyOtp({ email: email.trim(), otp: otp.trim() });
       setFormData((previous) => ({
         ...previous,
-        username: previous.username || email.trim(),
+        username: email.trim(),
       }));
-      setIsUsernameEditable(false);
       setStep("details");
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      const errStr = getErrorMessage(error);
+      setFieldErrors({
+        otp: errStr.includes("invalid") || errStr.includes("Invalid") ? "Invalid OTP. Please try again." : errStr,
+      });
     } finally {
       setLoading(null);
     }
@@ -297,30 +325,39 @@ export default function DeveloperRegistrationForm({
   const handleSignup = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const isOAuthSignup = searchParams?.get("oauth_verified") === "1" && Boolean(searchParams?.get("oauth_provider"));
-    if (!formData.first_name || !formData.last_name || !formData.username || !formData.password) {
-      setErrorMessage("Please fill in all required fields.");
-      return;
-    }
 
-    if (!STRONG_PASSWORD_REGEX.test(formData.password)) {
-      setErrorMessage(
-        "Please enter a strong password with at least 8 characters, uppercase, lowercase, number, and special character.",
-      );
-      return;
+    const errors: Record<string, string> = {};
+    if (!formData.first_name) {
+      errors.first_name = "First Name is required.";
     }
-
+    if (!formData.last_name) {
+      errors.last_name = "Last Name is required.";
+    }
+    if (!formData.username) {
+      errors.username = "Username is required.";
+    }
+    if (!formData.password) {
+      errors.password = "Password is required.";
+    } else if (!STRONG_PASSWORD_REGEX.test(formData.password)) {
+      errors.password =
+        "Please enter a strong password with at least 8 characters, uppercase, lowercase, number, and special character.";
+    }
     if (!recaptchaToken) {
-      setErrorMessage("Please complete the reCAPTCHA verification.");
-      return;
+      errors.captcha = "Please complete the reCAPTCHA verification.";
+    }
+    if (!hasAcceptedPolicies) {
+      errors.policies = "Please accept the Terms and Conditions and Privacy Policy.";
     }
 
-    if (!hasAcceptedPolicies) {
-      setErrorMessage("Please accept the Terms and Conditions and Privacy Policy.");
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setErrorMessage("");
       return;
     }
 
     setLoading("signup");
     setErrorMessage("");
+    setFieldErrors({});
     setSuccessMessage("");
 
     try {
@@ -360,10 +397,10 @@ export default function DeveloperRegistrationForm({
       setStep("success");
       setSuccessMessage("Your developer account has been created successfully.");
       setFormData(initialSignupForm);
-      setIsUsernameEditable(false);
       setHasAcceptedPolicies(false);
       setRecaptchaToken("");
       setErrorMessage("");
+      setFieldErrors({});
 
       if (window.grecaptcha && recaptchaWidgetIdRef.current !== null) {
         window.grecaptcha.reset(recaptchaWidgetIdRef.current);
@@ -373,7 +410,14 @@ export default function DeveloperRegistrationForm({
     } catch (error) {
       const errStr = getErrorMessage(error);
       window.onOtpFailed?.("OTP_VERIFY_OR_SIGNUP_FAILED", errStr);
-      setErrorMessage(errStr);
+      const field = mapApiErrorField(errStr);
+      if (field === "otp" && step !== "otp") {
+        setErrorMessage(errStr);
+      } else if (field) {
+        setFieldErrors({ [field]: errStr });
+      } else {
+        setErrorMessage(errStr);
+      }
       setRecaptchaToken("");
       if (window.grecaptcha && recaptchaWidgetIdRef.current !== null) {
         window.grecaptcha.reset(recaptchaWidgetIdRef.current);
@@ -387,9 +431,7 @@ export default function DeveloperRegistrationForm({
     "w-full bg-[#FFFFFF05] border border-white/10 rounded-xl px-3.5 py-2.5 text-white placeholder:text-gray-400 text-base sm:text-sm focus:outline-none focus:border-[#ab386a] transition-colors";
   const otpHintClassName =
     "w-full bg-[#FFFFFF05] border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-gray-500 text-center text-xl sm:text-2xl tracking-[0.35em] font-mono focus:outline-none focus:border-[#ab386a] transition-colors";
-  const usernameInputClassName = isUsernameEditable
-    ? `${inputClassName} pr-12 border-[#D87AAA]/70 bg-[#FFFFFF08] shadow-[0_0_0_1px_rgba(216,122,170,0.15)]`
-    : `${inputClassName} pr-12 border-white/5 bg-white/[0.03] text-gray-300 cursor-default`;
+  const usernameInputClassName = `${inputClassName} border-white/5 bg-white/[0.03] text-gray-300 cursor-default`;
   const passwordStrength = getPasswordStrength(formData.password);
   const passwordStrengthConfig = {
     weak: { label: "Weak", textClassName: "text-red-300" },
@@ -439,10 +481,16 @@ export default function DeveloperRegistrationForm({
               type="email"
               name="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Enter your Email ID"
+              onChange={(event) => {
+                setEmail(event.target.value);
+                clearFieldError("email");
+              }}
+              placeholder="Verify your Email ID"
               className={inputClassName}
             />
+            {fieldErrors.email ? (
+              <p className="mt-1.5 text-xs text-red-300">{fieldErrors.email}</p>
+            ) : null}
           </div>
 
           <button
@@ -504,10 +552,16 @@ export default function DeveloperRegistrationForm({
               name="otp"
               maxLength={6}
               value={otp}
-              onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))}
-              placeholder="Enter 6-digit OTP"
+              onChange={(event) => {
+                setOtp(event.target.value.replace(/\D/g, ""));
+                clearFieldError("otp");
+              }}
+              placeholder="Verification Code"
               className={otpHintClassName}
             />
+            {fieldErrors.otp ? (
+              <p className="mt-1.5 text-xs text-red-300">{fieldErrors.otp}</p>
+            ) : null}
           </div>
 
           <button
@@ -537,10 +591,16 @@ export default function DeveloperRegistrationForm({
                 type="text"
                 name="first_name"
                 value={formData.first_name}
-                onChange={(event) => setFormData((prev) => ({ ...prev, first_name: event.target.value }))}
-                placeholder="John"
+                onChange={(event) => {
+                  setFormData((prev) => ({ ...prev, first_name: event.target.value }));
+                  clearFieldError("first_name");
+                }}
+                placeholder="First Name"
                 className={inputClassName}
               />
+              {fieldErrors.first_name ? (
+                <p className="mt-1.5 text-xs text-red-300">{fieldErrors.first_name}</p>
+              ) : null}
             </div>
 
             <div>
@@ -551,41 +611,34 @@ export default function DeveloperRegistrationForm({
                 type="text"
                 name="last_name"
                 value={formData.last_name}
-                onChange={(event) => setFormData((prev) => ({ ...prev, last_name: event.target.value }))}
-                placeholder="Doe"
+                onChange={(event) => {
+                  setFormData((prev) => ({ ...prev, last_name: event.target.value }));
+                  clearFieldError("last_name");
+                }}
+                placeholder="Last Name"
                 className={inputClassName}
               />
+              {fieldErrors.last_name ? (
+                <p className="mt-1.5 text-xs text-red-300">{fieldErrors.last_name}</p>
+              ) : null}
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1.5">
                 Username <span className="text-white">*</span>
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={(event) => setFormData((prev) => ({ ...prev, username: event.target.value }))}
-                  placeholder="john_doe"
-                  readOnly={!isUsernameEditable}
-                  aria-readonly={!isUsernameEditable}
-                  className={usernameInputClassName}
-                />
-                <button
-                  type="button"
-                  onClick={() => setIsUsernameEditable((previous) => !previous)}
-                  className={`absolute inset-y-1.5 right-1.5 flex w-9 items-center justify-center rounded-lg border transition-all ${
-                    isUsernameEditable
-                      ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25"
-                      : "border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white"
-                  }`}
-                  aria-label={isUsernameEditable ? "Finish editing username" : "Edit username"}
-                  title={isUsernameEditable ? "Finish editing username" : "Edit username"}
-                >
-                  {isUsernameEditable ? <Check className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-                </button>
-              </div>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                readOnly
+                aria-readonly
+                placeholder="Username"
+                className={usernameInputClassName}
+              />
+              {fieldErrors.username ? (
+                <p className="mt-1.5 text-xs text-red-300">{fieldErrors.username}</p>
+              ) : null}
             </div>
 
             <div className="md:col-span-2">
@@ -619,15 +672,33 @@ export default function DeveloperRegistrationForm({
                   ) : null}
                 </div>
               </div>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={(event) => setFormData((prev) => ({ ...prev, password: event.target.value }))}
-                placeholder="Enter your password"
-                className={inputClassName}
-              />
-              <p className={`mt-1.5 text-xs ${activePasswordStrength.textClassName}`}>{passwordStrengthText}</p>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={(event) => {
+                    setFormData((prev) => ({ ...prev, password: event.target.value }));
+                    clearFieldError("password");
+                  }}
+                  placeholder="Password"
+                  className={`${inputClassName} pr-12`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((previous) => !previous)}
+                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-gray-400 transition-colors hover:text-gray-200"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {fieldErrors.password ? (
+                <p className="mt-1.5 text-xs text-red-300">{fieldErrors.password}</p>
+              ) : (
+                <p className={`mt-1.5 text-xs ${activePasswordStrength.textClassName}`}>{passwordStrengthText}</p>
+              )}
             </div>
           </div>
 
@@ -641,13 +712,19 @@ export default function DeveloperRegistrationForm({
                 className="inline-flex max-w-full origin-left scale-[0.92] sm:scale-100 rounded-md overflow-hidden"
               />
             </div>
+            {fieldErrors.captcha ? (
+              <p className="mt-1.5 text-xs text-red-300">{fieldErrors.captcha}</p>
+            ) : null}
           </div>
 
           <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs sm:text-sm text-gray-300">
             <input
               type="checkbox"
               checked={hasAcceptedPolicies}
-              onChange={(event) => setHasAcceptedPolicies(event.target.checked)}
+              onChange={(event) => {
+                setHasAcceptedPolicies(event.target.checked);
+                clearFieldError("policies");
+              }}
               className="mt-0.5 h-4 w-4 rounded border-white/20 bg-transparent accent-[#D87AAA]"
             />
             <span>
@@ -662,6 +739,9 @@ export default function DeveloperRegistrationForm({
               <span className="text-white">*</span>
             </span>
           </label>
+          {fieldErrors.policies ? (
+            <p className="-mt-2 text-xs text-red-300">{fieldErrors.policies}</p>
+          ) : null}
 
           <button
             type="submit"
