@@ -14,6 +14,9 @@ services:
       - MYSQL_HOST=db
     depends_on:
       - db
+    volumes:
+      - app_assets:/app/assets
+      - app_public_uploads:/app/public/uploads
     restart: unless-stopped
 
   db:
@@ -30,3 +33,5 @@ services:
 
 volumes:
   db_data:
+  app_assets:
+  app_public_uploads:
