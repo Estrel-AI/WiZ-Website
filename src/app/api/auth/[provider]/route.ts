@@ -21,8 +21,19 @@ export async function GET(
 
   try {
     const intent = request.nextUrl.searchParams.get("intent") === "login" ? "login" : "signup";
+    const accountTypeParam = request.nextUrl.searchParams.get("account_type");
+    const accountType =
+      accountTypeParam === "business" || accountTypeParam === "developer" ? accountTypeParam : undefined;
+    const planIdParam = Number(request.nextUrl.searchParams.get("plan_id"));
+    const planNameParam = request.nextUrl.searchParams.get("plan_name")?.trim() || undefined;
     const cookieStore = await cookies();
-    const { state, token } = createOAuthStateToken(rawProvider, intent);
+    const { state, token } = createOAuthStateToken(
+      rawProvider,
+      intent,
+      accountType,
+      Number.isInteger(planIdParam) && planIdParam > 0 ? planIdParam : undefined,
+      planNameParam,
+    );
     const authorizationUrl = buildOAuthAuthorizationUrl(rawProvider, state);
 
     cookieStore.set(getOAuthStateCookieName(rawProvider), token, {

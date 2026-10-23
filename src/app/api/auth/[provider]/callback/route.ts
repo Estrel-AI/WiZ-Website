@@ -76,8 +76,11 @@ export async function GET(
   const cookieStore = await cookies();
   const stateCookieName = getOAuthStateCookieName(rawProvider);
   const signedStateToken = cookieStore.get(stateCookieName)?.value;
+  const statePayload = signedStateToken
+    ? verifyOAuthStateToken(signedStateToken, rawProvider, state)
+    : null;
 
-  if (!signedStateToken || !verifyOAuthStateToken(signedStateToken, rawProvider, state)) {
+  if (!statePayload) {
     return NextResponse.json(
       { success: false, message: "Your OAuth session is invalid or has expired. Please try again." },
       { status: 400 },
@@ -87,6 +90,18 @@ export async function GET(
   try {
     const profile = await getOAuthProfileFromCode(rawProvider, code);
     const registerUrl = new URL("/register", request.url);
+
+    if (statePayload.accountType === "business") {
+      registerUrl.searchParams.set("user_type", "business");
+    }
+
+    if (statePayload.planId) {
+      registerUrl.searchParams.set("plan_id", String(statePayload.planId));
+    }
+
+    if (statePayload.planName) {
+      registerUrl.searchParams.set("plan_name", statePayload.planName);
+    }
 
     if (!profile.email) {
       registerUrl.searchParams.set("oauth_error", `We could not get your ${rawProvider} email address.`);
@@ -124,6 +139,11 @@ export async function GET(
       error instanceof Error ? error.message : "Unable to complete OAuth authentication.";
 
     const registerUrl = new URL("/register", request.url);
+
+    if (statePayload.accountType === "business") {
+      registerUrl.searchParams.set("user_type", "business");
+    }
+
     registerUrl.searchParams.set("oauth_error", message);
 
     return NextResponse.json(
