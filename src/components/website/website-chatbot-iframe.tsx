@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 
 export const WEBSITE_CHATBOT_OPEN_EVENT = "wiiz:open-website-chatbot";
 
+const CHAT_AGENT_URL =
+  process.env.NEXT_PUBLIC_CHAT_AGENT_URL ||
+  "https://hub.wiiz.it/iframe/agent/chat/16802a64-618d-4c64-a6a5-ab4d588d8079";
+
 export default function WebsiteChatbotIframe() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -43,7 +47,7 @@ export default function WebsiteChatbotIframe() {
 
           <div className="h-[calc(100%-61px)]">
             <iframe
-              src="https://test.wiiz.it/aistudio/agent/chat/16802a64-618d-4c64-a6a5-ab4d588d8079"
+              src={CHAT_AGENT_URL}
               width="100%"
               height="100%"
               frameBorder="0"
