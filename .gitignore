@@ -1,10 +1,4 @@
-# Dependencies
-node_modules/
- 
-# Runtime secrets
 .env
- 
-# Host / runtime data
-certbot/
-backend/mysql-data/
-*.log
+.env.local
+.env.dev
+backup.zip

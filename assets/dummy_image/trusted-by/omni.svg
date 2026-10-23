@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="176" height="48" viewBox="0 0 176 48" role="img" aria-labelledby="title">
+  <title id="title">omni</title>
+  <rect width="176" height="48" fill="none"/>
+  <path d="M22 14 36 22v16L22 46 8 38V22l14-8Z" transform="translate(0 -6)" fill="#20242A"/>
+  <path d="M22 15 32 21 22 27 12 21l10-6Z" fill="#D13B6C"/>
+  <text x="48" y="31" fill="#20242A" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700">omni</text>
+</svg>

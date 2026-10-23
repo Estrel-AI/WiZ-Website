@@ -1,57 +1,37 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: wiiz_mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: Root@321
-      MYSQL_DATABASE: wizz_db
-      MYSQL_USER: wizz_db_user
-      MYSQL_PASSWORD: Wizz@321
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ~/mysql-schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uwizz_db_user", "-pWizz@321"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
- 
-  nextjs:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: wiiz_nextjs
-    restart: unless-stopped
+    container_name: wiiz-website-test
+    ports:
+      - "3000:3000"
     env_file:
       - .env
     environment:
-      MYSQL_HOST: mysql
+      - NODE_ENV=production
+      - APP_ENV=testing
+      - MYSQL_HOST=db
     depends_on:
-      mysql:
-        condition: service_healthy
- 
-  nginx:
-    image: nginx:alpine
-    container_name: wiiz_nginx
+      - db
+    volumes:
+      - app_assets:/app/assets
+      - app_public_uploads:/app/public/uploads
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+
+  db:
+    image: mysql:8
+    container_name: wiiz-website-test-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-wizz_db}
+      - MYSQL_USER=${MYSQL_USER:-wizz_db_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-Wizz@321}
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - /etc/letsencrypt:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    depends_on:
-      - nextjs
- 
-  certbot:
-    image: certbot/certbot
-    container_name: wiiz_certbot
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
- 
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
 volumes:
-  mysql_data:
+  db_data:
+  app_assets:
+  app_public_uploads:

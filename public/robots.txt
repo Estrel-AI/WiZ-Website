@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://wiiz.it/sitemap.xml
+# Sitemap
+Sitemap: https://wiiz.ai/sitemap.xml

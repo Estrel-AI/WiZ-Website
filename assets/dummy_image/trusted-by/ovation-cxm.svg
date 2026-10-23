@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="176" height="48" viewBox="0 0 176 48" role="img" aria-labelledby="title">
+  <title id="title">OvationCXM</title>
+  <rect width="176" height="48" fill="none"/>
+  <circle cx="22" cy="24" r="13" fill="none" stroke="#20242A" stroke-width="5"/>
+  <circle cx="22" cy="24" r="5" fill="#D13B6C"/>
+  <text x="44" y="30" fill="#20242A" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Ovation</text>
+  <text x="118" y="30" fill="#D13B6C" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800">CXM</text>
+</svg>

@@ -1,3 +1,0 @@
-{
-  "/(website)/ai-agents/[industrySlug]/[functionSlug]/[useCaseSlug]/page": "app/(website)/ai-agents/[industrySlug]/[functionSlug]/[useCaseSlug]/page.js"
-}

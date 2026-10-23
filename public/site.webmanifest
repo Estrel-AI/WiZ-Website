@@ -1,1 +1,21 @@
-{"name":"WiiZ","short_name":"WiiZ","icons":[{"src":"/favicon-32x32.png","sizes":"32x32","type":"image/png"},{"src":"/apple-touch-icon.png","sizes":"180x180","type":"image/png"}],"theme_color":"#110a10","background_color":"#110a10","display":"standalone"}
+{
+  "name": "WiiZ",
+  "short_name": "WiiZ",
+  "description": "AI orchestration and automation platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F1115",
+  "theme_color": "#98235f",
+  "icons": [
+    {
+      "src": "/api/assets/icons/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/api/assets/icons/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

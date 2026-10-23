@@ -1,3 +1,0 @@
-{
-  "/api/auth/[provider]/callback/route": "app/api/auth/[provider]/callback/route.js"
-}

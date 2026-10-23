@@ -1,6 +1,8 @@
-
-de_modules
-.env
-*.log
-*.md
 .git
+.gitignore
+node_modules
+.next
+.env.local
+Dockerfile
+docker-compose.yml
+README.md
