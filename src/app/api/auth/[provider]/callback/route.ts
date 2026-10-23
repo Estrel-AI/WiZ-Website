@@ -6,7 +6,7 @@ import {
   isOAuthProvider,
   verifyOAuthStateToken,
 } from "@/src/lib/oauth";
-import { AUTH_API_BASE_URL, buildPublicApiUrl } from "@/src/config/public-env";
+import { AUTH_API_BASE_URL, BUSINESS_AUTH_API_BASE_URL, buildPublicApiUrl } from "@/src/config/public-env";
 import type { UserRegisteredResponse } from "@/src/types/auth";
 
 export const runtime = "nodejs";
@@ -32,6 +32,33 @@ async function checkUserRegistered(email: string) {
   if (!response.ok) {
     throw new Error(responseData?.message || "Unable to verify whether this email is already registered.");
   }
+
+  if (responseData?.status === "conflict" || responseData?.data?.status === "conflict") {
+    return true;
+  }
+
+  return Boolean(
+    responseData?.registered ??
+      responseData?.exists ??
+      responseData?.data?.registered ??
+      responseData?.data?.exists,
+  );
+}
+
+async function checkBusinessUserRegistered(email: string) {
+  const query = new URLSearchParams({ email }).toString();
+  const response = await fetch(buildPublicApiUrl(BUSINESS_AUTH_API_BASE_URL, `/user_registered?${query}`), {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    // The business backend does not expose a registration-check endpoint yet;
+    // treat the result as unknown instead of blocking the signup flow.
+    return false;
+  }
+
+  const responseData = (await response.json().catch(() => null)) as UserRegisteredResponse | null;
 
   if (responseData?.status === "conflict" || responseData?.data?.status === "conflict") {
     return true;
@@ -114,7 +141,11 @@ export async function GET(
     }
 
     const email = profile.email.trim().toLowerCase();
-    const isRegistered = await checkUserRegistered(email);
+    // Each account type checks its own registry: developer accounts against the
+    // developer backend, business accounts against the wbs backend.
+    const isRegistered = statePayload.accountType === "business"
+      ? await checkBusinessUserRegistered(email)
+      : await checkUserRegistered(email);
 
     if (isRegistered) {
       registerUrl.searchParams.set("oauth_error", "This email is already registered. Please log in instead.");

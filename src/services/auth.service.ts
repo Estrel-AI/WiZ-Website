@@ -66,6 +66,35 @@ export async function submitBusinessSignup(payload: BusinessSignupPayload): Prom
   return data ?? {};
 }
 
+export async function checkBusinessUserRegistered(email: string): Promise<boolean | null> {
+  const query = new URLSearchParams({ email }).toString();
+  const response = await fetch(`${BUSINESS_AUTH_API_BASE_URL}/user_registered?${query}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    // The business backend does not expose a registration-check endpoint yet;
+    // treat the result as unknown instead of blocking the signup flow.
+    return null;
+  }
+
+  const responseData = (await response.json().catch(() => null)) as
+    | { status?: string; message?: string; registered?: boolean; exists?: boolean; data?: { status?: string; registered?: boolean; exists?: boolean } }
+    | null;
+
+  if (responseData?.status === "conflict" || responseData?.data?.status === "conflict") {
+    return true;
+  }
+
+  return Boolean(
+    responseData?.registered ??
+      responseData?.exists ??
+      responseData?.data?.registered ??
+      responseData?.data?.exists,
+  );
+}
+
 export async function submitBusinessSignin(payload: SigninRequest): Promise<AuthApiResponse> {
   const response = await fetch(`${BUSINESS_SIGNIN_BASE_URL}/signin`, {
     method: "POST",
