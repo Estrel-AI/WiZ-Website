@@ -7,7 +7,7 @@ import { BUSINESS_LOGIN_URL } from "@/src/features/auth/website-auth";
 import { generateBusinessOtp, verifyBusinessOtp, submitBusinessSignup } from "@/src/services/auth.service";
 import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 export type BusinessFormData = {
@@ -84,6 +84,7 @@ export default function BusinessRegistrationForm({
   onStepChange,
 }: BusinessRegistrationFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<RegisterStep>("email");
   const [email, setEmail] = useState(initialEmail);
   const [otp, setOtp] = useState("");
@@ -109,6 +110,39 @@ export default function BusinessRegistrationForm({
       setRecaptchaLoaded(true);
     }
   };
+
+  useEffect(() => {
+    if (!searchParams) return;
+    const oauthError = searchParams.get("oauth_error");
+    const oauthStep = searchParams.get("oauth_step");
+    const oauthEmail = searchParams.get("oauth_email");
+    const oauthFirstName = searchParams.get("oauth_first_name");
+    const oauthLastName = searchParams.get("oauth_last_name");
+    const oauthUsername = searchParams.get("oauth_username");
+    const oauthVerified = searchParams.get("oauth_verified");
+
+    if (oauthError) {
+      setErrorMessage(oauthError);
+      setSuccessMessage("");
+      setStep("email");
+      return;
+    }
+
+    if (oauthStep === "details" && oauthEmail && oauthVerified === "1") {
+      setEmail(oauthEmail);
+      setOtp("");
+      setErrorMessage("");
+      setSuccessMessage("Your email has been verified successfully. Complete the remaining details.");
+      setFormData((previous) => ({
+        ...previous,
+        official_email: oauthEmail,
+        first_name: oauthFirstName ?? previous.first_name,
+        last_name: oauthLastName ?? previous.last_name,
+        preferred_system_username: oauthUsername ?? oauthEmail,
+      }));
+      setStep("details");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     onStepChange?.(step);
@@ -524,7 +558,7 @@ export default function BusinessRegistrationForm({
             {loading === "otp" ? "Sending OTP..." : "Send OTP"}
           </button>
 
-          <SocialAuthButtons intent="signup" variant="icons" />
+          <SocialAuthButtons intent="signup" variant="icons" accountType="business" planId={planId} planName={planName} />
 
           <p className="text-center text-sm text-gray-400 pt-1">
             Already have an account?{" "}

@@ -501,7 +501,7 @@ export default function DeveloperRegistrationForm({
             {loading === "otp" ? "Sending OTP..." : "Send OTP"}
           </button>
 
-          <SocialAuthButtons intent="signup" variant="icons" />
+          <SocialAuthButtons intent="signup" variant="icons" accountType="developer" planId={planId} planName={planName} />
 
           <p className="text-center text-sm text-gray-400 pt-1">
             Already have an account?{" "}

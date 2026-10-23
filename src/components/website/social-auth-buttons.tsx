@@ -3,7 +3,34 @@
 type SocialAuthButtonsProps = {
   intent: "login" | "signup";
   variant?: "full" | "icons";
+  accountType?: "developer" | "business";
+  planId?: number;
+  planName?: string;
 };
+
+function buildAuthHref(
+  providerId: string,
+  intent: "login" | "signup",
+  accountType?: "developer" | "business",
+  planId?: number,
+  planName?: string,
+) {
+  const params = new URLSearchParams({ intent });
+
+  if (accountType) {
+    params.set("account_type", accountType);
+  }
+
+  if (planId) {
+    params.set("plan_id", String(planId));
+  }
+
+  if (planName) {
+    params.set("plan_name", planName);
+  }
+
+  return `/api/auth/${providerId}?${params.toString()}`;
+}
 
 const providers = [
   {
@@ -79,6 +106,9 @@ function LinkedInIcon() {
 export default function SocialAuthButtons({
   intent,
   variant = "full",
+  accountType,
+  planId,
+  planName,
 }: SocialAuthButtonsProps) {
   if (variant === "icons") {
     return (
@@ -89,7 +119,7 @@ export default function SocialAuthButtons({
           return (
             <a
               key={provider.id}
-              href={`/api/auth/${provider.id}?intent=${intent}`}
+              href={buildAuthHref(provider.id, intent, accountType, planId, planName)}
               aria-label={`Continue with ${provider.label}`}
               title={`Continue with ${provider.label}`}
               className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 transition-colors hover:bg-white/10"
@@ -111,7 +141,7 @@ export default function SocialAuthButtons({
           return (
             <a
               key={provider.id}
-              href={`/api/auth/${provider.id}?intent=${intent}`}
+              href={buildAuthHref(provider.id, intent, accountType, planId, planName)}
               className="flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/10"
             >
               <Icon />

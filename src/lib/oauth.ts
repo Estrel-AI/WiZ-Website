@@ -18,6 +18,9 @@ type OAuthStatePayload = {
   provider: OAuthProvider;
   state: string;
   intent: string;
+  accountType?: string;
+  planId?: number;
+  planName?: string;
   iat?: number;
   exp?: number;
 };
@@ -156,7 +159,13 @@ export function getOAuthStateCookieName(provider: OAuthProvider) {
   return `${OAUTH_STATE_COOKIE_PREFIX}${provider}`;
 }
 
-export function createOAuthStateToken(provider: OAuthProvider, intent: string) {
+export function createOAuthStateToken(
+  provider: OAuthProvider,
+  intent: string,
+  accountType?: string,
+  planId?: number,
+  planName?: string,
+) {
   const issuedAt = Math.floor(Date.now() / 1000);
   const payload: OAuthStatePayload = {
     provider,
@@ -165,6 +174,18 @@ export function createOAuthStateToken(provider: OAuthProvider, intent: string) {
     iat: issuedAt,
     exp: issuedAt + 60 * 10,
   };
+
+  if (accountType) {
+    payload.accountType = accountType;
+  }
+
+  if (planId) {
+    payload.planId = planId;
+  }
+
+  if (planName) {
+    payload.planName = planName;
+  }
 
   return {
     state: payload.state,
