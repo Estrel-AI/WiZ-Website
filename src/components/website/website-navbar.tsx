@@ -6,8 +6,10 @@ import {
   AUTH_USER_KEY,
   BUSINESS_LOGIN_URL,
   DEVELOPER_LOGIN_URL,
+  getWebsiteHubLabel,
   getWebsiteHubUrl,
   hasWebsiteSession,
+  resolveWebsiteAccountType,
 } from "@/src/features/auth/website-auth";
 import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
@@ -42,6 +44,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hubUrl, setHubUrl] = useState<string | null>(null);
+  const [hubLabel, setHubLabel] = useState("Go to Hub");
   const pathname = usePathname();
 
   useEffect(() => {
@@ -49,6 +52,11 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
       const authed = hasWebsiteSession();
       setIsAuthenticated(authed);
       setHubUrl(authed ? getWebsiteHubUrl() : null);
+      setHubLabel(authed ? getWebsiteHubLabel() : "Go to Hub");
+
+      if (authed) {
+        void resolveWebsiteAccountType();
+      }
     };
 
     syncAuthState();
@@ -126,7 +134,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                         title="Go to your hub"
                         className="inline-flex items-center gap-2 rounded-full border border-tertiary/30 bg-white px-6 py-2.5 text-sm font-semibold text-tertiary shadow-sm transition hover:bg-tertiary/5 md:text-base"
                       >
-                        Go to Hub
+                        {hubLabel}
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2m-4 0V9a1 1 0 00-1-1H8m0 0V5a2 2 0 012-2h4a2 2 0 012 2v4M7 12l-4-4m0 0l4-4m-4 4h18" />
                         </svg>
@@ -253,7 +261,7 @@ export default function WebsiteNavbar({ salesBarText }: WebsiteNavbarProps) {
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center justify-center gap-2 rounded-full border border-tertiary/30 bg-white px-6 py-3 text-center text-base font-semibold text-tertiary shadow-sm transition hover:bg-tertiary/5"
                   >
-                    Go to Hub
+                    {hubLabel}
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2m-4 0V9a1 1 0 00-1-1H8m0 0V5a2 2 0 012-2h4a2 2 0 012 2v4M7 12l-4-4m0 0l4-4m-4 4h18" />
                     </svg>

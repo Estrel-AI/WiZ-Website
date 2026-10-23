@@ -81,7 +81,7 @@ export function verifyOtp(payload: VerifyOtpRequest) {
   return postAuthEndpoint("is_valid_otp", payload);
 }
 
-export { generateBusinessOtp, verifyBusinessOtp, submitBusinessSignup } from "./auth.service";
+export { generateBusinessOtp, verifyBusinessOtp, submitBusinessSignup, submitBusinessSignin } from "./auth.service";
 
 export function submitSignup(payload: SignupRequest) {
   return postAuthEndpoint("signup", payload);

@@ -25,6 +25,11 @@ export const AUTH_API_BASE_URL = normalizeBaseUrl(
   "https://sandbox.wiiz.it/aiwf",
 );
 
+export const BUSINESS_AUTH_API_BASE_URL = normalizeBaseUrl(
+  process.env.NEXT_PUBLIC_BUSINESS_AUTH_API_BASE_URL,
+  "https://testwbs.wiiz.it/aiwf",
+);
+
 export const AUTH_OAUTH_BASE_URL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_AUTH_OAUTH_BASE_URL,
   "https://test-backend.wiiz.it",

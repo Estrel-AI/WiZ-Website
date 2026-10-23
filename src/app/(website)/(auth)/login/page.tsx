@@ -3,10 +3,15 @@
 import PolicyModalTrigger from "@/src/components/website/policy-modal-trigger";
 import SocialAuthButtons from "@/src/components/website/social-auth-buttons";
 import { RECAPTCHA_SITE_KEY } from "@/src/config/public-env";
-import { persistWebsiteLogin } from "@/src/features/auth/website-auth";
+import { persistWebsiteLogin, getStoredWebsiteUser, findAccountType } from "@/src/features/auth/website-auth";
 import { getHubLoginUrl } from "@/src/features/auth/user-type";
-import { requestPasswordReset, submitSignin } from "@/src/services/website-auth-service";
+import {
+  requestPasswordReset,
+  submitSignin,
+  submitBusinessSignin,
+} from "@/src/services/website-auth-service";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type LoginView = "login" | "reset" | "success";
@@ -43,6 +48,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [view, setView] = useState<LoginView>("login");
   const [loginForm, setLoginForm] = useState<LoginForm>({ username: "", password: "" });
   const [resetEmail, setResetEmail] = useState("");
@@ -54,6 +60,9 @@ export default function LoginPage() {
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetIdRef = useRef<number | null>(null);
+
+  const typeParam = searchParams?.get("user_type") || searchParams?.get("type") || "";
+  const isBusinessLogin = typeParam === "business";
 
   const inputClassName =
     "w-full bg-[#FFFFFF05] border border-white/10 rounded-xl px-3 md:px-4 py-2 md:py-3 text-white placeholder:text-gray-400 text-sm focus:outline-none focus:border-[#ab386a] transition-colors";
@@ -188,7 +197,18 @@ export default function LoginPage() {
     setSuccessMessage("");
 
     try {
-      const responseData = await submitSignin({
+      const storedAccountType = findAccountType(getStoredWebsiteUser());
+      const accountType =
+        isBusinessLogin ||
+        (storedAccountType
+          ? storedAccountType === "business"
+          : Boolean(getStoredWebsiteUser()?.org_id))
+          ? "business"
+          : "developer";
+
+      const signin = accountType === "business" ? submitBusinessSignin : submitSignin;
+
+      const responseData = await signin({
         username: loginForm.username.trim(),
         password: loginForm.password,
         recaptcha_token: recaptchaToken,
@@ -198,7 +218,7 @@ export default function LoginPage() {
         throw new Error(responseData?.message || "Unable to log in right now.");
       }
 
-      persistWebsiteLogin(responseData as Record<string, unknown>);
+      persistWebsiteLogin(responseData as Record<string, unknown>, accountType);
       setView("success");
       setSuccessMessage("Login successful. You can continue to the hub now.");
     } catch (error) {
@@ -248,7 +268,10 @@ export default function LoginPage() {
         <div className="w-full max-w-xl bg-gradient-to-b to-primary from-[#251321] border border-white/20 rounded-2xl p-4 md:p-6 lg:p-10 shadow-2xl relative z-10">
           <h2 className="text-xl md:text-2xl mb-2">Login</h2>
           <p className="text-sm text-gray-300 mb-6">
-            {view === "login" && "Sign in with your username and password."}
+            {view === "login" &&
+              (isBusinessLogin
+                ? "Sign in to your business account."
+                : "Sign in with your username and password.")}
             {view === "reset" && "Enter your email address and we will send you a password reset link."}
             {view === "success" && "Your request was completed successfully."}
           </p>
@@ -387,7 +410,10 @@ export default function LoginPage() {
               <>
                 <p className="text-xs text-gray-400">
                   Don&apos;t have an account?{" "}
-                  <Link href="/register" className="text-white hover:underline transition-all">
+                  <Link
+                    href={isBusinessLogin ? "/register?user_type=business" : "/register"}
+                    className="text-white hover:underline transition-all"
+                  >
                     Create one
                   </Link>
                 </p>

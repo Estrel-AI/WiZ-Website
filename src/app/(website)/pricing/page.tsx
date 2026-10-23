@@ -5,6 +5,7 @@ import { X, Zap } from "lucide-react";
 import Link from "next/link";
 import {
   AUTH_API_BASE_URL,
+  BUSINESS_AUTH_API_BASE_URL,
   PAYMENTS_API_BASE_URL,
   RECAPTCHA_SITE_KEY,
   STARTER_ANNUAL_PLAN_CODE,
@@ -25,9 +26,10 @@ import {
   BUSINESS_CHECKOUT_REDIRECT_URL,
   DEVELOPER_LOGIN_URL,
   decodeJwtPayload,
+  findAccountType,
   persistWebsiteLogin,
 } from "@/src/features/auth/website-auth";
-import { requestPasswordReset, submitSignin } from "@/src/services/website-auth-service";
+import { requestPasswordReset, submitSignin, submitBusinessSignin } from "@/src/services/website-auth-service";
 import type { ApiResponse, ListData, PlanRow } from "@/src/types/admin-api";
 import DeveloperRegistrationForm from "@/src/components/auth/developer-registration-form";
 import BusinessRegistrationForm from "@/src/components/auth/business-registration-form";
@@ -292,6 +294,7 @@ function getStoredWebsiteUser() {
       display_name?: string;
       zoho_customer_id?: string;
       org_id?: string;
+      user_type?: string;
     };
   } catch {
     return null;
@@ -329,7 +332,7 @@ function readZohoIdFromStoredData(): { zohoCustomerId: string; email: string; na
   };
 }
 
-async function refreshZohoCustomerId(): Promise<{
+async function refreshZohoCustomerId(kind: "developer" | "business" = "developer"): Promise<{
   zohoCustomerId: string;
   email: string;
   name: string;
@@ -345,8 +348,11 @@ async function refreshZohoCustomerId(): Promise<{
     return current;
   }
 
+  const isBusinessUser = kind === "business" || Boolean(getStoredWebsiteUser()?.org_id);
+  const meBaseUrl = isBusinessUser ? BUSINESS_AUTH_API_BASE_URL : AUTH_API_BASE_URL;
+
   try {
-    const response = await fetch(buildPublicApiUrl(AUTH_API_BASE_URL, "/me"), {
+    const response = await fetch(buildPublicApiUrl(meBaseUrl, "/me"), {
       method: "GET",
       headers: token
         ? {
@@ -1129,17 +1135,39 @@ export default function PricingPage() {
     };
 
     try {
-      const responseData = await submitSignin(data);
+      const storedAccountType = findAccountType(getStoredWebsiteUser());
+      const businessLoginIntent =
+        pendingRegistrationType === "business" ||
+        pendingCheckoutTarget?.kind === "business" ||
+        (storedAccountType
+          ? storedAccountType === "business"
+          : Boolean(getStoredWebsiteUser()?.org_id));
+
+      const signin = businessLoginIntent ? submitBusinessSignin : submitSignin;
+
+      const responseData = await signin(data);
 
       if (!responseData?.success) {
         throw new Error(responseData?.message || "Unable to log in right now.");
       }
 
-      persistWebsiteLogin(responseData as Record<string, unknown>);
+      const pendingTarget = pendingCheckoutTarget;
+
+      persistWebsiteLogin(
+        responseData as Record<string, unknown>,
+        businessLoginIntent ? "business" : "developer",
+      );
       setIsWebsiteAuthenticated(true);
       setHasClientSession(true);
       setLoginError("");
       setPendingCheckoutTarget(null);
+
+      if (pendingTarget) {
+        setLoginModalOpen(false);
+        resetLoginState();
+        void startCheckout(pendingTarget);
+        return;
+      }
 
       setModalView("login-success");
     } catch (error) {
@@ -1221,7 +1249,7 @@ export default function PricingPage() {
       let { zohoCustomerId, email: customerEmail, name: customerName } = readZohoIdFromStoredData();
 
       if (isPendingZohoId(zohoCustomerId)) {
-        const refreshed = await refreshZohoCustomerId();
+        const refreshed = await refreshZohoCustomerId(target.kind);
         zohoCustomerId = refreshed.zohoCustomerId;
         if (!customerEmail) {
           customerEmail = refreshed.email;
@@ -1314,6 +1342,7 @@ export default function PricingPage() {
 
     if (!isWebsiteAuthenticated && !hasClientSession) {
       setPendingCheckoutTarget(target);
+      setPendingRegistrationType("business");
       setLoginModalOpen(true);
       return;
     }
@@ -1503,22 +1532,30 @@ export default function PricingPage() {
                 {selectedBusinessPlanContent?.shortDescription?.trim() || ""}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <div className="flex flex-wrap gap-3 w-full">
                 <button
                   type="button"
                   onClick={() => openRegistrationModal("business", 2, "Business Plan")}
-                  className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-white font-semibold text-sm transition-all text-center"
+                  className="w-full sm:w-[calc(50%-6px)] py-2.5 md:py-3.5 px-4 rounded-full border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 text-white font-semibold text-sm transition-all text-center"
                 >
                   Free Trial
                 </button>
+                {/* TODO: Re-enable once business self-serve checkout goes live.
                 <button
                   type="button"
                   onClick={() => handlePurchaseBusinessPlan()}
                   disabled={isStartingCheckout}
-                  className="flex-1 py-2.5 md:py-3.5 px-4 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
+                  className="w-full sm:w-[calc(50%-6px)] py-2.5 md:py-3.5 px-4 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isStartingCheckout ? "Redirecting..." : "Purchase Plan"}
                 </button>
+                */}
+                <Link
+                  href="/contact"
+                  className="w-full sm:w-[calc(50%-6px)] py-2.5 md:py-3.5 px-4 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
+                >
+                  Contact Sales
+                </Link>
               </div>
               {businessHighlightedFeatures.length > 0 || businessPlanFeatures.length > 0 ? (
                 <>
@@ -1574,7 +1611,7 @@ export default function PricingPage() {
                 href="/contact"
                 className="w-full sm:w-fit md:w-full py-2.5 md:py-3.5 px-4 md:px-6 rounded-full bg-gradient-to-r from-[#912059] to-[#D87AAA] text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(216,69,142,0.3)] text-center"
               >
-                Purchase Plan
+                Contact Sales
               </Link>
 
               {enterpriseHighlightedFeatures.length > 0 || enterprisePlanFeatures.length > 0 ? (
