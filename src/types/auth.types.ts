@@ -24,6 +24,7 @@ export type BusinessSignupPayload = {
   contact_number: string;
   plan: string;
   otp: string;
+  email_verified_token?: string;
 };
 
 export type AuthApiResponse = {
