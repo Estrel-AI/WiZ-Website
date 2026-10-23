@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import {
+  createEmailVerifiedToken,
   getOAuthProfileFromCode,
   getOAuthStateCookieName,
   isOAuthProvider,
@@ -157,6 +158,13 @@ export async function GET(
       registerUrl.searchParams.set("oauth_username", email);
       registerUrl.searchParams.set("oauth_verified", "1");
       registerUrl.searchParams.set("oauth_provider", rawProvider);
+
+      if (statePayload.accountType === "business") {
+        registerUrl.searchParams.set(
+          "oauth_verified_token",
+          createEmailVerifiedToken(email, rawProvider),
+        );
+      }
     }
 
     const response = NextResponse.json({

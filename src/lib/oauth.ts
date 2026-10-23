@@ -165,8 +165,7 @@ export function createOAuthStateToken(
   accountType?: string,
   planId?: number,
   planName?: string,
-) {
-  const issuedAt = Math.floor(Date.now() / 1000);
+) {  const issuedAt = Math.floor(Date.now() / 1000);
   const payload: OAuthStatePayload = {
     provider,
     intent,
@@ -201,6 +200,18 @@ export function verifyOAuthStateToken(token: string, provider: OAuthProvider, st
   }
 
   return payload;
+}
+
+export function createEmailVerifiedToken(email: string, provider: string) {
+  const issuedAt = Math.floor(Date.now() / 1000);
+
+  return signPayload({
+    purpose: "business_email_verified",
+    email,
+    provider,
+    iat: issuedAt,
+    exp: issuedAt + 60 * 15,
+  });
 }
 
 export function buildOAuthAuthorizationUrl(provider: OAuthProvider, state: string) {

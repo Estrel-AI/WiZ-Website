@@ -100,6 +100,7 @@ export default function BusinessRegistrationForm({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
+  const [oauthVerifiedToken, setOauthVerifiedToken] = useState("");
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
@@ -120,6 +121,7 @@ export default function BusinessRegistrationForm({
     const oauthLastName = searchParams.get("oauth_last_name");
     const oauthUsername = searchParams.get("oauth_username");
     const oauthVerified = searchParams.get("oauth_verified");
+    const oauthVerifiedToken = searchParams.get("oauth_verified_token") ?? "";
 
     if (oauthError) {
       setErrorMessage(oauthError);
@@ -129,6 +131,7 @@ export default function BusinessRegistrationForm({
     }
 
     if (oauthStep === "details" && oauthEmail && oauthVerified === "1") {
+      setOauthVerifiedToken(oauthVerifiedToken);
       setEmail(oauthEmail);
       setOtp("");
       setErrorMessage("");
@@ -375,7 +378,7 @@ export default function BusinessRegistrationForm({
     } else if (trimmed.password !== trimmed.confirm_password) {
       errors.confirm_password = "Password and Confirm Password do not match.";
     }
-    if (!otp.trim()) {
+    if (!otp.trim() && !oauthVerifiedToken) {
       errors.otp = "OTP is required before signup.";
     }
     if (!recaptchaToken) {
@@ -411,6 +414,7 @@ export default function BusinessRegistrationForm({
         contact_number: trimmed.contact_number,
         plan: "free_trial",
         otp: otp.trim(),
+        ...(oauthVerifiedToken ? { email_verified_token: oauthVerifiedToken } : {}),
       });
 
       setStep("success");
