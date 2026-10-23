@@ -306,21 +306,8 @@ export default function WebsiteFooter() {
         <div className="w-full h-[1px] bg-[#2a2a2a] mb-4 md:mb-8" aria-hidden="true" />
         <div className="flex flex-col sm:flex-row lg:grid lg:grid-cols-3 items-center justify-between text-center gap-3 pb-20 md:pb-0">
           <p className="text-[13px] sm:text-[14px] text-gray-400 tracking-wide sm:text-left">
-            &copy; 2026 WiiZ Platform Inc. All rights reserved.
+            &copy; 2026 WiiZ AI Inc. All rights reserved.
           </p>
-          <a
-            href="https://pageupsoft.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[13px] sm:text-[14px] text-gray-400 hover:text-white transition-colors tracking-wide inline-flex items-center justify-center sm:justify-end lg:justify-center gap-2 lg:col-start-2"
-          >
-            <span>Designed and developed by</span>
-            <img
-              src="/images/pageup-logo-white.png"
-              alt="Pageup Logo"
-              className="h-4 w-auto object-contain"
-            />
-          </a>
           <div className="hidden lg:block" aria-hidden="true" />
         </div>
       </div>

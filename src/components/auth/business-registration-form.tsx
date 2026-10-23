@@ -4,7 +4,7 @@ import PolicyModalTrigger from "@/src/components/website/policy-modal-trigger";
 import SocialAuthButtons from "@/src/components/website/social-auth-buttons";
 import { RECAPTCHA_SITE_KEY } from "@/src/config/public-env";
 import { BUSINESS_LOGIN_URL } from "@/src/features/auth/website-auth";
-import { generateBusinessOtp, verifyBusinessOtp, submitBusinessSignup } from "@/src/services/auth.service";
+import { checkBusinessUserRegistered, generateBusinessOtp, verifyBusinessOtp, submitBusinessSignup } from "@/src/services/auth.service";
 import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -262,6 +262,13 @@ export default function BusinessRegistrationForm({
     setSuccessMessage("");
 
     try {
+      const isRegistered = await checkBusinessUserRegistered(email.trim());
+
+      if (isRegistered) {
+        setFieldErrors({ email: "This email is already registered. Please log in instead." });
+        return;
+      }
+
       const response = await generateBusinessOtp({ email: email.trim() });
       setStep("otp");
       setResendCountdown(OTP_RESEND_COOLDOWN_SECONDS);
